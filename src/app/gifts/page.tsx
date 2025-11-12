@@ -6,6 +6,7 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { FilterDropdown } from '@/components/shared/FilterDropdown'
+import { ExportButtons } from '@/components/shared/ExportButtons'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -88,12 +89,15 @@ export default function GiftsPage() {
             Track and manage gift ideas for everyone
           </p>
         </div>
-        <Button asChild>
-          <Link href="/gifts/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Gift
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <ExportButtons data={gifts} type="gifts" />
+          <Button asChild>
+            <Link href="/gifts/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Gift
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Bar */}

@@ -25,6 +25,8 @@ export default function NewGiftPage() {
     image_url: '',
     status: 'idea',
     purchase_date: '',
+    occasion: '',
+    occasion_date: '',
     notes: '',
   });
 
@@ -107,6 +109,8 @@ export default function NewGiftPage() {
         image_url: formData.image_url || null,
         status: formData.status,
         purchase_date: formData.purchase_date || null,
+        occasion: formData.occasion || null,
+        occasion_date: formData.occasion_date || null,
         notes: formData.notes || null,
       };
 
@@ -372,6 +376,51 @@ export default function NewGiftPage() {
                     id="purchase_date"
                     name="purchase_date"
                     value={formData.purchase_date}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Occasion and Occasion Date */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="occasion" className="block text-sm font-medium text-gray-700 mb-2">
+                    Occasion
+                  </label>
+                  <select
+                    id="occasion"
+                    name="occasion"
+                    value={formData.occasion}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="">Select occasion...</option>
+                    <option value="birthday">Birthday</option>
+                    <option value="christmas">Christmas</option>
+                    <option value="hanukkah">Hanukkah</option>
+                    <option value="anniversary">Anniversary</option>
+                    <option value="wedding">Wedding</option>
+                    <option value="graduation">Graduation</option>
+                    <option value="baby_shower">Baby Shower</option>
+                    <option value="holiday">Holiday</option>
+                    <option value="valentines">Valentine's Day</option>
+                    <option value="mothers_day">Mother's Day</option>
+                    <option value="fathers_day">Father's Day</option>
+                    <option value="just_because">Just Because</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="occasion_date" className="block text-sm font-medium text-gray-700 mb-2">
+                    Occasion Date
+                  </label>
+                  <input
+                    type="date"
+                    id="occasion_date"
+                    name="occasion_date"
+                    value={formData.occasion_date}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />

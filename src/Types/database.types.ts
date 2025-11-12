@@ -114,6 +114,7 @@ export interface Database {
           priority: string | null
           purchase_date: string | null
           occasion: string | null
+          occasion_date: string | null
           notes: string | null
           created_at: string
           updated_at: string
@@ -136,6 +137,7 @@ export interface Database {
           priority?: string | null
           purchase_date?: string | null
           occasion?: string | null
+          occasion_date?: string | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -158,6 +160,7 @@ export interface Database {
           priority?: string | null
           purchase_date?: string | null
           occasion?: string | null
+          occasion_date?: string | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -311,6 +314,21 @@ export const GIFT_CATEGORIES = [
   'food',
   'jewelry',
   'experiences',
+  'other'
+] as const
+export const OCCASION_TYPES = [
+  'birthday',
+  'christmas',
+  'hanukkah',
+  'anniversary',
+  'wedding',
+  'graduation',
+  'baby_shower',
+  'holiday',
+  'valentines',
+  'mothers_day',
+  'fathers_day',
+  'just_because',
   'other'
 ] as const
 export const RELATIONSHIPS = [
