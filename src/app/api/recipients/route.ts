@@ -1,16 +1,27 @@
 // src/app/api/recipients/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/client';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-// GET /api/recipients - List all recipients
+// GET /api/recipients - List all recipients for the authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
     const { data: recipients, error } = await supabase
       .from('recipients')
       .select('*')
+      .eq('user_id', user.id)
       .order('name', { ascending: true });
 
     if (error) throw error;
@@ -28,7 +39,18 @@ export async function GET(request: NextRequest) {
 // POST /api/recipients - Create a new recipient
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const {
@@ -54,10 +76,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the recipient
+    // Create the recipient with user_id
     const { data: recipient, error } = await supabase
       .from('recipients')
       .insert({
+        user_id: user.id,
         name,
         relationship,
         birthday,

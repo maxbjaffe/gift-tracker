@@ -4,6 +4,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import Link from 'next/link'
+import { UserMenu } from '@/components/shared/UserMenu'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,11 +14,16 @@ export const metadata: Metadata = {
   description: 'AI-powered family gift management with price tracking and smart recommendations',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const supabase = await createServerSupabaseClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -48,6 +55,7 @@ export default function RootLayout({
               >
                 Gifts
               </Link>
+              <UserMenu user={user} />
             </nav>
           </div>
         </header>

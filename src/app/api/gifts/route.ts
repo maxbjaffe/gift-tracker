@@ -1,12 +1,23 @@
 // src/app/api/gifts/route.ts - FIXED VERSION
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/client';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-// GET /api/gifts - List all gifts or filter by recipient
+// GET /api/gifts - List all gifts for the authenticated user or filter by recipient
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const recipient_id = searchParams.get('recipient_id');
 
@@ -28,6 +39,7 @@ export async function GET(request: NextRequest) {
       const { data: gifts, error: giftsError } = await supabase
         .from('gifts')
         .select('*')
+        .eq('user_id', user.id)
         .in('id', giftIds)
         .order('created_at', { ascending: false });
 
@@ -35,10 +47,11 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(gifts || []);
     } else {
-      // Get all gifts
+      // Get all gifts for the authenticated user
       const { data: gifts, error } = await supabase
         .from('gifts')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -57,7 +70,18 @@ export async function GET(request: NextRequest) {
 // POST /api/gifts - Create a new gift
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const {
@@ -84,10 +108,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the gift
+    // Create the gift with user_id
     const { data: gift, error: giftError } = await supabase
       .from('gifts')
       .insert({
+        user_id: user.id,
         name,
         url,
         price,

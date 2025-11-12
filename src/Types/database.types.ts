@@ -15,6 +15,7 @@ export interface Database {
       recipients: {
         Row: {
           id: string
+          user_id: string
           name: string
           relationship: string | null
           birthday: string | null
@@ -41,6 +42,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          user_id: string
           name: string
           relationship?: string | null
           birthday?: string | null
@@ -67,6 +69,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          user_id?: string
           name?: string
           relationship?: string | null
           birthday?: string | null
@@ -95,6 +98,7 @@ export interface Database {
       gifts: {
         Row: {
           id: string
+          user_id: string
           name: string
           description: string | null
           category: string | null
@@ -116,6 +120,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          user_id: string
           name: string
           description?: string | null
           category?: string | null
@@ -137,6 +142,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          user_id?: string
           name?: string
           description?: string | null
           category?: string | null
