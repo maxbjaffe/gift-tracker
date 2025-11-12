@@ -290,7 +290,7 @@ export type GiftFormData = {
   store?: string
   brand?: string
   current_price?: number
-  status: 'idea' | 'researching' | 'purchased' | 'wrapped' | 'given'
+  status: 'idea' | 'purchased' | 'wrapped' | 'delivered'
   priority?: 'low' | 'medium' | 'high'
   occasion?: string
   notes?: string
@@ -298,8 +298,21 @@ export type GiftFormData = {
 }
 
 // Constants
-export const GIFT_STATUSES = ['idea', 'researching', 'purchased', 'wrapped', 'given'] as const
+export const GIFT_STATUSES = ['idea', 'purchased', 'wrapped', 'delivered'] as const
 export const GIFT_PRIORITIES = ['low', 'medium', 'high'] as const
+export const GIFT_CATEGORIES = [
+  'toys',
+  'books',
+  'clothing',
+  'electronics',
+  'home',
+  'beauty',
+  'sports',
+  'food',
+  'jewelry',
+  'experiences',
+  'other'
+] as const
 export const RELATIONSHIPS = [
   'Parent',
   'Child',

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
+import { GIFT_CATEGORIES } from '@/Types/database.types';
 
 export default function NewGiftPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function NewGiftPage() {
     category: '',
     description: '',
     image_url: '',
-    status: 'Idea',
+    status: 'idea',
     purchase_date: '',
     notes: '',
   });
@@ -109,6 +110,7 @@ export default function NewGiftPage() {
         notes: formData.notes || null,
       };
 
+      const supabase = createClient();
       const { data, error: insertError } = await supabase
         .from('gifts')
         .insert([giftData])
@@ -292,15 +294,20 @@ export default function NewGiftPage() {
                 <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                   Category
                 </label>
-                <input
-                  type="text"
+                <select
                   id="category"
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="e.g., Electronics, Clothing, Books"
-                />
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent capitalize"
+                >
+                  <option value="">Select a category...</option>
+                  {GIFT_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat} className="capitalize">
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Description */}
@@ -349,10 +356,10 @@ export default function NewGiftPage() {
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
-                    <option value="Idea">💡 Idea</option>
-                    <option value="Purchased">🛍️ Purchased</option>
-                    <option value="Wrapped">🎁 Wrapped</option>
-                    <option value="Given">✅ Given</option>
+                    <option value="idea">💡 Idea</option>
+                    <option value="purchased">🛒 Purchased</option>
+                    <option value="wrapped">🎁 Wrapped</option>
+                    <option value="delivered">✅ Delivered</option>
                   </select>
                 </div>
 

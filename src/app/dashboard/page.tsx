@@ -175,10 +175,99 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Budget and Price Tracking */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        {/* Price Tracking by Status */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Spending by Status</h2>
+          <div className="space-y-3">
+            {['idea', 'purchased', 'wrapped', 'delivered'].map((status) => {
+              const statusGifts = gifts.filter((g) => g.status === status)
+              const statusValue = statusGifts.reduce(
+                (sum, g) => sum + (g.current_price || 0),
+                0
+              )
+              const percentage =
+                totalValue > 0 ? (statusValue / totalValue) * 100 : 0
+
+              return (
+                <div key={status} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="capitalize text-gray-700">{status}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">${statusValue.toFixed(2)}</span>
+                      <span className="text-gray-500">
+                        ({statusGifts.length} {statusGifts.length === 1 ? 'gift' : 'gifts'})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          {totalValue === 0 && (
+            <p className="text-gray-500 text-center py-8">
+              No gifts with prices yet
+            </p>
+          )}
+        </Card>
+
+        {/* Budget Overview */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">Budget Overview</h2>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/recipients/budgets">View All</Link>
+            </Button>
+          </div>
+          <div className="space-y-3">
+            {recipients
+              .filter((r) => r.max_budget && r.max_budget > 0)
+              .slice(0, 5)
+              .map((recipient) => {
+                // Calculate spent for this recipient
+                // Note: In real app, would use gift_recipients join table
+                const spent = 0 // Placeholder
+                const percentage = (spent / (recipient.max_budget || 1)) * 100
+
+                return (
+                  <div key={recipient.id} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-gray-700">
+                        {recipient.name}
+                      </span>
+                      <span className="text-gray-600">
+                        ${spent.toFixed(2)} / ${recipient.max_budget?.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-green-500 transition-all"
+                        style={{ width: `${Math.min(percentage, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+          </div>
+          {recipients.filter((r) => r.max_budget && r.max_budget > 0).length === 0 && (
+            <p className="text-gray-500 text-center py-8">
+              No budgets set yet
+            </p>
+          )}
+        </Card>
+      </div>
+
       {/* Quick Actions */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Button asChild className="h-16">
             <Link href="/recipients/new">
               <Users className="h-5 w-5 mr-2" />
@@ -189,6 +278,12 @@ export default function DashboardPage() {
             <Link href="/gifts/new">
               <Gift className="h-5 w-5 mr-2" />
               Add Gift Idea
+            </Link>
+          </Button>
+          <Button asChild className="h-16" variant="outline">
+            <Link href="/recipients/budgets">
+              <DollarSign className="h-5 w-5 mr-2" />
+              Track Budgets
             </Link>
           </Button>
           <Button asChild className="h-16" variant="outline">
