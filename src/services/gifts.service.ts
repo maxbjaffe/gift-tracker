@@ -12,15 +12,34 @@ export class GiftService {
     return createClient()
   }
 
-  async getAll(): Promise<Gift[]> {
+  async getAll(): Promise<GiftWithRecipients[]> {
     const supabase = this.getSupabase()
     const { data, error } = await supabase
       .from('gifts')
-      .select('*')
+      .select(`
+        *,
+        gift_recipients (
+          recipient_id,
+          recipients (
+            id,
+            name,
+            avatar_type,
+            avatar_data,
+            avatar_background
+          )
+        )
+      `)
       .order('created_at', { ascending: false })
-    
+
     if (error) throw error
-    return data || []
+
+    // Transform the data to match GiftWithRecipients type
+    return (data || []).map((gift: any) => ({
+      ...gift,
+      recipients: gift.gift_recipients?.map((gr: any) => gr.recipients).filter(Boolean) || [],
+      recipient_count: gift.gift_recipients?.length || 0,
+      gift_recipients: undefined // Remove the junction table data
+    }))
   }
 
   async getById(id: string): Promise<Gift> {

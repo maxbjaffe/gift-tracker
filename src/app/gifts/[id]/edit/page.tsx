@@ -10,13 +10,17 @@ type Gift = {
   id: string;
   name: string;
   url: string | null;
-  price: number | null;
+  current_price: number | null;
+  original_price: number | null;
   store: string | null;
   brand: string | null;
   category: string | null;
   description: string | null;
   image_url: string | null;
   status: string;
+  occasion: string | null;
+  occasion_date: string | null;
+  notes: string | null;
 };
 
 export default function EditGiftPage({ params }: { params: { id: string } }) {
@@ -31,13 +35,17 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
   const [formData, setFormData] = useState({
     name: '',
     url: '',
-    price: '',
+    current_price: '',
+    original_price: '',
     store: '',
     brand: '',
     category: '',
     description: '',
     image_url: '',
     status: 'idea',
+    occasion: '',
+    occasion_date: '',
+    notes: '',
   });
 
   useEffect(() => {
@@ -58,13 +66,17 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
       setFormData({
         name: data.name || '',
         url: data.url || '',
-        price: data.price?.toString() || '',
+        current_price: data.current_price?.toString() || '',
+        original_price: data.original_price?.toString() || '',
         store: data.store || '',
         brand: data.brand || '',
         category: data.category || '',
         description: data.description || '',
         image_url: data.image_url || '',
         status: data.status || 'idea',
+        occasion: data.occasion || '',
+        occasion_date: data.occasion_date || '',
+        notes: data.notes || '',
       });
       
       setLoading(false);
@@ -84,13 +96,17 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
       const updateData = {
         name: formData.name,
         url: formData.url || null,
-        price: formData.price ? parseFloat(formData.price) : null,
+        current_price: formData.current_price ? parseFloat(formData.current_price) : null,
+        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         store: formData.store || null,
         brand: formData.brand || null,
         category: formData.category || null,
         description: formData.description || null,
         image_url: formData.image_url || null,
         status: formData.status,
+        occasion: formData.occasion || null,
+        occasion_date: formData.occasion_date || null,
+        notes: formData.notes || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -190,24 +206,46 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
             </select>
           </div>
 
-          {/* Price */}
-          <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-              Price
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-2 text-gray-500">$</span>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                step="0.01"
-                min="0"
-                className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="99.99"
-              />
+          {/* Price Fields */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="current_price" className="block text-sm font-medium text-gray-700 mb-2">
+                Current Price
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-2 text-gray-500">$</span>
+                <input
+                  type="number"
+                  id="current_price"
+                  name="current_price"
+                  value={formData.current_price}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="99.99"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="original_price" className="block text-sm font-medium text-gray-700 mb-2">
+                Original Price
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-2 text-gray-500">$</span>
+                <input
+                  type="number"
+                  id="original_price"
+                  name="original_price"
+                  value={formData.original_price}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="129.99"
+                />
+              </div>
             </div>
           </div>
 
@@ -292,6 +330,38 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
             />
           </div>
 
+          {/* Occasion Fields */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="occasion" className="block text-sm font-medium text-gray-700 mb-2">
+                Occasion
+              </label>
+              <input
+                type="text"
+                id="occasion"
+                name="occasion"
+                value={formData.occasion}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="e.g., Birthday, Christmas"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="occasion_date" className="block text-sm font-medium text-gray-700 mb-2">
+                Occasion Date
+              </label>
+              <input
+                type="date"
+                id="occasion_date"
+                name="occasion_date"
+                value={formData.occasion_date}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
@@ -302,9 +372,25 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows={4}
+              rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="Add notes or description about this gift..."
+              placeholder="Product description..."
+            />
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+              Notes
+            </label>
+            <textarea
+              id="notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Additional notes about this gift..."
             />
           </div>
 

@@ -46,6 +46,9 @@ export async function POST(request: NextRequest) {
       recommendation_description,
       price_range,           // e.g. "$120-$160"
       where_to_buy,          // e.g. "LEGO Store, Amazon"
+      image_url,
+      amazon_link,
+      google_shopping_link,
       feedback_type,
     } = body;
 
@@ -65,16 +68,21 @@ export async function POST(request: NextRequest) {
       // Extract store from where_to_buy text
       const extractedStore = extractStoreFromText(where_to_buy);
 
-      // Create gift
+      // Create gift with image and shopping links
       const { data: giftCreated, error: giftError } = await supabase
         .from('gifts')
         .insert({
           name: recommendation_name,
           description: recommendation_description,
-          price: extractedPrice,
+          current_price: extractedPrice,
           store: extractedStore,
           category: 'Gift Idea',
           status: 'idea',
+          image_url: image_url || null,
+          url: amazon_link || google_shopping_link || null,
+          notes: amazon_link && google_shopping_link
+            ? `Amazon: ${amazon_link}\nGoogle Shopping: ${google_shopping_link}`
+            : null,
         })
         .select()
         .single();
@@ -112,15 +120,18 @@ export async function POST(request: NextRequest) {
         // Don't throw - feedback is nice to have but not critical
       }
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         message: 'Gift created and linked to recipient',
         gift_id: giftCreated.id,
         debug: {
           price_range,
           extracted_price: extractedPrice,
           where_to_buy,
-          extracted_store: extractedStore
+          extracted_store: extractedStore,
+          image_url,
+          amazon_link,
+          google_shopping_link
         }
       });
     }

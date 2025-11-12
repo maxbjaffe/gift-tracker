@@ -10,13 +10,17 @@ type Gift = {
   id: string;
   name: string;
   url: string | null;
-  price: number | null;
+  current_price: number | null;
+  original_price: number | null;
   store: string | null;
   brand: string | null;
   category: string | null;
   description: string | null;
   image_url: string | null;
   status: string;
+  occasion: string | null;
+  occasion_date: string | null;
+  notes: string | null;
   created_at: string;
 };
 
@@ -223,9 +227,9 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
                 }`}>
                   {gift.status}
                 </span>
-                {gift.price && (
+                {gift.current_price && (
                   <span className="text-2xl font-bold text-purple-600">
-                    ${gift.price.toFixed(2)}
+                    ${gift.current_price.toFixed(2)}
                   </span>
                 )}
               </div>

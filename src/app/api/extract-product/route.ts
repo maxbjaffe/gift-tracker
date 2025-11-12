@@ -5,27 +5,155 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Helper function to extract basic info from URL when fetch fails
+function extractBasicInfoFromUrl(url: string) {
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname;
+
+    // Determine store name from domain
+    let store = null;
+    if (hostname.includes('amazon')) store = 'Amazon';
+    else if (hostname.includes('target')) store = 'Target';
+    else if (hostname.includes('walmart')) store = 'Walmart';
+    else if (hostname.includes('ebay')) store = 'eBay';
+    else if (hostname.includes('etsy')) store = 'Etsy';
+    else if (hostname.includes('bestbuy')) store = 'Best Buy';
+    else {
+      // Extract readable domain name
+      const parts = hostname.split('.');
+      store = parts[parts.length - 2]?.charAt(0).toUpperCase() + parts[parts.length - 2]?.slice(1);
+    }
+
+    return {
+      name: 'Product from ' + store,
+      store,
+      url: url
+    };
+  } catch {
+    return {
+      name: 'Product',
+      store: 'Unknown',
+      url: url
+    };
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { url } = await request.json();
+    const { url, productName, storeName } = await request.json();
+
+    // If product name is provided, use AI to generate details
+    if (productName && storeName) {
+      console.log('Generating product details from name:', productName, 'at', storeName);
+
+      const message = await anthropic.messages.create({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 2000,
+        messages: [
+          {
+            role: 'user',
+            content: `You are a product information assistant. Based on the following product name and store, provide reasonable estimates and details about this product.
+
+Product Name: ${productName}
+Store: ${storeName}
+
+Please return a JSON object with the following fields:
+- name: Clean, properly formatted product name
+- price: Estimated typical price range (use the midpoint as a numeric value, no currency symbols)
+- store: Store name (cleaned up, e.g., "Amazon", "Target", "Walmart")
+- brand: Most likely brand name if identifiable from the product name
+- category: Product category (e.g., "Electronics", "Toys", "Clothing", "Home & Garden", "Beauty", "Books", "Sports", "Food & Beverage", "Jewelry", "Other")
+- description: Brief 2-3 sentence product description based on what you know about this type of product
+
+CRITICAL: Respond ONLY with a valid JSON object. Do not include any explanation, markdown formatting, or text outside the JSON object.
+
+Example format:
+{
+  "name": "Product Name",
+  "price": 99.99,
+  "store": "Amazon",
+  "brand": "Sony",
+  "category": "Electronics",
+  "description": "Brief description here"
+}
+
+If you cannot determine a field with confidence, set it to null. Make reasonable estimates based on typical products with similar names.`
+          }
+        ]
+      });
+
+      const extractedText = message.content[0].type === 'text' ? message.content[0].text : '';
+
+      try {
+        const cleanedText = extractedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const productData = JSON.parse(cleanedText);
+
+        return NextResponse.json({
+          success: true,
+          data: productData,
+          source: 'ai_generated'
+        });
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', extractedText);
+        return NextResponse.json(
+          { error: 'Failed to generate product details from AI' },
+          { status: 500 }
+        );
+      }
+    }
 
     if (!url) {
       return NextResponse.json(
-        { error: 'URL is required' },
+        { error: 'URL or product name is required' },
         { status: 400 }
       );
     }
 
     // Fetch the HTML content from the URL
     console.log('Fetching URL:', url);
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
+
+    let response;
+    try {
+      response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'DNT': '1',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Cache-Control': 'max-age=0'
+        }
+      });
+    } catch (fetchError) {
+      console.error('Fetch error:', fetchError);
+
+      // Return basic info extracted from URL
+      const basicInfo = extractBasicInfoFromUrl(url);
+      return NextResponse.json({
+        success: true,
+        partial: true,
+        message: 'Could not access the product page directly. Please complete the details manually.',
+        data: basicInfo
+      });
+    }
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch URL: ${response.status}`);
+      console.error(`Failed to fetch URL. Status: ${response.status}, URL: ${url}`);
+
+      // Return basic info extracted from URL instead of failing completely
+      const basicInfo = extractBasicInfoFromUrl(url);
+      return NextResponse.json({
+        success: true,
+        partial: true,
+        message: 'The website is blocking automated access. Please complete the product details manually.',
+        data: basicInfo
+      });
     }
 
     const html = await response.text();
@@ -33,7 +161,7 @@ export async function POST(request: NextRequest) {
     // Use Claude to extract product information
     console.log('Calling Claude API to extract product info...');
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-haiku-20240307',
       max_tokens: 2000,
       messages: [
         {

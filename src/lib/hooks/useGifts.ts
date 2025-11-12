@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from 'react'
 import { giftService } from '@/services/gifts.service'
-import type { Gift, GiftInsert, GiftUpdate } from '@/types/database.types'
+import type { Gift, GiftInsert, GiftUpdate, GiftWithRecipients } from '@/types/database.types'
 import { useToast } from '@/components/ui/use-toast'
 
 export function useGifts(recipientId?: string) {
-  const [gifts, setGifts] = useState<Gift[]>([])
+  const [gifts, setGifts] = useState<GiftWithRecipients[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const { toast } = useToast()

@@ -1,14 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import AvatarSelector from '@/components/AvatarSelector';
+import type { AvatarData } from '@/components/AvatarSelector';
+import { generateDefaultAvatar } from '@/lib/avatar-utils';
 
 export default function NewRecipientPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<AvatarData | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -27,6 +31,13 @@ export default function NewRecipientPage() {
     wishlist_items: '',
     past_gifts: '',
   });
+
+  // Auto-generate default avatar when name changes
+  useEffect(() => {
+    if (formData.name && !avatar) {
+      setAvatar(generateDefaultAvatar(formData.name));
+    }
+  }, [formData.name, avatar]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,14 +105,17 @@ export default function NewRecipientPage() {
           gender: formData.gender || null,
           interests: interestsArray,
           notes: formData.notes || null,
-          gift_categories: giftCategoriesArray,
+          hobbies: giftCategoriesArray, // Map gift_categories to hobbies field
           favorite_colors: favoriteColorsArray,
           favorite_stores: favoriteStoresArray,
           favorite_brands: favoriteBrandsArray,
           gift_dos: giftDosArray,
           gift_donts: giftDontsArray,
           wishlist_items: wishlistItemsJson,
-          past_gifts: pastGiftsJson,
+          past_gifts_received: pastGiftsJson, // Correct field name
+          avatar_type: avatar?.type || null,
+          avatar_data: avatar?.data || null,
+          avatar_background: avatar?.background || null,
         })
         .select()
         .single();
@@ -160,6 +174,18 @@ export default function NewRecipientPage() {
                   placeholder="Enter recipient's name"
                 />
               </div>
+
+              {/* Avatar Selection */}
+              {formData.name && (
+                <div className="mb-4 p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Avatar</h3>
+                  <AvatarSelector
+                    name={formData.name}
+                    currentAvatar={avatar}
+                    onChange={setAvatar}
+                  />
+                </div>
+              )}
 
               {/* Relationship */}
               <div className="mb-4">
@@ -263,17 +289,17 @@ export default function NewRecipientPage() {
                 </p>
               </div>
 
-              {/* Gift Categories */}
+              {/* Hobbies / Gift Categories */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Favorite Gift Categories
+                  Hobbies & Favorite Gift Categories
                 </label>
                 <input
                   type="text"
                   value={formData.gift_categories}
                   onChange={(e) => setFormData({ ...formData, gift_categories: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="e.g., Books, Tech, Home Decor, Jewelry"
+                  placeholder="e.g., Gaming, Books, Tech, Home Decor, Jewelry"
                 />
                 <p className="text-sm text-gray-500 mt-1">
                   Separate with commas

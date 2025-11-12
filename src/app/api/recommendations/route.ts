@@ -38,8 +38,9 @@ export async function POST(request: NextRequest) {
     const prompt = buildRecommendationPrompt(recipient);
 
     // Call Claude API
+    // Use Claude 3 Haiku (fast and cost-effective)
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-haiku-20240307',
       max_tokens: 3000,
       messages: [
         {
@@ -58,18 +59,48 @@ export async function POST(request: NextRequest) {
     // Parse the JSON response
     let recommendations = JSON.parse(textContent.text);
 
-    // Extract price from price_range if estimated_price is missing
-    recommendations = recommendations.map((rec: any) => {
+    // Enhance recommendations with images and shopping links
+    recommendations = await Promise.all(recommendations.map(async (rec: any) => {
+      // Extract price from price_range if estimated_price is missing
       if (!rec.estimated_price && rec.price_range) {
-        // Try to extract a number from price_range like "$50-$100"
         const match = rec.price_range.match(/\$?(\d+(?:\.\d{2})?)/);
         if (match && match[1]) {
           const min = parseFloat(match[1]);
           rec.estimated_price = min;
         }
       }
+
+      // Generate shopping links
+      const searchQuery = rec.search_query || rec.title;
+      rec.amazon_link = `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}`;
+      rec.google_shopping_link = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(searchQuery)}`;
+
+      // Fetch product image from Unsplash
+      try {
+        const imageKeywords = rec.image_keywords || rec.category || rec.title;
+        const unsplashResponse = await fetch(
+          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(imageKeywords)}&per_page=1&orientation=landscape`,
+          {
+            headers: {
+              'Authorization': 'Client-ID 9e0f4ca10c03e1b69cf570cf16be3af6b715559029bc6d46e50a3b89e0f28fd1'
+            }
+          }
+        );
+
+        if (unsplashResponse.ok) {
+          const imageData = await unsplashResponse.json();
+          if (imageData.results && imageData.results.length > 0) {
+            rec.image_url = imageData.results[0].urls.regular;
+            rec.image_thumb = imageData.results[0].urls.small;
+          }
+        }
+      } catch (imageError) {
+        console.error('Error fetching image:', imageError);
+        // Image is optional, continue without it
+      }
+
       return rec;
-    });
+    }));
 
     return NextResponse.json({
       success: true,
@@ -77,6 +108,19 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error generating recommendations:', error);
+
+    // Provide helpful error message if it's a model not found error
+    if (error.status === 404 && error.message?.includes('model:')) {
+      return NextResponse.json(
+        {
+          error: 'Claude API model not available',
+          message: 'The AI model is not accessible with your API key. Please check your Anthropic API key has access to Claude 3.5 Sonnet, or update ANTHROPIC_API_KEY in your .env.local file.',
+          details: error.message
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || 'Failed to generate recommendations' },
       { status: 500 }
@@ -118,7 +162,9 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure. Do not inclu
     "price_range": "$XX-$YY or $XX",
     "reasoning": "Why this gift fits this person",
     "where_to_buy": "Store names (e.g., Amazon, Target, Walmart)",
-    "category": "Category name"
+    "category": "Category name",
+    "search_query": "Specific product search term for Google/Amazon (e.g., 'LEGO Architecture Statue of Liberty 21042')",
+    "image_keywords": "Short keyword for image search (e.g., 'lego architecture building', 'wireless headphones', 'coffee maker')"
   }
 ]
 

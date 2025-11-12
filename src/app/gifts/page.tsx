@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import Link from 'next/link'
 import { Plus, ExternalLink, Lightbulb, ShoppingCart } from 'lucide-react'
 import { GIFT_STATUSES, GIFT_CATEGORIES } from '@/Types/database.types'
+import Avatar from '@/components/Avatar'
 
 export default function GiftsPage() {
   const { gifts, loading } = useGifts()
@@ -229,6 +230,29 @@ export default function GiftsPage() {
                 <p className="text-gray-600 mb-4 line-clamp-2">
                   {gift.description}
                 </p>
+              )}
+
+              {gift.recipients && gift.recipients.length > 0 && (
+                <div className="flex items-center gap-2 mb-4 pb-4 border-b">
+                  <span className="text-sm text-gray-500">For:</span>
+                  <div className="flex items-center gap-2">
+                    {gift.recipients.slice(0, 3).map((recipient) => (
+                      <div key={recipient.id} className="flex items-center gap-1">
+                        <Avatar
+                          type={recipient.avatar_type}
+                          data={recipient.avatar_data}
+                          background={recipient.avatar_background}
+                          name={recipient.name}
+                          size="xs"
+                        />
+                        <span className="text-sm text-gray-700">{recipient.name}</span>
+                      </div>
+                    ))}
+                    {gift.recipients.length > 3 && (
+                      <span className="text-xs text-gray-500">+{gift.recipients.length - 3} more</span>
+                    )}
+                  </div>
+                </div>
               )}
 
               <div className="flex items-center justify-between mb-4">

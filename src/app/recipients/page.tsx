@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import Avatar from '@/components/Avatar';
 
 type Recipient = {
   id: string;
@@ -11,6 +12,9 @@ type Recipient = {
   birthday: string | null;
   age_range: string | null;
   interests: any;
+  avatar_type?: 'ai' | 'emoji' | 'initials' | 'photo' | null;
+  avatar_data?: string | null;
+  avatar_background?: string | null;
 };
 
 export default function RecipientsPage() {
@@ -117,9 +121,14 @@ export default function RecipientsPage() {
                 className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all p-6 group hover:scale-105 duration-300"
               >
                 <div className="flex justify-center mb-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-3xl font-bold">
-                    {getInitials(recipient.name)}
-                  </div>
+                  <Avatar
+                    type={recipient.avatar_type}
+                    data={recipient.avatar_data}
+                    background={recipient.avatar_background}
+                    name={recipient.name}
+                    size="lg"
+                    showBorder
+                  />
                 </div>
 
                 <h2 className="text-2xl font-bold text-center text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">

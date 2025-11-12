@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Avatar from '@/components/Avatar';
 
 interface Recipient {
   id: string;
@@ -20,6 +21,9 @@ interface Recipient {
   wishlist_items: string;
   max_budget: number;
   notes: string;
+  avatar_type?: 'ai' | 'emoji' | 'initials' | 'photo' | null;
+  avatar_data?: string | null;
+  avatar_background?: string | null;
 }
 
 interface Gift {
@@ -38,6 +42,9 @@ interface Recommendation {
   reasoning: string;
   where_to_buy: string;     // e.g. "LEGO Store, Amazon"
   category: string;
+  image_url?: string;
+  amazon_link?: string;
+  google_shopping_link?: string;
 }
 
 export default function RecipientDetailPage() {
@@ -119,8 +126,11 @@ export default function RecipientDetailPage() {
           recipient_id: recipient?.id,
           recommendation_name: recommendation.title,
           recommendation_description: recommendation.description,
-          price_range: recommendation.price_range,      // PASS THIS
-          where_to_buy: recommendation.where_to_buy,    // PASS THIS
+          price_range: recommendation.price_range,
+          where_to_buy: recommendation.where_to_buy,
+          image_url: recommendation.image_url,
+          amazon_link: recommendation.amazon_link,
+          google_shopping_link: recommendation.google_shopping_link,
           feedback_type: feedbackType,
         })
       });
@@ -203,18 +213,28 @@ export default function RecipientDetailPage() {
           
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                  🎁 {recipient.name}
-                </h1>
-                <p className="text-gray-600 text-lg">
-                  {recipient.relationship} • Age: {recipient.age_range}
-                </p>
-                {recipient.birthday && (
-                  <p className="text-gray-500 mt-2">
-                    🎂 Birthday: {new Date(recipient.birthday).toLocaleDateString()}
+              <div className="flex items-center gap-6">
+                <Avatar
+                  type={recipient.avatar_type}
+                  data={recipient.avatar_data}
+                  background={recipient.avatar_background}
+                  name={recipient.name}
+                  size="xl"
+                  showBorder
+                />
+                <div>
+                  <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                    {recipient.name}
+                  </h1>
+                  <p className="text-gray-600 text-lg">
+                    {recipient.relationship} • Age: {recipient.age_range}
                   </p>
-                )}
+                  {recipient.birthday && (
+                    <p className="text-gray-500 mt-2">
+                      🎂 Birthday: {new Date(recipient.birthday).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
               </div>
               
               <div className="flex gap-2">
@@ -331,7 +351,42 @@ export default function RecipientDetailPage() {
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
                     {rec.title}
                   </h3>
-                  
+
+                  {rec.image_url && (
+                    <div className="mb-4 rounded-lg overflow-hidden bg-gray-100">
+                      <img
+                        src={rec.image_url}
+                        alt={rec.title}
+                        className="w-full h-64 object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {(rec.amazon_link || rec.google_shopping_link) && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {rec.amazon_link && (
+                        <a
+                          href={rec.amazon_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 min-w-[200px] px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-center font-medium"
+                        >
+                          🛒 Shop on Amazon
+                        </a>
+                      )}
+                      {rec.google_shopping_link && (
+                        <a
+                          href={rec.google_shopping_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 min-w-[200px] px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center font-medium"
+                        >
+                          🔍 Google Shopping
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-gray-700 mb-3">{rec.description}</p>
