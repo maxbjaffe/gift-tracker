@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { recipientId, budget, occasion } = body
+    const { recipientId, budget, occasion, category, minPrice, maxPrice } = body
 
     // Get recipient details
     const { data: recipient, error: recipientError } = await supabase
@@ -58,7 +58,15 @@ export async function POST(request: NextRequest) {
 
     const anthropic = new Anthropic({ apiKey })
 
-    // Build prompt
+    // Build prompt with filters
+    const priceRangeText = minPrice !== null && maxPrice !== null
+      ? `between $${minPrice} and $${maxPrice}`
+      : minPrice !== null
+      ? `$${minPrice} or more`
+      : maxPrice !== null
+      ? `$${maxPrice} or less`
+      : null
+
     const prompt = `You are a helpful gift suggestion assistant. Based on the following information about a person, suggest 5 thoughtful gift ideas.
 
 Person Details:
@@ -70,13 +78,18 @@ Person Details:
 - Hobbies: ${validRecipient.hobbies?.join(', ') || 'Not specified'}
 - Favorite Brands: ${validRecipient.favorite_brands?.join(', ') || 'Not specified'}
 - Favorite Stores: ${validRecipient.favorite_stores?.join(', ') || 'Not specified'}
-${budget ? `- Budget: $${budget}` : ''}
+${budget ? `- Overall Budget: $${budget}` : ''}
 ${occasion ? `- Occasion: ${occasion}` : ''}
 
-Please suggest 5 specific gift ideas. For each gift, provide:
+**IMPORTANT CONSTRAINTS:**
+${category ? `- ONLY suggest gifts in the "${category}" category. All suggestions must fit within this category.` : ''}
+${priceRangeText ? `- ONLY suggest gifts that cost ${priceRangeText}. All price ranges must fall within this constraint.` : ''}
+${category || priceRangeText ? '- These constraints are MANDATORY. Do not suggest anything outside these parameters.' : ''}
+
+Please suggest 5 specific gift ideas that meet ALL the constraints above. For each gift, provide:
 1. Gift name
 2. Brief description (1-2 sentences)
-3. Estimated price range
+3. Estimated price range (must be within the specified range if provided)
 4. Why it's a good match
 
 Format your response as JSON array with this structure:

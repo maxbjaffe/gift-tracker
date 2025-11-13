@@ -34,6 +34,9 @@ export function AISuggestionsDialog({ recipientId, recipientName }: AISuggestion
   const [loading, setLoading] = useState(false)
   const [budget, setBudget] = useState('')
   const [occasion, setOccasion] = useState('')
+  const [category, setCategory] = useState('')
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
   const [suggestions, setSuggestions] = useState<GiftSuggestion[]>([])
 
   const handleGetSuggestions = async () => {
@@ -46,6 +49,9 @@ export function AISuggestionsDialog({ recipientId, recipientName }: AISuggestion
           recipientId,
           budget: budget ? parseFloat(budget) : null,
           occasion: occasion || null,
+          category: category || null,
+          minPrice: minPrice ? parseFloat(minPrice) : null,
+          maxPrice: maxPrice ? parseFloat(maxPrice) : null,
         }),
       })
 
@@ -91,15 +97,16 @@ export function AISuggestionsDialog({ recipientId, recipientName }: AISuggestion
           {/* Input Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="budget">Budget (optional)</Label>
+              <Label htmlFor="category">Category (optional)</Label>
               <Input
-                id="budget"
-                type="number"
-                placeholder="50.00"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
+                id="category"
+                type="text"
+                placeholder="e.g., Toys, Books, Electronics"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
                 disabled={loading}
               />
+              <p className="text-xs text-gray-500 mt-1">Specify a gift category to focus suggestions</p>
             </div>
             <div>
               <Label htmlFor="occasion">Occasion (optional)</Label>
@@ -117,6 +124,60 @@ export function AISuggestionsDialog({ recipientId, recipientName }: AISuggestion
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="minPrice">Min Price (optional)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                <Input
+                  id="minPrice"
+                  type="number"
+                  placeholder="0"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  disabled={loading}
+                  className="pl-7"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="maxPrice">Max Price (optional)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                <Input
+                  id="maxPrice"
+                  type="number"
+                  placeholder="100"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  disabled={loading}
+                  className="pl-7"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="budget">Overall Budget (optional)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                <Input
+                  id="budget"
+                  type="number"
+                  placeholder="50"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  disabled={loading}
+                  className="pl-7"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
             </div>
           </div>
 
