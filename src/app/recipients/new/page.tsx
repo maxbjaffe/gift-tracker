@@ -49,9 +49,18 @@ export default function NewRecipientPage() {
 
     try {
       const supabase = createClient();
-      
+
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setError('You must be logged in to create a recipient');
+        setLoading(false);
+        return;
+      }
+
       // Convert comma-separated strings to arrays, or null if empty
-      const interestsArray = formData.interests.trim() 
+      const interestsArray = formData.interests.trim()
         ? formData.interests.split(',').map(item => item.trim()).filter(item => item)
         : null;
       
@@ -101,6 +110,7 @@ export default function NewRecipientPage() {
       const { data, error: submitError } = await supabase
         .from('recipients')
         .insert({
+          user_id: user.id,
           name: formData.name,
           relationship: formData.relationship || null,
           birthday: formData.birthday || null,
