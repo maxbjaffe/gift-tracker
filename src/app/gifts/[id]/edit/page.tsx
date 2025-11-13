@@ -154,16 +154,16 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <Link href={`/gifts/${params.id}`} className="text-purple-600 hover:text-purple-700 mb-4 inline-block">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-6 px-4 md:py-8 md:px-6 lg:py-12 lg:px-8">
+      <div className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+        <div className="mb-6 md:mb-8">
+          <Link href={`/gifts/${params.id}`} className="text-purple-600 hover:text-purple-700 mb-4 inline-block text-sm md:text-base">
             ← Back to Gift
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900">Edit Gift</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">Edit Gift</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
               {error}
@@ -172,7 +172,7 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
 
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Gift Name *
             </label>
             <input
@@ -182,14 +182,14 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="e.g., Wireless Headphones"
             />
           </div>
 
           {/* Status */}
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="status" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Status
             </label>
             <select
@@ -197,7 +197,7 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full h-11 md:h-12 px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="idea">Idea</option>
               <option value="purchased">Purchased</option>
@@ -207,13 +207,13 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Price Fields */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
             <div>
-              <label htmlFor="current_price" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="current_price" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
                 Current Price
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-2 text-gray-500">$</span>
+                <span className="absolute left-4 top-2 md:top-3 text-gray-500">$</span>
                 <input
                   type="number"
                   id="current_price"
@@ -222,18 +222,18 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
                   onChange={handleChange}
                   step="0.01"
                   min="0"
-                  className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full min-h-11 md:min-h-12 pl-8 pr-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="99.99"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="original_price" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="original_price" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
                 Original Price
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-2 text-gray-500">$</span>
+                <span className="absolute left-4 top-2 md:top-3 text-gray-500">$</span>
                 <input
                   type="number"
                   id="original_price"
@@ -242,7 +242,7 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
                   onChange={handleChange}
                   step="0.01"
                   min="0"
-                  className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full min-h-11 md:min-h-12 pl-8 pr-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="129.99"
                 />
               </div>
@@ -251,7 +251,7 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
 
           {/* URL */}
           <div>
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="url" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Product URL
             </label>
             <input
@@ -260,15 +260,15 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               name="url"
               value={formData.url}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="https://..."
             />
           </div>
 
           {/* Store and Brand */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
             <div>
-              <label htmlFor="store" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="store" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
                 Store
               </label>
               <input
@@ -277,13 +277,13 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
                 name="store"
                 value={formData.store}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="e.g., Amazon, Target"
               />
             </div>
 
             <div>
-              <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="brand" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
                 Brand
               </label>
               <input
@@ -292,7 +292,7 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
                 name="brand"
                 value={formData.brand}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="e.g., Sony, Apple"
               />
             </div>
@@ -300,7 +300,7 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
 
           {/* Category */}
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="category" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Category
             </label>
             <input
@@ -309,14 +309,14 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="e.g., Electronics, Books, Clothing"
             />
           </div>
 
           {/* Image URL */}
           <div>
-            <label htmlFor="image_url" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="image_url" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Image URL
             </label>
             <input
@@ -325,15 +325,15 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               name="image_url"
               value={formData.image_url}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="https://..."
             />
           </div>
 
           {/* Occasion Fields */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
             <div>
-              <label htmlFor="occasion" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="occasion" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
                 Occasion
               </label>
               <input
@@ -342,13 +342,13 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
                 name="occasion"
                 value={formData.occasion}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="e.g., Birthday, Christmas"
               />
             </div>
 
             <div>
-              <label htmlFor="occasion_date" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="occasion_date" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
                 Occasion Date
               </label>
               <input
@@ -357,14 +357,14 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
                 name="occasion_date"
                 value={formData.occasion_date}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="description" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Description
             </label>
             <textarea
@@ -373,14 +373,14 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="Product description..."
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="notes" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Notes
             </label>
             <textarea
@@ -389,23 +389,23 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
               value={formData.notes}
               onChange={handleChange}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="Additional notes about this gift..."
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4">
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="w-full sm:flex-1 h-11 md:h-12 px-6 py-3 bg-purple-600 text-white rounded-lg text-sm md:text-base hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
             <Link
               href={`/gifts/${params.id}`}
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-center"
+              className="w-full sm:w-auto h-11 md:h-12 flex items-center justify-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg text-sm md:text-base hover:bg-gray-300 transition-colors font-medium"
             >
               Cancel
             </Link>

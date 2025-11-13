@@ -2,8 +2,9 @@
 -- Gift Tracker Enhancement: Chat, Calendar, Personality, Avatars
 
 -- 1. Update recipients table with avatar and personality fields
+-- Note: Run the migration in supabase/migrations/update_avatar_type_constraint.sql to update existing constraints
 ALTER TABLE recipients
-ADD COLUMN IF NOT EXISTS avatar_type TEXT CHECK (avatar_type IN ('ai', 'emoji', 'initials', 'photo')),
+ADD COLUMN IF NOT EXISTS avatar_type TEXT CHECK (avatar_type IN ('preset', 'emoji', 'ai', 'photo', 'initials')),
 ADD COLUMN IF NOT EXISTS avatar_data TEXT,
 ADD COLUMN IF NOT EXISTS avatar_background TEXT,
 ADD COLUMN IF NOT EXISTS personality_type TEXT,

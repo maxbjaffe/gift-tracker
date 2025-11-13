@@ -59,66 +59,66 @@ export default function DashboardPage() {
     .sort((a, b) => a.daysUntil - b.daysUntil)
 
   return (
-    <div className="container mx-auto p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-gray-600 mt-2">
+    <div className="container mx-auto p-4 md:p-6 lg:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-2">
           Welcome back! Here's your gift tracking overview.
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+        <Card className="p-4 md:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Recipients</p>
-              <p className="text-3xl font-bold mt-2">{recipients.length}</p>
+              <p className="text-xs md:text-sm text-gray-600">Total Recipients</p>
+              <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{recipients.length}</p>
             </div>
-            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Users className="h-6 w-6 text-blue-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Users className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 md:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Gift Ideas</p>
-              <p className="text-3xl font-bold mt-2">{totalGifts}</p>
+              <p className="text-xs md:text-sm text-gray-600">Gift Ideas</p>
+              <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{totalGifts}</p>
             </div>
-            <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Gift className="h-6 w-6 text-purple-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Gift className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 md:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Upcoming Birthdays</p>
-              <p className="text-3xl font-bold mt-2">{upcomingBirthdays.length}</p>
+              <p className="text-xs md:text-sm text-gray-600">Upcoming Birthdays</p>
+              <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{upcomingBirthdays.length}</p>
             </div>
-            <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-green-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Calendar className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 md:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Value</p>
-              <p className="text-3xl font-bold mt-2">${totalValue.toFixed(0)}</p>
+              <p className="text-xs md:text-sm text-gray-600">Total Value</p>
+              <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">${totalValue.toFixed(0)}</p>
             </div>
-            <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-yellow-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-yellow-600" />
             </div>
           </div>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Gift Status Breakdown */}
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Gift Status</h2>
@@ -176,7 +176,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Budget and Price Tracking */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mt-6 md:mt-8">
         {/* Price Tracking by Status */}
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Spending by Status</h2>
@@ -226,49 +226,107 @@ export default function DashboardPage() {
               <Link href="/recipients/budgets">View All</Link>
             </Button>
           </div>
-          <div className="space-y-3">
-            {recipients
-              .filter((r) => r.max_budget && r.max_budget > 0)
-              .slice(0, 5)
-              .map((recipient) => {
-                // Calculate spent for this recipient
-                // Note: In real app, would use gift_recipients join table
-                const spent = 0 // Placeholder
-                const percentage = (spent / (recipient.max_budget || 1)) * 100
 
-                return (
-                  <div key={recipient.id} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-gray-700">
-                        {recipient.name}
-                      </span>
-                      <span className="text-gray-600">
-                        ${spent.toFixed(2)} / ${recipient.max_budget?.toFixed(2)}
-                      </span>
+          {/* Per-Gift Budget */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-gray-600 mb-3">Per-Gift Budget</h3>
+            <div className="space-y-3">
+              {recipients
+                .filter((r) => r.max_budget && r.max_budget > 0)
+                .slice(0, 3)
+                .map((recipient) => {
+                  // Calculate spent for this recipient
+                  // Note: In real app, would use gift_recipients join table
+                  const spent = 0 // Placeholder
+                  const percentage = (spent / (recipient.max_budget || 1)) * 100
+
+                  return (
+                    <div key={recipient.id} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-gray-700">
+                          {recipient.name}
+                        </span>
+                        <span className="text-gray-600">
+                          ${spent.toFixed(2)} / ${recipient.max_budget?.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green-500 transition-all"
+                          style={{ width: `${Math.min(percentage, 100)}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-green-500 transition-all"
-                        style={{ width: `${Math.min(percentage, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              {recipients.filter((r) => r.max_budget && r.max_budget > 0).length === 0 && (
+                <p className="text-gray-500 text-center py-4 text-sm">
+                  No per-gift budgets set
+                </p>
+              )}
+            </div>
           </div>
-          {recipients.filter((r) => r.max_budget && r.max_budget > 0).length === 0 && (
-            <p className="text-gray-500 text-center py-8">
-              No budgets set yet
-            </p>
-          )}
+
+          {/* Total Purchased Budget */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-600 mb-3">Total Purchased Gifts Budget</h3>
+            <div className="space-y-3">
+              {recipients
+                .filter((r) => r.max_purchased_budget && r.max_purchased_budget > 0)
+                .slice(0, 3)
+                .map((recipient) => {
+                  // Calculate total spent on purchased gifts for this recipient
+                  const purchasedGifts = gifts.filter(
+                    (g) => g.recipient_id === recipient.id && g.status === 'purchased'
+                  )
+                  const totalPurchased = purchasedGifts.reduce(
+                    (sum, g) => sum + (g.current_price || 0),
+                    0
+                  )
+                  const percentage = ((totalPurchased / (recipient.max_purchased_budget || 1)) * 100)
+                  const isOverBudget = totalPurchased > (recipient.max_purchased_budget || 0)
+
+                  return (
+                    <div key={recipient.id} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-gray-700">
+                          {recipient.name}
+                        </span>
+                        <span className={`font-semibold ${isOverBudget ? 'text-red-600' : 'text-gray-600'}`}>
+                          ${totalPurchased.toFixed(2)} / ${recipient.max_purchased_budget?.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all ${
+                            isOverBudget ? 'bg-red-500' : percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                          }`}
+                          style={{ width: `${Math.min(percentage, 100)}%` }}
+                        />
+                      </div>
+                      {isOverBudget && (
+                        <p className="text-xs text-red-600 mt-1">
+                          Over budget by ${(totalPurchased - (recipient.max_purchased_budget || 0)).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+              {recipients.filter((r) => r.max_purchased_budget && r.max_purchased_budget > 0).length === 0 && (
+                <p className="text-gray-500 text-center py-4 text-sm">
+                  No total purchase budgets set
+                </p>
+              )}
+            </div>
+          </div>
         </Card>
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Button asChild className="h-16">
+      <div className="mt-6 md:mt-8">
+        <h2 className="text-lg md:text-xl font-bold mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <Button asChild className="h-14 md:h-16 text-sm md:text-base">
             <Link href="/recipients/new">
               <Users className="h-5 w-5 mr-2" />
               Add Recipient

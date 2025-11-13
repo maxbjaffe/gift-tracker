@@ -88,81 +88,81 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-8">
+      <div className="container mx-auto p-4 md:p-6 lg:p-8">
         <LoadingSpinner type="card" count={4} />
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Analytics & Insights</h1>
-        <p className="text-gray-600 mt-2">
+    <div className="container mx-auto p-4 md:p-6 lg:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">Analytics & Insights</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-2">
           Deep dive into your gift-giving patterns and spending trends
         </p>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8">
+        <Card className="p-4 md:p-5 lg:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total Spent</p>
-              <p className="text-2xl font-bold text-purple-600">
+              <p className="text-xs md:text-sm text-gray-600 mb-1">Total Spent</p>
+              <p className="text-xl md:text-2xl font-bold text-purple-600">
                 ${analytics.totalSpent.toFixed(2)}
               </p>
             </div>
-            <DollarSign className="h-10 w-10 text-purple-600" />
+            <DollarSign className="h-8 w-8 md:h-10 md:w-10 text-purple-600" />
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 md:p-5 lg:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Average Gift</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-xs md:text-sm text-gray-600 mb-1">Average Gift</p>
+              <p className="text-xl md:text-2xl font-bold text-blue-600">
                 ${analytics.averageGiftPrice.toFixed(2)}
               </p>
             </div>
-            <TrendingUp className="h-10 w-10 text-blue-600" />
+            <TrendingUp className="h-8 w-8 md:h-10 md:w-10 text-blue-600" />
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 md:p-5 lg:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Total Gifts</p>
-              <p className="text-2xl font-bold text-green-600">{gifts.length}</p>
+              <p className="text-xs md:text-sm text-gray-600 mb-1">Total Gifts</p>
+              <p className="text-xl md:text-2xl font-bold text-green-600">{gifts.length}</p>
             </div>
-            <Package className="h-10 w-10 text-green-600" />
+            <Package className="h-8 w-8 md:h-10 md:w-10 text-green-600" />
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 md:p-5 lg:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Recipients</p>
-              <p className="text-2xl font-bold text-orange-600">{recipients.length}</p>
+              <p className="text-xs md:text-sm text-gray-600 mb-1">Recipients</p>
+              <p className="text-xl md:text-2xl font-bold text-orange-600">{recipients.length}</p>
             </div>
-            <Users className="h-10 w-10 text-orange-600" />
+            <Users className="h-8 w-8 md:h-10 md:w-10 text-orange-600" />
           </div>
         </Card>
       </div>
 
       {/* Charts */}
-      <Tabs defaultValue="category" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="category">Category Breakdown</TabsTrigger>
-          <TabsTrigger value="trends">Spending Trends</TabsTrigger>
-          <TabsTrigger value="status">By Status</TabsTrigger>
+      <Tabs defaultValue="category" className="space-y-4 md:space-y-6">
+        <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsTrigger value="category" className="text-xs md:text-sm h-11 md:h-12">Category</TabsTrigger>
+          <TabsTrigger value="trends" className="text-xs md:text-sm h-11 md:h-12">Trends</TabsTrigger>
+          <TabsTrigger value="status" className="text-xs md:text-sm h-11 md:h-12">Status</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="category" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-bold mb-4">Spending by Category</h3>
-              <ResponsiveContainer width="100%" height={300}>
+        <TabsContent value="category" className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            <Card className="p-4 md:p-5 lg:p-6">
+              <h3 className="text-base md:text-lg font-bold mb-3 md:mb-4">Spending by Category</h3>
+              <ResponsiveContainer width="100%" height={250} className="md:h-[300px]">
                 <PieChart>
                   <Pie
                     data={analytics.categoryChartData}
@@ -170,7 +170,7 @@ export default function AnalyticsPage() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
+                    outerRadius={window.innerWidth < 768 ? 60 : 80}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -183,21 +183,21 @@ export default function AnalyticsPage() {
               </ResponsiveContainer>
             </Card>
 
-            <Card className="p-6">
-              <h3 className="text-lg font-bold mb-4">Category Details</h3>
-              <div className="space-y-3">
+            <Card className="p-4 md:p-5 lg:p-6">
+              <h3 className="text-base md:text-lg font-bold mb-3 md:mb-4">Category Details</h3>
+              <div className="space-y-2 md:space-y-3">
                 {analytics.categoryChartData.map((cat, idx) => (
                   <div key={cat.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                       <div
-                        className="w-4 h-4 rounded"
+                        className="w-3 h-3 md:w-4 md:h-4 rounded"
                         style={{ backgroundColor: COLORS[idx % COLORS.length] }}
                       />
-                      <span className="capitalize font-medium">{cat.name}</span>
+                      <span className="text-sm md:text-base capitalize font-medium">{cat.name}</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold">${cat.value.toFixed(2)}</div>
-                      <div className="text-sm text-gray-500">{cat.count} gifts</div>
+                      <div className="text-sm md:text-base font-bold">${cat.value.toFixed(2)}</div>
+                      <div className="text-xs md:text-sm text-gray-500">{cat.count} gifts</div>
                     </div>
                   </div>
                 ))}
@@ -207,20 +207,20 @@ export default function AnalyticsPage() {
         </TabsContent>
 
         <TabsContent value="trends">
-          <Card className="p-6">
-            <h3 className="text-lg font-bold mb-4">Monthly Spending Trend</h3>
-            <ResponsiveContainer width="100%" height={400}>
+          <Card className="p-4 md:p-5 lg:p-6">
+            <h3 className="text-base md:text-lg font-bold mb-3 md:mb-4">Monthly Spending Trend</h3>
+            <ResponsiveContainer width="100%" height={300} className="md:h-[400px]">
               <LineChart data={analytics.monthlyChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
+                <XAxis dataKey="month" tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
+                <YAxis tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
                     if (name === 'amount') return `$${value.toFixed(2)}`
                     return value
                   }}
                 />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: window.innerWidth < 768 ? '12px' : '14px' }} />
                 <Line type="monotone" dataKey="amount" stroke="#8b5cf6" strokeWidth={2} name="Amount" />
                 <Line type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={2} name="Gifts" />
               </LineChart>
@@ -229,15 +229,15 @@ export default function AnalyticsPage() {
         </TabsContent>
 
         <TabsContent value="status">
-          <Card className="p-6">
-            <h3 className="text-lg font-bold mb-4">Spending by Status</h3>
-            <ResponsiveContainer width="100%" height={400}>
+          <Card className="p-4 md:p-5 lg:p-6">
+            <h3 className="text-base md:text-lg font-bold mb-3 md:mb-4">Spending by Status</h3>
+            <ResponsiveContainer width="100%" height={300} className="md:h-[400px]">
               <BarChart data={analytics.statusChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <XAxis dataKey="name" tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
+                <YAxis tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
                 <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: window.innerWidth < 768 ? '12px' : '14px' }} />
                 <Bar dataKey="amount" fill="#8b5cf6" name="Amount" />
               </BarChart>
             </ResponsiveContainer>
@@ -246,26 +246,26 @@ export default function AnalyticsPage() {
       </Tabs>
 
       {/* Top Expensive Gifts */}
-      <Card className="p-6 mt-6">
-        <h3 className="text-lg font-bold mb-4">Most Expensive Gifts</h3>
-        <div className="space-y-3">
+      <Card className="p-4 md:p-5 lg:p-6 mt-4 md:mt-6">
+        <h3 className="text-base md:text-lg font-bold mb-3 md:mb-4">Most Expensive Gifts</h3>
+        <div className="space-y-2 md:space-y-3">
           {analytics.topGifts.map((gift, idx) => (
-            <div key={gift.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-4">
-                <span className="text-2xl font-bold text-gray-400">#{idx + 1}</span>
-                <div>
-                  <p className="font-semibold">{gift.name}</p>
+            <div key={gift.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 md:p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3 md:gap-4 w-full sm:w-auto">
+                <span className="text-xl md:text-2xl font-bold text-gray-400">#{idx + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm md:text-base font-semibold truncate">{gift.name}</p>
                   {gift.category && (
-                    <p className="text-sm text-gray-600 capitalize">{gift.category}</p>
+                    <p className="text-xs md:text-sm text-gray-600 capitalize">{gift.category}</p>
                   )}
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-purple-600">
+              <div className="text-right w-full sm:w-auto">
+                <p className="text-xl md:text-2xl font-bold text-purple-600">
                   ${gift.current_price?.toFixed(2)}
                 </p>
                 {gift.store && (
-                  <p className="text-sm text-gray-500">{gift.store}</p>
+                  <p className="text-xs md:text-sm text-gray-500">{gift.store}</p>
                 )}
               </div>
             </div>

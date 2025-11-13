@@ -57,7 +57,6 @@ export function AISuggestionsDialog({ recipientId, recipientName }: AISuggestion
 
       if (data.suggestions && data.suggestions.length > 0) {
         setSuggestions(data.suggestions)
-        toast.success('AI suggestions generated!')
       } else {
         toast.error('No suggestions generated. Try again.')
       }

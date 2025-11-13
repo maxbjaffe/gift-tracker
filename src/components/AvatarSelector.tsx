@@ -1,484 +1,231 @@
-// Avatar Selector Component - Interactive avatar creation/selection
+// Avatar Selector - Gallery-Based Approach (Simplified & Fast)
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Avatar from './Avatar';
 import {
-  type AvatarType,
-  DICEBEAR_STYLES,
-  AVATAR_GRADIENTS,
+  type AvatarData,
+  type AvatarCategory,
+  AVATAR_PRESETS,
   AVATAR_EMOJIS,
-  generateInitials,
-  getRandomDiceBearStyle,
+  AVATAR_GRADIENTS,
+  getPresetsByCategory,
+  getRandomPreset,
+  getRandomEmoji,
   getRandomGradient,
-  getRandomEmoji
 } from '@/lib/avatar-utils';
 
-export interface AvatarData {
-  type: AvatarType;
-  data: string;
-  background: string;
-}
-
 export interface AvatarSelectorProps {
-  name: string;
-  currentAvatar?: AvatarData | null;
-  onChange: (avatar: AvatarData) => void;
+  value: AvatarData | null;
+  onChange: (avatarData: AvatarData) => void;
+  name?: string;
 }
 
-export default function AvatarSelector({ name, currentAvatar, onChange }: AvatarSelectorProps) {
-  const [activeTab, setActiveTab] = useState<AvatarType>('ai');
-  const [previewAvatar, setPreviewAvatar] = useState<AvatarData>({
-    type: 'ai',
-    data: name || 'default',
-    background: 'adventurer'
-  });
+export default function AvatarSelector({ value, onChange, name = '' }: AvatarSelectorProps) {
+  const [activeTab, setActiveTab] = useState<'presets' | 'emoji'>('presets');
+  const [selectedCategory, setSelectedCategory] = useState<AvatarCategory | 'all'>('all');
+  const [selectedGradient, setSelectedGradient] = useState(value?.background || 'purple');
 
-  // Initialize from current avatar
-  useEffect(() => {
-    if (currentAvatar) {
-      setActiveTab(currentAvatar.type || 'ai');
-      setPreviewAvatar(currentAvatar as AvatarData);
-    } else {
-      // Generate default AI avatar
-      const defaultAvatar: AvatarData = {
-        type: 'ai',
-        data: name || Math.random().toString(),
-        background: getRandomDiceBearStyle()
-      };
-      setPreviewAvatar(defaultAvatar);
-      onChange(defaultAvatar);
-    }
-  }, [currentAvatar, name]);
+  // Filter presets by category
+  const filteredPresets = useMemo(() => {
+    if (selectedCategory === 'all') return AVATAR_PRESETS;
+    return getPresetsByCategory(selectedCategory);
+  }, [selectedCategory]);
 
-  const handleAvatarChange = (newAvatar: AvatarData) => {
-    setPreviewAvatar(newAvatar);
-    onChange(newAvatar);
-  };
-
-  const handleRegenerateAI = () => {
-    const newStyle = DICEBEAR_STYLES[Math.floor(Math.random() * DICEBEAR_STYLES.length)].id;
-    const newSeed = Math.random().toString();
-    handleAvatarChange({
-      type: 'ai',
-      data: newSeed,
-      background: newStyle
+  // Quick actions
+  const handleSurpriseMe = () => {
+    const randomPreset = getRandomPreset();
+    onChange({
+      type: 'preset',
+      data: randomPreset.id,
     });
   };
 
-  const tabs = [
-    { id: 'ai' as AvatarType, name: 'AI Generated', icon: '🤖' },
-    { id: 'emoji' as AvatarType, name: 'Emoji', icon: '😊' },
-    { id: 'initials' as AvatarType, name: 'Initials', icon: 'AB' },
-    { id: 'photo' as AvatarType, name: 'Photo', icon: '📷' }
+  const handleRandomEmoji = () => {
+    const randomEmoji = getRandomEmoji();
+    const randomGradient = getRandomGradient();
+    onChange({
+      type: 'emoji',
+      data: randomEmoji,
+      background: randomGradient,
+    });
+    setSelectedGradient(randomGradient);
+  };
+
+  const categories: Array<{ id: AvatarCategory | 'all'; label: string; emoji: string }> = [
+    { id: 'all', label: 'All', emoji: '🎨' },
+    { id: 'animals', label: 'Animals', emoji: '🐾' },
+    { id: 'fantasy', label: 'Fantasy', emoji: '🦄' },
+    { id: 'robots', label: 'Robots', emoji: '🤖' },
+    { id: 'fun', label: 'Fun', emoji: '🎉' },
+    { id: 'abstract', label: 'Abstract', emoji: '🎭' },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Preview */}
-      <div className="flex flex-col items-center space-y-3 p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
-        <div className="relative">
-          <Avatar
-            {...previewAvatar}
-            name={name}
-            size="xl"
-            showBorder
-            className="shadow-lg"
-          />
-          <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg">
-            <span className="text-2xl">{tabs.find(t => t.id === activeTab)?.icon}</span>
-          </div>
+    <div className="space-y-3 md:space-y-4">
+      {/* Preview Section */}
+      <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg">
+        <Avatar
+          type={value?.type || 'preset'}
+          data={value?.data}
+          background={value?.background}
+          name={name}
+          size="lg"
+          showBorder
+          className="md:w-24 md:h-24"
+        />
+        <div className="flex-1 text-center sm:text-left w-full">
+          <h3 className="font-semibold text-base md:text-lg">Avatar Preview</h3>
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {value?.type === 'emoji'
+              ? `${value.data} Emoji Avatar`
+              : value?.type === 'preset' && value?.data
+              ? AVATAR_PRESETS.find(p => p.id === value.data)?.name || 'Avatar'
+              : 'No avatar selected'}
+          </p>
+          <button
+            onClick={handleSurpriseMe}
+            className="mt-2 w-full sm:w-auto min-h-11 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95"
+          >
+            ✨ Surprise Me!
+          </button>
         </div>
-        <p className="text-sm text-gray-600 font-medium">{name || 'Preview'}</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-              activeTab === tab.id
-                ? 'bg-white text-purple-600 shadow'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <span className="mr-1">{tab.icon}</span>
-            {tab.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="min-h-[300px]">
-        {activeTab === 'ai' && (
-          <AIAvatarTab
-            currentSeed={previewAvatar.data}
-            currentStyle={previewAvatar.background}
-            onChange={(data, background) =>
-              handleAvatarChange({ type: 'ai', data, background })
-            }
-            onRegenerate={handleRegenerateAI}
-          />
-        )}
-
-        {activeTab === 'emoji' && (
-          <EmojiAvatarTab
-            currentEmoji={previewAvatar.data}
-            currentBackground={previewAvatar.background}
-            onChange={(data, background) =>
-              handleAvatarChange({ type: 'emoji', data, background })
-            }
-          />
-        )}
-
-        {activeTab === 'initials' && (
-          <InitialsAvatarTab
-            name={name}
-            currentInitials={previewAvatar.data}
-            currentBackground={previewAvatar.background}
-            onChange={(data, background) =>
-              handleAvatarChange({ type: 'initials', data, background })
-            }
-          />
-        )}
-
-        {activeTab === 'photo' && (
-          <PhotoAvatarTab
-            currentPhoto={previewAvatar.data}
-            onChange={(data) =>
-              handleAvatarChange({ type: 'photo', data, background: '' })
-            }
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// AI Avatar Tab
-function AIAvatarTab({
-  currentSeed,
-  currentStyle,
-  onChange,
-  onRegenerate
-}: {
-  currentSeed: string;
-  currentStyle: string;
-  onChange: (seed: string, style: string) => void;
-  onRegenerate: () => void;
-}) {
-  const [selectedStyle, setSelectedStyle] = useState(currentStyle);
-
-  const handleStyleChange = (style: string) => {
-    setSelectedStyle(style);
-    onChange(currentSeed, style);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Choose Style</h3>
+      <div className="flex gap-1 md:gap-2 border-b border-gray-200 dark:border-gray-700 -mx-1">
         <button
-          onClick={onRegenerate}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center gap-2"
+          onClick={() => setActiveTab('presets')}
+          className={`flex-1 sm:flex-none px-3 md:px-4 py-2.5 md:py-3 font-medium text-xs sm:text-sm transition-colors touch-manipulation ${
+            activeTab === 'presets'
+              ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+          }`}
         >
-          🎲 Regenerate
+          🎨 Fun Avatars
+        </button>
+        <button
+          onClick={() => setActiveTab('emoji')}
+          className={`flex-1 sm:flex-none px-3 md:px-4 py-2.5 md:py-3 font-medium text-xs sm:text-sm transition-colors touch-manipulation ${
+            activeTab === 'emoji'
+              ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+          }`}
+        >
+          😊 Emoji Avatars
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {DICEBEAR_STYLES.map((style) => (
-          <button
-            key={style.id}
-            onClick={() => handleStyleChange(style.id)}
-            className={`p-3 rounded-lg border-2 transition-all ${
-              selectedStyle === style.id
-                ? 'border-purple-500 bg-purple-50'
-                : 'border-gray-200 hover:border-purple-300'
-            }`}
-          >
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-12 h-12 rounded-full overflow-hidden">
+      {/* Presets Tab */}
+      {activeTab === 'presets' && (
+        <div className="space-y-3 md:space-y-4">
+          {/* Category Filter */}
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`min-h-9 px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-manipulation ${
+                  selectedCategory === cat.id
+                    ? 'bg-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95'
+                }`}
+              >
+                {cat.emoji} {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Avatar Grid */}
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8 gap-2 md:gap-3 max-h-80 md:max-h-96 overflow-y-auto p-1 md:p-2 -mx-1">
+            {filteredPresets.map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => onChange({ type: 'preset', data: preset.id })}
+                className={`group relative aspect-square rounded-lg md:rounded-xl overflow-hidden transition-all transform active:scale-95 md:hover:scale-110 md:hover:z-10 touch-manipulation ${
+                  value?.type === 'preset' && value?.data === preset.id
+                    ? 'ring-3 md:ring-4 ring-purple-500 shadow-xl scale-105'
+                    : 'ring-2 ring-gray-200 dark:ring-gray-700 md:hover:ring-purple-400'
+                }`}
+                title={preset.name}
+                aria-label={`Select ${preset.name}`}
+              >
                 <img
-                  src={`https://api.dicebear.com/7.x/${style.id}/svg?seed=${currentSeed}`}
-                  alt={style.name}
-                  className="w-full h-full"
+                  src={preset.url}
+                  alt={preset.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
                 />
-              </div>
-              <span className="text-xs font-medium text-gray-700">{style.name}</span>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
+                {/* Hover/Touch overlay with name */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity flex items-end justify-center p-1">
+                  <span className="text-white text-[10px] sm:text-xs font-medium text-center leading-tight">
+                    {preset.name}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
 
-// Emoji Avatar Tab
-function EmojiAvatarTab({
-  currentEmoji,
-  currentBackground,
-  onChange
-}: {
-  currentEmoji: string;
-  currentBackground: string;
-  onChange: (emoji: string, background: string) => void;
-}) {
-  const [selectedEmoji, setSelectedEmoji] = useState(currentEmoji || '🎁');
-  const [selectedBackground, setSelectedBackground] = useState(currentBackground || 'purple');
-
-  const handleEmojiChange = (emoji: string) => {
-    setSelectedEmoji(emoji);
-    onChange(emoji, selectedBackground);
-  };
-
-  const handleBackgroundChange = (background: string) => {
-    setSelectedBackground(background);
-    onChange(selectedEmoji, background);
-  };
-
-  const handleRandom = () => {
-    const randomEmoji = getRandomEmoji();
-    const randomBg = getRandomGradient();
-    setSelectedEmoji(randomEmoji);
-    setSelectedBackground(randomBg);
-    onChange(randomEmoji, randomBg);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Choose Emoji</h3>
-        <button
-          onClick={handleRandom}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center gap-2"
-        >
-          🎲 Random
-        </button>
-      </div>
-
-      <div className="grid grid-cols-8 sm:grid-cols-10 gap-2 max-h-[200px] overflow-y-auto p-2 bg-gray-50 rounded-lg">
-        {AVATAR_EMOJIS.map((emoji, index) => (
-          <button
-            key={index}
-            onClick={() => handleEmojiChange(emoji)}
-            className={`text-2xl p-2 rounded-lg transition-all hover:scale-110 ${
-              selectedEmoji === emoji ? 'bg-purple-100 scale-110' : 'hover:bg-white'
-            }`}
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Background Color</h3>
-        <div className="grid grid-cols-5 gap-2">
-          {AVATAR_GRADIENTS.map((gradient) => (
-            <button
-              key={gradient.id}
-              onClick={() => handleBackgroundChange(gradient.id)}
-              className={`h-12 rounded-lg ${gradient.class} transition-all ${
-                selectedBackground === gradient.id
-                  ? 'ring-2 ring-purple-500 ring-offset-2 scale-105'
-                  : 'hover:scale-105'
-              }`}
-              title={gradient.name}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Initials Avatar Tab
-function InitialsAvatarTab({
-  name,
-  currentInitials,
-  currentBackground,
-  onChange
-}: {
-  name: string;
-  currentInitials: string;
-  currentBackground: string;
-  onChange: (initials: string, background: string) => void;
-}) {
-  const defaultInitials = generateInitials(name);
-  const [initials, setInitials] = useState(currentInitials || defaultInitials);
-  const [selectedBackground, setSelectedBackground] = useState(currentBackground || 'purple');
-
-  useEffect(() => {
-    if (!currentInitials && name) {
-      const newInitials = generateInitials(name);
-      setInitials(newInitials);
-      onChange(newInitials, selectedBackground);
-    }
-  }, [name]);
-
-  const handleInitialsChange = (value: string) => {
-    const upper = value.toUpperCase().slice(0, 2);
-    setInitials(upper);
-    onChange(upper, selectedBackground);
-  };
-
-  const handleBackgroundChange = (background: string) => {
-    setSelectedBackground(background);
-    onChange(initials, background);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Initials (1-2 characters)
-        </label>
-        <input
-          type="text"
-          value={initials}
-          onChange={(e) => handleInitialsChange(e.target.value)}
-          maxLength={2}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-2xl font-bold uppercase"
-          placeholder="AB"
-        />
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Background Color</h3>
-        <div className="grid grid-cols-5 gap-2">
-          {AVATAR_GRADIENTS.map((gradient) => (
-            <button
-              key={gradient.id}
-              onClick={() => handleBackgroundChange(gradient.id)}
-              className={`h-12 rounded-lg ${gradient.class} transition-all ${
-                selectedBackground === gradient.id
-                  ? 'ring-2 ring-purple-500 ring-offset-2 scale-105'
-                  : 'hover:scale-105'
-              }`}
-              title={gradient.name}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Photo Avatar Tab
-function PhotoAvatarTab({
-  currentPhoto,
-  onChange
-}: {
-  currentPhoto: string;
-  onChange: (photoUrl: string) => void;
-}) {
-  const [photoUrl, setPhotoUrl] = useState(currentPhoto || '');
-  const [uploadMethod, setUploadMethod] = useState<'url' | 'file'>('url');
-
-  const handleUrlChange = (url: string) => {
-    setPhotoUrl(url);
-    if (url) onChange(url);
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setPhotoUrl(base64);
-        onChange(base64);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
-        <button
-          onClick={() => setUploadMethod('url')}
-          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-            uploadMethod === 'url'
-              ? 'bg-white text-purple-600 shadow'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          🔗 Image URL
-        </button>
-        <button
-          onClick={() => setUploadMethod('file')}
-          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-            uploadMethod === 'file'
-              ? 'bg-white text-purple-600 shadow'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          📁 Upload File
-        </button>
-      </div>
-
-      {uploadMethod === 'url' && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Image URL
-          </label>
-          <input
-            type="url"
-            value={photoUrl}
-            onChange={(e) => handleUrlChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            placeholder="https://example.com/photo.jpg"
-          />
-          <p className="mt-2 text-xs text-gray-500">
-            Paste a direct link to an image (jpg, png, gif)
+          <p className="text-xs text-gray-500 text-center">
+            Showing {filteredPresets.length} avatar{filteredPresets.length !== 1 ? 's' : ''}
           </p>
         </div>
       )}
 
-      {uploadMethod === 'file' && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Upload Photo
-          </label>
-          <div className="flex items-center justify-center w-full">
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg
-                  className="w-10 h-10 mb-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-                <p className="mb-2 text-sm text-gray-500">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 2MB)</p>
-              </div>
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileUpload}
-              />
-            </label>
+      {/* Emoji Tab */}
+      {activeTab === 'emoji' && (
+        <div className="space-y-3 md:space-y-4">
+          {/* Gradient Selector */}
+          <div>
+            <label className="block text-xs sm:text-sm font-medium mb-2">Background Color</label>
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+              {AVATAR_GRADIENTS.map((gradient) => (
+                <button
+                  key={gradient.id}
+                  onClick={() => setSelectedGradient(gradient.id)}
+                  className={`aspect-square rounded-md md:rounded-lg transition-all transform active:scale-95 md:hover:scale-110 touch-manipulation ${
+                    gradient.class
+                  } ${
+                    selectedGradient === gradient.id
+                      ? 'ring-3 md:ring-4 ring-purple-500 shadow-xl scale-105'
+                      : 'ring-2 ring-gray-200 dark:ring-gray-700'
+                  }`}
+                  title={gradient.name}
+                  aria-label={`Select ${gradient.name} background`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
 
-      {photoUrl && (
-        <div className="mt-4">
-          <p className="text-sm text-green-600 font-medium mb-2">✓ Photo loaded successfully!</p>
+          {/* Emoji Grid */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-xs sm:text-sm font-medium">Choose an Emoji</label>
+              <button
+                onClick={handleRandomEmoji}
+                className="text-xs px-3 py-1.5 min-h-8 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full hover:bg-purple-200 dark:hover:bg-purple-900/50 active:scale-95 transition-all touch-manipulation"
+              >
+                🎲 Random
+              </button>
+            </div>
+            <div className="grid grid-cols-6 xs:grid-cols-8 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-14 gap-1.5 md:gap-2 max-h-56 md:max-h-64 overflow-y-auto p-2 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
+              {AVATAR_EMOJIS.map((emoji, index) => (
+                <button
+                  key={index}
+                  onClick={() => onChange({ type: 'emoji', data: emoji, background: selectedGradient })}
+                  className={`aspect-square rounded-md md:rounded-lg text-xl md:text-2xl flex items-center justify-center transition-all transform active:scale-95 md:hover:scale-125 md:hover:z-10 touch-manipulation ${
+                    value?.type === 'emoji' && value?.data === emoji
+                      ? 'bg-purple-200 dark:bg-purple-800 shadow-lg scale-110'
+                      : 'hover:bg-gray-200 dark:hover:bg-gray-800'
+                  }`}
+                  aria-label={`Select ${emoji} emoji`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

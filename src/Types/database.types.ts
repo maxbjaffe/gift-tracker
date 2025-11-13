@@ -36,6 +36,7 @@ export interface Database {
           past_gifts_received: Json | null
           items_already_owned: string[] | null
           max_budget: number | null
+          max_purchased_budget: number | null
           notes: string | null
           created_at: string
           updated_at: string
@@ -63,6 +64,7 @@ export interface Database {
           past_gifts_received?: Json | null
           items_already_owned?: string[] | null
           max_budget?: number | null
+          max_purchased_budget?: number | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -90,6 +92,7 @@ export interface Database {
           past_gifts_received?: Json | null
           items_already_owned?: string[] | null
           max_budget?: number | null
+          max_purchased_budget?: number | null
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -282,6 +285,7 @@ export type RecipientFormData = {
   gift_donts?: string[]
   restrictions?: string[]
   max_budget?: number
+  max_purchased_budget?: number
   notes?: string
 }
 
@@ -344,7 +348,10 @@ export const RELATIONSHIPS = [
   'Other'
 ] as const
 export const AGE_RANGES = [
-  '0-12',
+  '0-2',
+  '3-5',
+  '6-9',
+  '10-12',
   '13-17',
   '18-24',
   '25-34',

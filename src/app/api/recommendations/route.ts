@@ -2,7 +2,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/client';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch recipient data from database
-    const supabase = createClient();
+    const supabase = await createServerSupabaseClient();
     const { data: recipient, error: recipientError } = await supabase
       .from('recipients')
       .select('*')
@@ -56,8 +56,34 @@ export async function POST(request: NextRequest) {
       throw new Error('No text response from Claude');
     }
 
-    // Parse the JSON response
-    let recommendations = JSON.parse(textContent.text);
+    // Parse the JSON response with robust extraction
+    let recommendations;
+    try {
+      const responseText = textContent.text;
+
+      // Extract JSON from markdown code blocks if present
+      const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) ||
+                       responseText.match(/```\n?([\s\S]*?)\n?```/) ||
+                       responseText.match(/\[[\s\S]*\]/);
+      const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : responseText;
+      recommendations = JSON.parse(jsonStr);
+
+      // Validate that we got an array
+      if (!Array.isArray(recommendations)) {
+        throw new Error('Response is not an array');
+      }
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError);
+      console.error('Raw response:', textContent.text);
+      return NextResponse.json(
+        {
+          error: 'Failed to parse AI response. The AI may have returned an invalid format.',
+          details: parseError instanceof Error ? parseError.message : 'Unknown error',
+          rawResponse: textContent.text.substring(0, 500) // First 500 chars for debugging
+        },
+        { status: 500 }
+      );
+    }
 
     // Enhance recommendations with images and shopping links
     recommendations = await Promise.all(recommendations.map(async (rec: any) => {

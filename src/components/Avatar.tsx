@@ -1,14 +1,15 @@
-// Avatar Display Component
+// Avatar Display Component - Simplified and Optimized
 
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   type AvatarType,
-  generateDiceBearAvatar,
-  generateInitials,
+  type AvatarData,
+  getPresetById,
   getGradientClass,
-  getAvatarSizeClasses
+  getAvatarSizeClasses,
+  getRandomPreset
 } from '@/lib/avatar-utils';
 
 export interface AvatarProps {
@@ -30,22 +31,49 @@ export default function Avatar({
   className = '',
   showBorder = false
 }: AvatarProps) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const sizeClasses = getAvatarSizeClasses(size);
   const borderClass = showBorder ? 'ring-2 ring-white ring-offset-2' : '';
 
   const avatarContent = useMemo(() => {
-    // If no type, generate default AI avatar
-    if (!type || type === 'ai') {
-      const seed = data || name || 'default';
-      const style = background || 'adventurer';
-      const avatarUrl = generateDiceBearAvatar(seed, style);
+    // Preset avatar (new default)
+    if (!type || type === 'preset') {
+      const presetId = data || getRandomPreset().id;
+      const preset = getPresetById(presetId);
+      const avatarUrl = preset?.url || getRandomPreset().url;
 
       return (
-        <img
-          src={avatarUrl}
-          alt={name}
-          className="w-full h-full object-cover"
-        />
+        <div className="w-full h-full relative bg-gradient-to-br from-gray-100 to-gray-200">
+          {/* Loading state - subtle pulse */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-1/2 h-1/2 rounded-full bg-gray-300 animate-pulse" />
+            </div>
+          )}
+
+          {/* Avatar image */}
+          <img
+            src={avatarUrl}
+            alt={preset?.name || name}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+          />
+
+          {/* Error fallback - show first letter */}
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-400 to-purple-600 text-white font-bold">
+              <span>{name?.[0]?.toUpperCase() || '?'}</span>
+            </div>
+          )}
+        </div>
       );
     }
 
@@ -55,46 +83,22 @@ export default function Avatar({
 
       return (
         <div className={`w-full h-full flex items-center justify-center ${gradientClass}`}>
-          <span className="text-current">{data || '🎁'}</span>
+          <span className="text-current select-none">{data || '🎁'}</span>
         </div>
       );
     }
 
-    // Initials avatar
-    if (type === 'initials') {
-      const initials = data || generateInitials(name);
-      const gradientClass = getGradientClass(background || 'purple');
-
-      return (
-        <div className={`w-full h-full flex items-center justify-center ${gradientClass} text-white font-bold`}>
-          <span>{initials}</span>
-        </div>
-      );
-    }
-
-    // Photo avatar
-    if (type === 'photo' && data) {
-      return (
-        <img
-          src={data}
-          alt={name}
-          className="w-full h-full object-cover"
-        />
-      );
-    }
-
-    // Fallback: generate initials
-    const initials = generateInitials(name);
+    // Fallback: emoji with purple gradient
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-400 to-purple-600 text-white font-bold">
-        <span>{initials}</span>
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-400 to-purple-600">
+        <span className="text-current select-none">🎁</span>
       </div>
     );
-  }, [type, data, background, name]);
+  }, [type, data, background, name, imageError, imageLoaded]);
 
   return (
     <div
-      className={`${sizeClasses} rounded-full overflow-hidden ${borderClass} ${className} flex-shrink-0`}
+      className={`${sizeClasses} rounded-full overflow-hidden ${borderClass} ${className} flex-shrink-0 transition-transform duration-200`}
       title={name}
     >
       {avatarContent}

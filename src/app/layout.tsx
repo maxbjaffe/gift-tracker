@@ -5,6 +5,7 @@ import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import Link from 'next/link'
 import { UserMenu } from '@/components/shared/UserMenu'
+import { MobileNav } from '@/components/shared/MobileNav'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -28,15 +29,16 @@ export default async function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container flex h-16 items-center">
+          <div className="container flex h-16 items-center px-4">
             <div className="flex items-center gap-2">
-              <span className="text-3xl">🎁</span>
-              <Link href="/" className="text-xl font-bold">
+              <span className="text-2xl md:text-3xl">🎁</span>
+              <Link href="/" className="text-lg md:text-xl font-bold">
                 Gift Tracker
               </Link>
             </div>
 
-            <nav className="ml-auto flex items-center gap-6">
+            {/* Desktop Navigation - Hidden on mobile */}
+            <nav className="ml-auto hidden md:flex items-center gap-6">
               <Link
                 href="/dashboard"
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -63,6 +65,11 @@ export default async function RootLayout({
               </Link>
               <UserMenu user={user} />
             </nav>
+
+            {/* Mobile Navigation - Visible only on mobile */}
+            <div className="ml-auto md:hidden">
+              <MobileNav user={user} />
+            </div>
           </div>
         </header>
 

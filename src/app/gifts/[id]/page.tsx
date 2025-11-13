@@ -181,9 +181,9 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="text-gray-600">Loading gift details...</div>
+          <div className="text-sm md:text-base text-gray-600">Loading gift details...</div>
         </div>
       </div>
     );
@@ -191,10 +191,10 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
   if (error || !gift) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="text-red-600">{error || 'Gift not found'}</div>
-          <Link href="/gifts" className="text-purple-600 hover:text-purple-700 mt-4 inline-block">
+          <div className="text-sm md:text-base text-red-600">{error || 'Gift not found'}</div>
+          <Link href="/gifts" className="text-sm md:text-base text-purple-600 hover:text-purple-700 mt-4 inline-block">
             ← Back to Gifts
           </Link>
         </div>
@@ -207,19 +207,19 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <Link href="/gifts" className="text-purple-600 hover:text-purple-700 mb-4 inline-block">
+        <div className="mb-6 md:mb-8 space-y-4 md:space-y-6">
+          <Link href="/gifts" className="text-sm md:text-base text-purple-600 hover:text-purple-700 inline-block">
             ← Back to Gifts
           </Link>
-          
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">{gift.name}</h1>
-              <div className="flex gap-2 items-center">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+
+          <div className="flex flex-col md:flex-row justify-between items-start gap-4 md:gap-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 break-words">{gift.name}</h1>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className={`px-3 py-1 rounded-full text-xs md:text-sm font-medium ${
                   gift.status === 'idea' ? 'bg-blue-100 text-blue-700' :
                   gift.status === 'purchased' ? 'bg-green-100 text-green-700' :
                   gift.status === 'wrapped' ? 'bg-purple-100 text-purple-700' :
@@ -228,24 +228,24 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
                   {gift.status}
                 </span>
                 {gift.current_price && (
-                  <span className="text-2xl font-bold text-purple-600">
+                  <span className="text-xl md:text-2xl font-bold text-purple-600">
                     ${gift.current_price.toFixed(2)}
                   </span>
                 )}
               </div>
             </div>
-            
-            <div className="flex gap-2">
+
+            <div className="flex gap-2 w-full sm:w-auto">
               <Link
                 href={`/gifts/${params.id}/edit`}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                className="flex-1 sm:flex-none px-4 h-11 md:h-12 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-sm md:text-base"
               >
                 Edit
               </Link>
               <button
                 onClick={handleDelete}
                 disabled={actionLoading}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                className="flex-1 sm:flex-none px-4 h-11 md:h-12 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 text-sm md:text-base"
               >
                 Delete
               </button>
@@ -254,62 +254,62 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
           {/* Left Column - Gift Details */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Image */}
             {gift.image_url && (
-              <div className="bg-white rounded-xl shadow-sm p-4">
+              <div className="bg-white rounded-xl shadow-sm p-3 md:p-4">
                 <img
                   src={gift.image_url}
                   alt={gift.name}
-                  className="w-full h-64 object-cover rounded-lg"
+                  className="w-full h-48 md:h-64 object-cover rounded-lg"
                 />
               </div>
             )}
 
             {/* Details Card */}
-            <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Details</h2>
-              
+            <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 lg:p-6 space-y-3 md:space-y-4">
+              <h2 className="text-base md:text-lg lg:text-xl font-semibold text-gray-900">Details</h2>
+
               {gift.brand && (
                 <div>
-                  <div className="text-sm text-gray-500">Brand</div>
-                  <div className="text-gray-900">{gift.brand}</div>
+                  <div className="text-xs md:text-sm text-gray-500">Brand</div>
+                  <div className="text-sm md:text-base text-gray-900">{gift.brand}</div>
                 </div>
               )}
-              
+
               {gift.store && (
                 <div>
-                  <div className="text-sm text-gray-500">Store</div>
-                  <div className="text-gray-900">{gift.store}</div>
+                  <div className="text-xs md:text-sm text-gray-500">Store</div>
+                  <div className="text-sm md:text-base text-gray-900">{gift.store}</div>
                 </div>
               )}
-              
+
               {gift.category && (
                 <div>
-                  <div className="text-sm text-gray-500">Category</div>
-                  <div className="text-gray-900">{gift.category}</div>
+                  <div className="text-xs md:text-sm text-gray-500">Category</div>
+                  <div className="text-sm md:text-base text-gray-900">{gift.category}</div>
                 </div>
               )}
-              
+
               {gift.url && (
                 <div>
-                  <div className="text-sm text-gray-500">Product Link</div>
+                  <div className="text-xs md:text-sm text-gray-500">Product Link</div>
                   <a
                     href={gift.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-700 break-all"
+                    className="text-sm md:text-base text-purple-600 hover:text-purple-700 break-all"
                   >
                     View Product →
                   </a>
                 </div>
               )}
-              
+
               <div>
-                <div className="text-sm text-gray-500">Added</div>
-                <div className="text-gray-900">
+                <div className="text-xs md:text-sm text-gray-500">Added</div>
+                <div className="text-sm md:text-base text-gray-900">
                   {new Date(gift.created_at).toLocaleDateString()}
                 </div>
               </div>
@@ -317,23 +317,23 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
             {/* Description */}
             {gift.description && (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Description</h2>
-                <p className="text-gray-700 whitespace-pre-wrap">{gift.description}</p>
+              <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 lg:p-6">
+                <h2 className="text-base md:text-lg lg:text-xl font-semibold text-gray-900 mb-3">Description</h2>
+                <p className="text-sm md:text-base text-gray-700 whitespace-pre-wrap">{gift.description}</p>
               </div>
             )}
           </div>
 
           {/* Right Column - Recipients */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
+          <div className="space-y-4 md:space-y-6">
+            <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 lg:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-4">
+                <h2 className="text-base md:text-lg lg:text-xl font-semibold text-gray-900">
                   Gift For ({linkedRecipients.length})
                 </h2>
                 <button
                   onClick={() => setShowLinkModal(true)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                  className="w-full sm:w-auto px-4 h-11 md:h-12 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs md:text-sm whitespace-nowrap flex items-center justify-center"
                   disabled={actionLoading}
                 >
                   + Add Recipient
@@ -341,32 +341,32 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
               </div>
 
               {linkedRecipients.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No recipients assigned yet.</p>
-                  <p className="text-sm mt-2">Click "Add Recipient" to assign this gift.</p>
+                <div className="text-center py-6 md:py-8 text-gray-500">
+                  <p className="text-sm md:text-base">No recipients assigned yet.</p>
+                  <p className="text-xs md:text-sm mt-2">Click "Add Recipient" to assign this gift.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {linkedRecipients.map((recipient) => (
                     <div
                       key={recipient.id}
-                      className="flex items-center justify-between p-4 bg-purple-50 rounded-lg"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 md:p-4 bg-purple-50 rounded-lg"
                     >
-                      <div>
+                      <div className="flex-1">
                         <Link
                           href={`/recipients/${recipient.id}`}
-                          className="font-medium text-gray-900 hover:text-purple-600"
+                          className="text-sm md:text-base font-medium text-gray-900 hover:text-purple-600"
                         >
                           {recipient.name}
                         </Link>
                         {recipient.relationship && (
-                          <div className="text-sm text-gray-500">{recipient.relationship}</div>
+                          <div className="text-xs md:text-sm text-gray-500">{recipient.relationship}</div>
                         )}
                       </div>
                       <button
                         onClick={() => unlinkRecipient(recipient.id)}
                         disabled={actionLoading}
-                        className="text-red-600 hover:text-red-700 text-sm font-medium"
+                        className="w-full sm:w-auto h-11 md:h-auto text-red-600 hover:text-red-700 text-xs md:text-sm font-medium"
                       >
                         Remove
                       </button>
@@ -383,14 +383,14 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
       {showLinkModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b">
-              <h3 className="text-xl font-semibold text-gray-900">Add Recipient</h3>
+            <div className="p-4 md:p-6 border-b">
+              <h3 className="text-base md:text-lg lg:text-xl font-semibold text-gray-900">Add Recipient</h3>
             </div>
-            
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
+
+            <div className="p-4 md:p-6 overflow-y-auto max-h-[60vh]">
               {availableRecipients.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <p>All recipients are already linked to this gift.</p>
+                <div className="text-center py-6 md:py-8 text-gray-500">
+                  <p className="text-sm md:text-base">All recipients are already linked to this gift.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -399,23 +399,23 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
                       key={recipient.id}
                       onClick={() => linkRecipient(recipient.id)}
                       disabled={actionLoading}
-                      className="w-full text-left p-4 bg-gray-50 hover:bg-purple-50 rounded-lg transition-colors"
+                      className="w-full text-left p-3 md:p-4 bg-gray-50 hover:bg-purple-50 rounded-lg transition-colors"
                     >
-                      <div className="font-medium text-gray-900">{recipient.name}</div>
+                      <div className="text-sm md:text-base font-medium text-gray-900">{recipient.name}</div>
                       {recipient.relationship && (
-                        <div className="text-sm text-gray-500">{recipient.relationship}</div>
+                        <div className="text-xs md:text-sm text-gray-500">{recipient.relationship}</div>
                       )}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            
-            <div className="p-6 border-t">
+
+            <div className="p-4 md:p-6 border-t">
               <button
                 onClick={() => setShowLinkModal(false)}
                 disabled={actionLoading}
-                className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                className="w-full px-4 h-11 md:h-12 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm md:text-base"
               >
                 Close
               </button>

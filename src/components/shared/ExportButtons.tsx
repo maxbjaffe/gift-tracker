@@ -25,7 +25,6 @@ export function ExportButtons({ data, type }: ExportButtonsProps) {
       } else {
         exportRecipientsToCSV(data as Recipient[], `recipients_${new Date().toISOString().split('T')[0]}.csv`)
       }
-      toast.success('CSV exported successfully!')
     } catch (error) {
       toast.error('Failed to export CSV')
       console.error(error)
@@ -36,7 +35,6 @@ export function ExportButtons({ data, type }: ExportButtonsProps) {
     try {
       if (type === 'gifts') {
         exportToPDF(data as Gift[], 'My Gift List')
-        toast.success('PDF generated successfully!')
       } else {
         toast.info('PDF export for recipients coming soon!')
       }
