@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json([]);
       }
 
-      const giftIds = giftRecipients.map(gr => gr.gift_id);
+      const giftIds = (giftRecipients as any[]).map((gr: any) => gr.gift_id);
 
       // In development with service role, skip user_id filter
       let query = supabase
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
         occasion,
         occasion_date,
         notes,
-      })
+      } as any)
       .select()
       .single();
 
@@ -139,13 +139,13 @@ export async function POST(request: NextRequest) {
     // Link to recipients if provided
     if (recipient_ids && recipient_ids.length > 0) {
       const links = recipient_ids.map((recipient_id: string) => ({
-        gift_id: gift.id,
+        gift_id: (gift as any).id,
         recipient_id,
       }));
 
       const { error: linkError } = await supabase
         .from('gift_recipients')
-        .insert(links);
+        .insert(links as any);
 
       if (linkError) {
         console.error('Error linking gift to recipients:', linkError);

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
+import type { Database } from '@/Types/database.types'
+
+type Recipient = Database['public']['Tables']['recipients']['Row']
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,12 +30,22 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single()
 
-    if (recipientError || !recipient) {
+    if (recipientError) {
+      return NextResponse.json(
+        { error: 'Recipient not found', details: recipientError.message },
+        { status: 404 }
+      )
+    }
+
+    if (!recipient) {
       return NextResponse.json(
         { error: 'Recipient not found' },
         { status: 404 }
       )
     }
+
+    // Type assertion after null check
+    const validRecipient: Recipient = recipient
 
     // Initialize Anthropic client
     const apiKey = process.env.ANTHROPIC_API_KEY
@@ -49,14 +62,14 @@ export async function POST(request: NextRequest) {
     const prompt = `You are a helpful gift suggestion assistant. Based on the following information about a person, suggest 5 thoughtful gift ideas.
 
 Person Details:
-- Name: ${recipient.name}
-- Relationship: ${recipient.relationship || 'Not specified'}
-- Age Range: ${recipient.age_range || 'Not specified'}
-- Gender: ${recipient.gender || 'Not specified'}
-- Interests: ${recipient.interests?.join(', ') || 'Not specified'}
-- Hobbies: ${recipient.hobbies?.join(', ') || 'Not specified'}
-- Favorite Brands: ${recipient.favorite_brands?.join(', ') || 'Not specified'}
-- Favorite Stores: ${recipient.favorite_stores?.join(', ') || 'Not specified'}
+- Name: ${validRecipient.name}
+- Relationship: ${validRecipient.relationship || 'Not specified'}
+- Age Range: ${validRecipient.age_range || 'Not specified'}
+- Gender: ${validRecipient.gender || 'Not specified'}
+- Interests: ${validRecipient.interests?.join(', ') || 'Not specified'}
+- Hobbies: ${validRecipient.hobbies?.join(', ') || 'Not specified'}
+- Favorite Brands: ${validRecipient.favorite_brands?.join(', ') || 'Not specified'}
+- Favorite Stores: ${validRecipient.favorite_stores?.join(', ') || 'Not specified'}
 ${budget ? `- Budget: $${budget}` : ''}
 ${occasion ? `- Occasion: ${occasion}` : ''}
 
@@ -114,8 +127,8 @@ Format your response as JSON array with this structure:
       success: true,
       suggestions,
       recipient: {
-        name: recipient.name,
-        relationship: recipient.relationship
+        name: validRecipient.name,
+        relationship: validRecipient.relationship
       }
     })
 

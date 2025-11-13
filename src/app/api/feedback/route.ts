@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
           notes: amazon_link && google_shopping_link
             ? `Amazon: ${amazon_link}\nGoogle Shopping: ${google_shopping_link}`
             : null,
-        })
+        } as any)
         .select()
         .single();
 
@@ -96,9 +96,9 @@ export async function POST(request: NextRequest) {
       const { error: linkError } = await supabase
         .from('gift_recipients')
         .insert({
-          gift_id: giftCreated.id,
+          gift_id: (giftCreated as any).id,
           recipient_id: recipient_id,
-        });
+        } as any);
 
       if (linkError) {
         console.error('Error linking gift to recipient:', linkError);
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
           recommendation_name,
           recommendation_description,
           feedback_type,
-        });
+        } as any);
 
       if (feedbackError) {
         console.error('Error storing feedback:', feedbackError);
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Gift created and linked to recipient',
-        gift_id: giftCreated.id,
+        gift_id: (giftCreated as any)?.id,
         debug: {
           price_range,
           extracted_price: extractedPrice,
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         recommendation_name,
         recommendation_description,
         feedback_type,
-      });
+      } as any);
 
     if (error) throw error;
 

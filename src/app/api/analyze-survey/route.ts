@@ -3,6 +3,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { Database } from '@/Types/database.types';
+
+type Recipient = Database['public']['Tables']['recipients']['Row'];
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -34,6 +37,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Type assertion after null check
+    const validRecipient: Recipient = recipient;
+
     // Get previous surveys to show evolution
     const { data: previousSurveys } = await supabase
       .from('personality_surveys')
@@ -43,7 +49,7 @@ export async function POST(request: NextRequest) {
       .limit(3);
 
     // Build AI prompt
-    const prompt = buildAnalysisPrompt(recipient, surveyResponses, previousSurveys || []);
+    const prompt = buildAnalysisPrompt(validRecipient, surveyResponses, previousSurveys || []);
 
     // Call Claude API
     // Using Claude 3 Haiku (fast and cost-effective, same as recommendations)
@@ -94,12 +100,12 @@ export async function POST(request: NextRequest) {
       .from('personality_surveys')
       .insert({
         recipient_id: recipientId,
-        user_id: recipient.user_id,
+        user_id: validRecipient.user_id,
         survey_version: 'v1',
-        responses: surveyResponses,
-        profile_suggestions: profileSuggestions,
+        responses: surveyResponses as any,
+        profile_suggestions: profileSuggestions as any,
         applied: false,
-      })
+      } as any)
       .select()
       .single();
 
@@ -111,7 +117,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       suggestions: profileSuggestions,
-      surveyId: savedSurvey?.id,
+      surveyId: (savedSurvey as any)?.id ?? null,
     });
 
   } catch (error) {
