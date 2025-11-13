@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { X, Menu, Home, Gift, Users, BarChart3 } from 'lucide-react'
+import { X, Menu, Home, Gift, Users, BarChart3, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
@@ -38,6 +38,7 @@ export function MobileNav({ user }: MobileNavProps) {
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/recipients', label: 'Recipients', icon: Users },
     { href: '/gifts', label: 'Gifts', icon: Gift },
+    { href: '/gift-finder', label: 'Gift Finder', icon: MessageCircle },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ]
 

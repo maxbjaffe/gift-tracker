@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Avatar from '@/components/Avatar';
 import PersonalitySurveyModal from '@/components/PersonalitySurveyModal';
 import ProfileSuggestionsModal from '@/components/ProfileSuggestionsModal';
+import ChatDialog from '@/components/ChatDialog';
 import { createClient } from '@/lib/supabase/client';
 import { formatAgeDisplay } from '@/lib/utils/age';
 
@@ -341,6 +342,7 @@ export default function RecipientDetailPage() {
                 >
                   ✨ Take Personality Survey
                 </button>
+                <ChatDialog recipientId={recipient.id} recipientName={recipient.name} />
                 <Link
                   href={`/recipients/${recipient.id}/edit`}
                   className="px-4 h-11 md:h-12 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center text-sm md:text-base"

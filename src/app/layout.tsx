@@ -58,6 +58,12 @@ export default async function RootLayout({
                 Gifts
               </Link>
               <Link
+                href="/gift-finder"
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              >
+                💬 Gift Finder
+              </Link>
+              <Link
                 href="/analytics"
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >
