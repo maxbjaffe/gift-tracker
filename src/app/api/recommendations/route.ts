@@ -10,7 +10,7 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    const { recipientId } = await request.json();
+    const { recipientId, category, minPrice, maxPrice } = await request.json();
 
     if (!recipientId) {
       return NextResponse.json(
@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build a detailed prompt based on recipient information
-    const prompt = buildRecommendationPrompt(recipient);
+    // Build a detailed prompt based on recipient information and filters
+    const prompt = buildRecommendationPrompt(recipient, category, minPrice, maxPrice);
 
     // Call Claude API
     // Use Claude 3 Haiku (fast and cost-effective)
@@ -154,12 +154,26 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function buildRecommendationPrompt(recipient: any): string {
+function buildRecommendationPrompt(
+  recipient: any,
+  category?: string | null,
+  minPrice?: number | null,
+  maxPrice?: number | null
+): string {
   const age = recipient.age_range || 'Not specified';
   const interests = recipient.interests || 'Not specified';
   const budget = recipient.max_budget ? `$${recipient.max_budget}` : 'No limit';
   const preferences = recipient.gift_preferences || 'None specified';
   const restrictions = recipient.restrictions || 'None';
+
+  // Build price range text
+  const priceRangeText = minPrice !== null && maxPrice !== null
+    ? `between $${minPrice} and $${maxPrice}`
+    : minPrice !== null
+    ? `$${minPrice} or more`
+    : maxPrice !== null
+    ? `$${maxPrice} or less`
+    : null;
 
   return `You are a gift recommendation expert. Generate 8-10 personalized gift ideas for this person:
 
@@ -172,10 +186,15 @@ RECIPIENT PROFILE:
 - Gift Preferences: ${preferences}
 - Restrictions: ${restrictions}
 
+${category || priceRangeText ? '**MANDATORY FILTERS:**' : ''}
+${category ? `- CATEGORY: ONLY suggest gifts in the "${category}" category. All suggestions MUST fit within this category.` : ''}
+${priceRangeText ? `- PRICE RANGE: ONLY suggest gifts that cost ${priceRangeText}. All price ranges MUST fall within this constraint.` : ''}
+${category || priceRangeText ? '- These filters are MANDATORY. Do not suggest anything outside these parameters.\n' : ''}
+
 REQUIREMENTS:
 1. Each gift should match their interests and age
 2. Stay within the budget (or close to it)
-3. Provide variety in price ranges (some cheaper, some more expensive)
+${!priceRangeText ? '3. Provide variety in price ranges (some cheaper, some more expensive)' : '3. ALL gifts must be within the specified price range'}
 4. Be specific and detailed in descriptions
 5. Include practical information
 

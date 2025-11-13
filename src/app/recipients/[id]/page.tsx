@@ -61,6 +61,11 @@ export default function RecipientDetailPage() {
   const [generating, setGenerating] = useState(false);
   const [processingFeedback, setProcessingFeedback] = useState<string | null>(null);
 
+  // Filter state for AI recommendations
+  const [category, setCategory] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+
   // Personality Survey State
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
@@ -194,7 +199,12 @@ export default function RecipientDetailPage() {
       const response = await fetch('/api/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipientId: recipient.id })
+        body: JSON.stringify({
+          recipientId: recipient.id,
+          category: category || null,
+          minPrice: minPrice ? parseFloat(minPrice) : null,
+          maxPrice: maxPrice ? parseFloat(maxPrice) : null,
+        })
       });
 
       if (!response.ok) throw new Error('Failed to generate recommendations');
@@ -409,14 +419,70 @@ export default function RecipientDetailPage() {
 
         {/* AI Recommendations Section */}
         <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">
-              🤖 AI Gift Recommendations
-            </h2>
+          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-4 md:mb-6">
+            🤖 AI Gift Recommendations
+          </h2>
+
+          {/* Filter Inputs */}
+          <div className="mb-4 md:mb-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                  Category (optional)
+                </label>
+                <input
+                  id="category"
+                  type="text"
+                  placeholder="e.g., Toys, Books, Electronics"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  disabled={generating}
+                  className="w-full min-h-11 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label htmlFor="minPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                  Min Price (optional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-gray-500">$</span>
+                  <input
+                    id="minPrice"
+                    type="number"
+                    placeholder="0"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    disabled={generating}
+                    className="w-full min-h-11 pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="maxPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                  Max Price (optional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-3 text-gray-500">$</span>
+                  <input
+                    id="maxPrice"
+                    type="number"
+                    placeholder="100"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    disabled={generating}
+                    className="w-full min-h-11 pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+            </div>
             <button
               onClick={generateRecommendations}
               disabled={generating}
-              className="w-full sm:w-auto px-4 md:px-6 h-11 md:h-12 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm md:text-base flex items-center justify-center gap-2"
+              className="w-full px-4 md:px-6 h-11 md:h-12 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm md:text-base flex items-center justify-center gap-2"
             >
               {generating ? (
                 <>
