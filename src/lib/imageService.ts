@@ -18,31 +18,71 @@ export async function fetchProductImage(
   keywords: string,
   productName?: string
 ): Promise<ImageResult> {
-  // Clean up keywords for better search results
+  // Strategy 1: Try the full product name first (most specific)
+  if (productName) {
+    const productSearchTerm = extractProductSearchTerm(productName);
+
+    try {
+      const unsplashResult = await fetchFromUnsplash(productSearchTerm);
+      if (unsplashResult) {
+        return unsplashResult;
+      }
+    } catch (error) {
+      console.error('Unsplash product name search failed:', error);
+    }
+
+    try {
+      const pexelsResult = await fetchFromPexels(productSearchTerm);
+      if (pexelsResult) {
+        return pexelsResult;
+      }
+    } catch (error) {
+      console.error('Pexels product name search failed:', error);
+    }
+  }
+
+  // Strategy 2: Try the provided keywords (more generic but still specific)
   const cleanKeywords = cleanSearchKeywords(keywords);
 
-  // Try Unsplash first (high quality, free)
   try {
     const unsplashResult = await fetchFromUnsplash(cleanKeywords);
     if (unsplashResult) {
       return unsplashResult;
     }
   } catch (error) {
-    console.error('Unsplash fetch failed:', error);
+    console.error('Unsplash keyword search failed:', error);
   }
 
-  // Try Pexels as backup (also free, different library)
   try {
     const pexelsResult = await fetchFromPexels(cleanKeywords);
     if (pexelsResult) {
       return pexelsResult;
     }
   } catch (error) {
-    console.error('Pexels fetch failed:', error);
+    console.error('Pexels keyword search failed:', error);
   }
 
   // Return category-based placeholder as final fallback
   return getCategoryPlaceholder(keywords, productName);
+}
+
+/**
+ * Extract the most searchable terms from a product name
+ * Removes articles, focuses on key product identifiers
+ */
+function extractProductSearchTerm(productName: string): string {
+  // Remove common articles and filler words
+  let cleaned = productName
+    .toLowerCase()
+    .replace(/\b(the|a|an|for|with|and|or)\b/gi, '')
+    .trim();
+
+  // Try to keep brand names and model numbers
+  // Split into words and take first 3-4 meaningful words
+  const words = cleaned.split(/\s+/).filter(word => word.length > 2);
+  const searchTerm = words.slice(0, 4).join(' ');
+
+  return searchTerm || productName;
 }
 
 /**
@@ -66,7 +106,7 @@ function cleanSearchKeywords(keywords: string): string {
 async function fetchFromUnsplash(keywords: string): Promise<ImageResult | null> {
   try {
     const response = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(keywords)}&per_page=3&orientation=squarish&content_filter=high`,
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(keywords)}&per_page=5&orientation=squarish&content_filter=high`,
       {
         headers: {
           Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
@@ -81,9 +121,9 @@ async function fetchFromUnsplash(keywords: string): Promise<ImageResult | null> 
 
     const data = await response.json();
     if (data.results && data.results.length > 0) {
-      // Pick a random image from top 3 for variety
-      const randomIndex = Math.floor(Math.random() * Math.min(data.results.length, 3));
-      const image = data.results[randomIndex];
+      // Pick the first result (most relevant) for better accuracy
+      // Unsplash orders by relevance, so first result is usually best
+      const image = data.results[0];
 
       return {
         url: image.urls.regular,
@@ -110,7 +150,7 @@ async function fetchFromPexels(keywords: string): Promise<ImageResult | null> {
 
   try {
     const response = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(keywords)}&per_page=3&orientation=square`,
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(keywords)}&per_page=5&orientation=square`,
       {
         headers: {
           Authorization: PEXELS_API_KEY,
@@ -124,8 +164,8 @@ async function fetchFromPexels(keywords: string): Promise<ImageResult | null> {
 
     const data = await response.json();
     if (data.photos && data.photos.length > 0) {
-      const randomIndex = Math.floor(Math.random() * Math.min(data.photos.length, 3));
-      const photo = data.photos[randomIndex];
+      // Use the first result (most relevant) for better accuracy
+      const photo = data.photos[0];
 
       return {
         url: photo.src.large,

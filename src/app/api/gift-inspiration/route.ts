@@ -39,13 +39,16 @@ REQUIREMENTS:
 - Diverse selection to appeal to different tastes
 
 For each gift, provide:
-1. Specific product name
+1. Specific product name (include brand/model when relevant)
 2. Engaging 1-2 sentence description
 3. Estimated price range
 4. Category
 5. Age appropriateness
 6. Best occasion for this gift
-7. Keywords for image search (2-3 words, descriptive, like "wireless headphones black" or "lego architecture taj mahal")
+7. **CRITICAL - image_keywords**: Must be HIGHLY SPECIFIC to the exact product type, NOT generic categories.
+   - GOOD: "sony wireless headphones", "lego millennium falcon", "nike running shoes", "kitchenaid stand mixer red"
+   - BAD: "headphones", "toys", "shoes", "kitchen appliance"
+   - Include brand, color, or distinctive features when possible
 
 CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.
 

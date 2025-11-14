@@ -204,7 +204,7 @@ CRITICAL: Return ONLY a valid JSON array with this exact structure. Do not inclu
     "where_to_buy": "Store names (e.g., Amazon, Target, Walmart)",
     "category": "Category name",
     "search_query": "Specific product search term for Google/Amazon (e.g., 'LEGO Architecture Statue of Liberty 21042')",
-    "image_keywords": "Short keyword for image search (e.g., 'lego architecture building', 'wireless headphones', 'coffee maker')"
+    "image_keywords": "HIGHLY SPECIFIC keywords for image search - include brand, color, distinctive features (e.g., 'lego architecture statue liberty', 'sony wireless noise cancelling headphones', 'red kitchenaid stand mixer'). Be SPECIFIC, not generic!"
   }
 ]
 
