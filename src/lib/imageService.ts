@@ -1,7 +1,7 @@
 // Image Service - Fetches product images with multiple sources and fallbacks
 
 const UNSPLASH_ACCESS_KEY = '9e0f4ca10c03e1b69cf570cf16be3af6b715559029bc6d46e50a3b89e0f28fd1';
-const PEXELS_API_KEY = 'YOUR_PEXELS_KEY_HERE'; // Free at https://www.pexels.com/api/
+const PEXELS_API_KEY = 'FXEWQGUMBPSL5KdwBubgdAejoGEh8v9ZwyJCSQEqA8ffnL84XeYuy2ri';
 
 interface ImageResult {
   url: string;
