@@ -107,25 +107,26 @@ export default function InspirationPage() {
   };
 
   const handleSaveGift = async (gift: Gift, recipientIds: string[]) => {
-    const supabase = createClient();
-
     try {
-      // Save to each selected recipient
-      const saves = recipientIds.map(async (recipientId) => {
-        const { error } = await supabase.from('gifts').insert({
-          recipient_id: recipientId,
+      // Use the API endpoint which properly handles the gift_recipients join table
+      const response = await fetch('/api/gifts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: gift.name,
           description: gift.description,
-          price: gift.price_min || 0,
+          current_price: gift.price_min || 0,
           category: gift.category,
-          link: gift.amazon_link,
+          url: gift.amazon_link,
           status: 'idea',
-        });
-
-        if (error) throw error;
+          recipient_ids: recipientIds, // This will be linked in the gift_recipients table
+        }),
       });
 
-      await Promise.all(saves);
+      if (!response.ok) {
+        throw new Error('Failed to save gift');
+      }
+
       toast.success(`Gift saved for ${recipientIds.length} recipient${recipientIds.length !== 1 ? 's' : ''}!`);
     } catch (error) {
       console.error('Error saving gift:', error);

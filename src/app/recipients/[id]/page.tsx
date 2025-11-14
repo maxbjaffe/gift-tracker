@@ -9,6 +9,7 @@ import Avatar from '@/components/Avatar';
 import PersonalitySurveyModal from '@/components/PersonalitySurveyModal';
 import ProfileSuggestionsModal from '@/components/ProfileSuggestionsModal';
 import ChatDialog from '@/components/ChatDialog';
+import AssignGiftsDialog from '@/components/AssignGiftsDialog';
 import { createClient } from '@/lib/supabase/client';
 import { formatAgeDisplay } from '@/lib/utils/age';
 
@@ -379,12 +380,21 @@ export default function RecipientDetailPage() {
               <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">
                 Assigned Gifts ({assignedGifts.length})
               </h2>
-              <Link
-                href={`/gifts/new?recipient=${recipient.id}`}
-                className="w-full sm:w-auto px-4 h-11 md:h-12 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-sm md:text-base whitespace-nowrap"
-              >
-                + Add Gift
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <AssignGiftsDialog
+                  recipientId={recipient.id}
+                  recipientName={recipient.name}
+                  onAssignmentComplete={() => {
+                    fetchAssignedGifts();
+                  }}
+                />
+                <Link
+                  href={`/gifts/new?recipient=${recipient.id}`}
+                  className="w-full sm:w-auto px-4 h-11 md:h-12 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-sm md:text-base whitespace-nowrap"
+                >
+                  + Create Gift
+                </Link>
+              </div>
             </div>
 
             {assignedGifts.length === 0 ? (
