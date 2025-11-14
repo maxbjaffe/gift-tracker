@@ -85,10 +85,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Enhance recommendations with images and shopping links using improved image service
+    // Enhance recommendations with images and shopping links using category placeholders
     const { fetchProductImage } = await import('@/lib/imageService');
 
-    recommendations = await Promise.all(recommendations.map(async (rec: any, index: number) => {
+    recommendations = await Promise.all(recommendations.map(async (rec: any) => {
       // Extract price from price_range if estimated_price is missing
       if (!rec.estimated_price && rec.price_range) {
         const match = rec.price_range.match(/\$?(\d+(?:\.\d{2})?)/);
@@ -103,11 +103,8 @@ export async function POST(request: NextRequest) {
       rec.amazon_link = `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}`;
       rec.google_shopping_link = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(searchQuery)}`;
 
-      // Fetch product image with fallbacks
+      // Fetch product image placeholder
       try {
-        // Add a small delay to avoid rate limits (stagger by 100ms)
-        await new Promise(resolve => setTimeout(resolve, index * 100));
-
         const imageKeywords = rec.image_keywords || rec.category || rec.title;
         const imageResult = await fetchProductImage(imageKeywords, rec.title);
 
@@ -115,8 +112,8 @@ export async function POST(request: NextRequest) {
         rec.image_thumb = imageResult.thumbnail;
       } catch (imageError) {
         console.error('Error fetching image:', imageError);
-        // Fallback to placeholder
-        rec.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁`;
+        // Fallback to default placeholder
+        rec.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁%0AGift&font=montserrat`;
         rec.image_thumb = rec.image_url;
       }
 

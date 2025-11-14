@@ -1,270 +1,99 @@
-// Image Service - Fetches product images with multiple sources and fallbacks
-
-const UNSPLASH_ACCESS_KEY = '9e0f4ca10c03e1b69cf570cf16be3af6b715559029bc6d46e50a3b89e0f28fd1';
-const PEXELS_API_KEY = 'FXEWQGUMBPSL5KdwBubgdAejoGEh8v9ZwyJCSQEqA8ffnL84XeYuy2ri';
+// Image Service - Fetches real product images or uses category placeholders
 
 interface ImageResult {
   url: string;
   thumbnail: string;
-  source: 'unsplash' | 'pexels' | 'placeholder';
+  source: 'product' | 'placeholder';
+  isPlaceholder: boolean;
 }
 
 /**
- * Fetch a product image from multiple sources with fallbacks
- * @param keywords - Search keywords (e.g., "wireless headphones", "lego set")
- * @param productName - Full product name for better placeholder
+ * Fetch a product image - returns category-based placeholder
+ * Stock photo APIs don't provide accurate product images, so we use
+ * clean, honest placeholders that match the product category
+ *
+ * @param keywords - Category or product type
+ * @param productName - Full product name for placeholder text
  */
 export async function fetchProductImage(
   keywords: string,
   productName?: string
 ): Promise<ImageResult> {
-  // Strategy 1: Try the full product name first (most specific)
-  if (productName) {
-    const productSearchTerm = extractProductSearchTerm(productName);
-
-    try {
-      const unsplashResult = await fetchFromUnsplash(productSearchTerm);
-      if (unsplashResult) {
-        return unsplashResult;
-      }
-    } catch (error) {
-      console.error('Unsplash product name search failed:', error);
-    }
-
-    try {
-      const pexelsResult = await fetchFromPexels(productSearchTerm);
-      if (pexelsResult) {
-        return pexelsResult;
-      }
-    } catch (error) {
-      console.error('Pexels product name search failed:', error);
-    }
-  }
-
-  // Strategy 2: Try the provided keywords (more generic but still specific)
-  const cleanKeywords = cleanSearchKeywords(keywords);
-
-  try {
-    const unsplashResult = await fetchFromUnsplash(cleanKeywords);
-    if (unsplashResult) {
-      return unsplashResult;
-    }
-  } catch (error) {
-    console.error('Unsplash keyword search failed:', error);
-  }
-
-  try {
-    const pexelsResult = await fetchFromPexels(cleanKeywords);
-    if (pexelsResult) {
-      return pexelsResult;
-    }
-  } catch (error) {
-    console.error('Pexels keyword search failed:', error);
-  }
-
-  // Return category-based placeholder as final fallback
+  // For now, we only use category placeholders
+  // Stock photo services can't provide accurate product images
   return getCategoryPlaceholder(keywords, productName);
 }
 
 /**
- * Extract the most searchable terms from a product name
- * Removes articles, focuses on key product identifiers
- */
-function extractProductSearchTerm(productName: string): string {
-  // Remove common articles and filler words
-  let cleaned = productName
-    .toLowerCase()
-    .replace(/\b(the|a|an|for|with|and|or)\b/gi, '')
-    .trim();
-
-  // Try to keep brand names and model numbers
-  // Split into words and take first 3-4 meaningful words
-  const words = cleaned.split(/\s+/).filter(word => word.length > 2);
-  const searchTerm = words.slice(0, 4).join(' ');
-
-  return searchTerm || productName;
-}
-
-/**
- * Clean and optimize search keywords for better results
- */
-function cleanSearchKeywords(keywords: string): string {
-  // Remove price-related terms, brand names that might limit results
-  const cleaned = keywords
-    .toLowerCase()
-    .replace(/\$[\d,.]+/g, '') // Remove prices
-    .replace(/\b(under|over|between|cheap|expensive|premium|luxury)\b/gi, '') // Remove price descriptors
-    .replace(/\b(new|latest|2023|2024|2025)\b/gi, '') // Remove year/new descriptors
-    .trim();
-
-  return cleaned;
-}
-
-/**
- * Fetch from Unsplash
- */
-async function fetchFromUnsplash(keywords: string): Promise<ImageResult | null> {
-  try {
-    const response = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(keywords)}&per_page=5&orientation=squarish&content_filter=high`,
-      {
-        headers: {
-          Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      console.error('Unsplash API error:', response.status, response.statusText);
-      return null;
-    }
-
-    const data = await response.json();
-    if (data.results && data.results.length > 0) {
-      // Pick the first result (most relevant) for better accuracy
-      // Unsplash orders by relevance, so first result is usually best
-      const image = data.results[0];
-
-      return {
-        url: image.urls.regular,
-        thumbnail: image.urls.small,
-        source: 'unsplash',
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Unsplash fetch error:', error);
-    return null;
-  }
-}
-
-/**
- * Fetch from Pexels (backup source)
- */
-async function fetchFromPexels(keywords: string): Promise<ImageResult | null> {
-  // Skip if no API key configured
-  if (!PEXELS_API_KEY || PEXELS_API_KEY === 'YOUR_PEXELS_KEY_HERE') {
-    return null;
-  }
-
-  try {
-    const response = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(keywords)}&per_page=5&orientation=square`,
-      {
-        headers: {
-          Authorization: PEXELS_API_KEY,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    if (data.photos && data.photos.length > 0) {
-      // Use the first result (most relevant) for better accuracy
-      const photo = data.photos[0];
-
-      return {
-        url: photo.src.large,
-        thumbnail: photo.src.medium,
-        source: 'pexels',
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Pexels fetch error:', error);
-    return null;
-  }
-}
-
-/**
- * Get a category-based placeholder image
+ * Get a clean category-based placeholder image
+ * These are honest placeholders, not pretending to be product photos
  */
 function getCategoryPlaceholder(keywords: string, productName?: string): ImageResult {
   const lowerKeywords = keywords.toLowerCase();
 
-  // Map keywords to emoji-based placeholder categories
-  const categoryMap: { [key: string]: string } = {
-    'book': '📚',
-    'electronics': '💻',
-    'phone': '📱',
-    'headphone': '🎧',
-    'speaker': '🔊',
-    'camera': '📷',
-    'game': '🎮',
-    'toy': '🧸',
-    'clothes': '👕',
-    'fashion': '👗',
-    'shoe': '👟',
-    'watch': '⌚',
-    'jewelry': '💎',
-    'food': '🍽️',
-    'coffee': '☕',
-    'drink': '🥤',
-    'kitchen': '🍳',
-    'home': '🏠',
-    'furniture': '🛋️',
-    'art': '🎨',
-    'music': '🎵',
-    'sport': '⚽',
-    'fitness': '💪',
-    'bike': '🚴',
-    'car': '🚗',
-    'travel': '✈️',
-    'bag': '👜',
-    'backpack': '🎒',
-    'beauty': '💄',
-    'pet': '🐾',
-    'garden': '🌱',
-    'tool': '🔧',
+  // Map keywords to category info
+  const categoryMap: { [key: string]: { emoji: string; color: string; bgColor: string; label: string } } = {
+    'book': { emoji: '📚', color: '8B4513', bgColor: 'FFF8DC', label: 'Books' },
+    'electronics': { emoji: '💻', color: '4169E1', bgColor: 'E6F3FF', label: 'Electronics' },
+    'phone': { emoji: '📱', color: '000000', bgColor: 'F0F0F0', label: 'Phone' },
+    'headphone': { emoji: '🎧', color: '9333EA', bgColor: 'F3E8FF', label: 'Audio' },
+    'speaker': { emoji: '🔊', color: '2563EB', bgColor: 'DBEAFE', label: 'Audio' },
+    'camera': { emoji: '📷', color: '1F2937', bgColor: 'F3F4F6', label: 'Camera' },
+    'game': { emoji: '🎮', color: 'DC2626', bgColor: 'FEE2E2', label: 'Gaming' },
+    'toy': { emoji: '🧸', color: 'F59E0B', bgColor: 'FEF3C7', label: 'Toys' },
+    'clothes': { emoji: '👕', color: '7C3AED', bgColor: 'EDE9FE', label: 'Clothing' },
+    'fashion': { emoji: '👗', color: 'EC4899', bgColor: 'FCE7F3', label: 'Fashion' },
+    'shoe': { emoji: '👟', color: '059669', bgColor: 'D1FAE5', label: 'Shoes' },
+    'watch': { emoji: '⌚', color: '374151', bgColor: 'F9FAFB', label: 'Watch' },
+    'jewelry': { emoji: '💎', color: '7C3AED', bgColor: 'F5F3FF', label: 'Jewelry' },
+    'food': { emoji: '🍽️', color: 'EF4444', bgColor: 'FEE2E2', label: 'Food' },
+    'coffee': { emoji: '☕', color: '92400E', bgColor: 'FEF3C7', label: 'Coffee' },
+    'drink': { emoji: '🥤', color: 'DC2626', bgColor: 'FECACA', label: 'Drinks' },
+    'kitchen': { emoji: '🍳', color: 'B45309', bgColor: 'FED7AA', label: 'Kitchen' },
+    'home': { emoji: '🏠', color: '0891B2', bgColor: 'CFFAFE', label: 'Home' },
+    'furniture': { emoji: '🛋️', color: '78350F', bgColor: 'FED7AA', label: 'Furniture' },
+    'art': { emoji: '🎨', color: 'EC4899', bgColor: 'FBCFE8', label: 'Art' },
+    'music': { emoji: '🎵', color: '7C3AED', bgColor: 'EDE9FE', label: 'Music' },
+    'sport': { emoji: '⚽', color: '059669', bgColor: 'D1FAE5', label: 'Sports' },
+    'fitness': { emoji: '💪', color: 'DC2626', bgColor: 'FEE2E2', label: 'Fitness' },
+    'bike': { emoji: '🚴', color: '2563EB', bgColor: 'DBEAFE', label: 'Cycling' },
+    'car': { emoji: '🚗', color: '1F2937', bgColor: 'E5E7EB', label: 'Automotive' },
+    'travel': { emoji: '✈️', color: '0891B2', bgColor: 'CFFAFE', label: 'Travel' },
+    'bag': { emoji: '👜', color: '92400E', bgColor: 'FDE68A', label: 'Bags' },
+    'backpack': { emoji: '🎒', color: '0F766E', bgColor: 'CCFBF1', label: 'Backpacks' },
+    'beauty': { emoji: '💄', color: 'EC4899', bgColor: 'FCE7F3', label: 'Beauty' },
+    'pet': { emoji: '🐾', color: 'F59E0B', bgColor: 'FEF3C7', label: 'Pets' },
+    'garden': { emoji: '🌱', color: '16A34A', bgColor: 'DCFCE7', label: 'Garden' },
+    'tool': { emoji: '🔧', color: '6B7280', bgColor: 'F3F4F6', label: 'Tools' },
   };
 
   // Find matching category
-  let emoji = '🎁'; // Default gift emoji
+  let categoryInfo = { emoji: '🎁', color: '9333EA', bgColor: 'F3E8FF', label: 'Gift' };
   for (const [key, value] of Object.entries(categoryMap)) {
     if (lowerKeywords.includes(key)) {
-      emoji = value;
+      categoryInfo = value;
       break;
     }
   }
 
-  // Generate a placeholder using an external service
-  const placeholderText = productName
-    ? encodeURIComponent(productName.substring(0, 30))
-    : encodeURIComponent('Gift Item');
-
-  // Use a placeholder service with the emoji
-  const url = `https://placehold.co/400x400/f3e8ff/9333ea?text=${emoji}+${placeholderText.replace(/%20/g, '+')}`;
+  // Create a clean, minimal placeholder
+  // Format: emoji + category label (no product name to avoid confusion)
+  const url = `https://placehold.co/400x400/${categoryInfo.bgColor}/${categoryInfo.color}?text=${categoryInfo.emoji}%0A${encodeURIComponent(categoryInfo.label)}&font=montserrat`;
 
   return {
     url,
     thumbnail: url,
     source: 'placeholder',
+    isPlaceholder: true,
   };
 }
 
 /**
- * Batch fetch images for multiple items (more efficient)
+ * Batch fetch images for multiple items
+ * Since we only use placeholders now, this is instant
  */
 export async function fetchProductImages(
   items: Array<{ keywords: string; productName?: string }>
 ): Promise<ImageResult[]> {
-  // Fetch all in parallel with a small delay to avoid rate limits
-  const results = await Promise.all(
-    items.map((item, index) =>
-      new Promise<ImageResult>((resolve) => {
-        // Stagger requests by 100ms to be nice to the API
-        setTimeout(async () => {
-          const result = await fetchProductImage(item.keywords, item.productName);
-          resolve(result);
-        }, index * 100);
-      })
-    )
-  );
-
-  return results;
+  return items.map((item) => getCategoryPlaceholder(item.keywords, item.productName));
 }

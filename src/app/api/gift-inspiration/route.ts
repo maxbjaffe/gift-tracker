@@ -113,23 +113,20 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.
       );
     }
 
-    // Enhance with images using our improved image service
+    // Enhance with images using category placeholders
     const { fetchProductImage } = await import('@/lib/imageService');
 
-    const enhancedGifts = await Promise.all(giftIdeas.map(async (gift: any, index: number) => {
+    const enhancedGifts = await Promise.all(giftIdeas.map(async (gift: any) => {
       try {
-        // Add a small delay to avoid rate limits (stagger by 100ms)
-        await new Promise(resolve => setTimeout(resolve, index * 100));
-
-        const imageKeywords = gift.image_keywords || gift.name;
+        const imageKeywords = gift.image_keywords || gift.category || gift.name;
         const imageResult = await fetchProductImage(imageKeywords, gift.name);
 
         gift.image_url = imageResult.url;
         gift.image_thumb = imageResult.thumbnail;
       } catch (imageError) {
         console.error('Error fetching image:', imageError);
-        // Fallback to placeholder
-        gift.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁`;
+        // Fallback to default placeholder
+        gift.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁%0AGift&font=montserrat`;
         gift.image_thumb = gift.image_url;
       }
 
