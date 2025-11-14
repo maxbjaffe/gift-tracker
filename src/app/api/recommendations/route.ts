@@ -85,8 +85,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Enhance recommendations with images and shopping links
-    recommendations = await Promise.all(recommendations.map(async (rec: any) => {
+    // Enhance recommendations with images and shopping links using improved image service
+    const { fetchProductImage } = await import('@/lib/imageService');
+
+    recommendations = await Promise.all(recommendations.map(async (rec: any, index: number) => {
       // Extract price from price_range if estimated_price is missing
       if (!rec.estimated_price && rec.price_range) {
         const match = rec.price_range.match(/\$?(\d+(?:\.\d{2})?)/);
@@ -101,28 +103,21 @@ export async function POST(request: NextRequest) {
       rec.amazon_link = `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}`;
       rec.google_shopping_link = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(searchQuery)}`;
 
-      // Fetch product image from Unsplash
+      // Fetch product image with fallbacks
       try {
-        const imageKeywords = rec.image_keywords || rec.category || rec.title;
-        const unsplashResponse = await fetch(
-          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(imageKeywords)}&per_page=1&orientation=landscape`,
-          {
-            headers: {
-              'Authorization': 'Client-ID 9e0f4ca10c03e1b69cf570cf16be3af6b715559029bc6d46e50a3b89e0f28fd1'
-            }
-          }
-        );
+        // Add a small delay to avoid rate limits (stagger by 100ms)
+        await new Promise(resolve => setTimeout(resolve, index * 100));
 
-        if (unsplashResponse.ok) {
-          const imageData = await unsplashResponse.json();
-          if (imageData.results && imageData.results.length > 0) {
-            rec.image_url = imageData.results[0].urls.regular;
-            rec.image_thumb = imageData.results[0].urls.small;
-          }
-        }
+        const imageKeywords = rec.image_keywords || rec.category || rec.title;
+        const imageResult = await fetchProductImage(imageKeywords, rec.title);
+
+        rec.image_url = imageResult.url;
+        rec.image_thumb = imageResult.thumbnail;
       } catch (imageError) {
         console.error('Error fetching image:', imageError);
-        // Image is optional, continue without it
+        // Fallback to placeholder
+        rec.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁`;
+        rec.image_thumb = rec.image_url;
       }
 
       return rec;

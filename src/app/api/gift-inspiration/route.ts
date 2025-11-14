@@ -110,29 +110,24 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.
       );
     }
 
-    // Enhance with images from Unsplash
-    const enhancedGifts = await Promise.all(giftIdeas.map(async (gift: any) => {
-      try {
-        const imageKeywords = gift.image_keywords || gift.name;
-        const unsplashResponse = await fetch(
-          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(imageKeywords)}&per_page=1&orientation=squarish`,
-          {
-            headers: {
-              'Authorization': 'Client-ID 9e0f4ca10c03e1b69cf570cf16be3af6b715559029bc6d46e50a3b89e0f28fd1'
-            }
-          }
-        );
+    // Enhance with images using our improved image service
+    const { fetchProductImage } = await import('@/lib/imageService');
 
-        if (unsplashResponse.ok) {
-          const imageData = await unsplashResponse.json();
-          if (imageData.results && imageData.results.length > 0) {
-            gift.image_url = imageData.results[0].urls.regular;
-            gift.image_thumb = imageData.results[0].urls.small;
-          }
-        }
+    const enhancedGifts = await Promise.all(giftIdeas.map(async (gift: any, index: number) => {
+      try {
+        // Add a small delay to avoid rate limits (stagger by 100ms)
+        await new Promise(resolve => setTimeout(resolve, index * 100));
+
+        const imageKeywords = gift.image_keywords || gift.name;
+        const imageResult = await fetchProductImage(imageKeywords, gift.name);
+
+        gift.image_url = imageResult.url;
+        gift.image_thumb = imageResult.thumbnail;
       } catch (imageError) {
         console.error('Error fetching image:', imageError);
-        // Continue without image
+        // Fallback to placeholder
+        gift.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁`;
+        gift.image_thumb = gift.image_url;
       }
 
       // Add shopping links
