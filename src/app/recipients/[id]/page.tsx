@@ -396,7 +396,7 @@ export default function RecipientDetailPage() {
                 {assignedGifts.map((gift) => (
                   <Link
                     key={gift.id}
-                    href={`/gifts/${gift.id}`}
+                    href={`/gifts/${gift.id}/edit`}
                     className="block p-3 md:p-4 border-2 border-gray-200 rounded-xl hover:border-purple-400 hover:shadow-lg transition-all"
                   >
                     <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-2">{gift.name}</h3>

@@ -29,9 +29,11 @@ export default function DashboardPage() {
     return acc
   }, {} as Record<string, number>)
 
-  const totalValue = gifts.reduce((sum, gift) => {
-    return sum + (gift.current_price || 0)
-  }, 0)
+  const totalValue = gifts
+    .filter((gift) => gift.status === 'purchased')
+    .reduce((sum, gift) => {
+      return sum + (gift.current_price || 0)
+    }, 0)
 
   // Get upcoming birthdays (next 30 days)
   const upcomingBirthdays = recipients
@@ -108,7 +110,7 @@ export default function DashboardPage() {
         <Card className="p-4 md:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs md:text-sm text-gray-600">Total Value</p>
+              <p className="text-xs md:text-sm text-gray-600">Total Spent</p>
               <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">${totalValue.toFixed(0)}</p>
             </div>
             <div className="h-10 w-10 md:h-12 md:w-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">

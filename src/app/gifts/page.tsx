@@ -215,83 +215,78 @@ export default function GiftsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
           {filteredGifts.map((gift) => (
-            <Card key={gift.id} className="p-4 md:p-5 lg:p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-start justify-between mb-3 md:mb-4">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base md:text-lg lg:text-xl font-semibold truncate">{gift.name}</h3>
-                  {gift.category && (
-                    <Badge variant="outline" className="mt-2 capitalize text-xs md:text-sm">
-                      {gift.category}
-                    </Badge>
-                  )}
-                </div>
-                <StatusBadge status={gift.status} />
-              </div>
-
-              {gift.description && (
-                <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4 line-clamp-2">
-                  {gift.description}
-                </p>
-              )}
-
-              {gift.recipients && gift.recipients.length > 0 && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3 md:mb-4 pb-3 md:pb-4 border-b">
-                  <span className="text-xs md:text-sm text-gray-500">For:</span>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {gift.recipients.slice(0, 3).map((recipient) => (
-                      <div key={recipient.id} className="flex items-center gap-1">
-                        <Avatar
-                          type={recipient.avatar_type}
-                          data={recipient.avatar_data}
-                          background={recipient.avatar_background}
-                          name={recipient.name}
-                          size="xs"
-                        />
-                        <span className="text-xs md:text-sm text-gray-700">{recipient.name}</span>
-                      </div>
-                    ))}
-                    {gift.recipients.length > 3 && (
-                      <span className="text-xs text-gray-500">+{gift.recipients.length - 3} more</span>
+            <Link key={gift.id} href={`/gifts/${gift.id}/edit`} className="block">
+              <Card className="p-4 md:p-5 lg:p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <div className="flex items-start justify-between mb-3 md:mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base md:text-lg lg:text-xl font-semibold truncate">{gift.name}</h3>
+                    {gift.category && (
+                      <Badge variant="outline" className="mt-2 capitalize text-xs md:text-sm">
+                        {gift.category}
+                      </Badge>
                     )}
                   </div>
+                  <StatusBadge status={gift.status} />
                 </div>
-              )}
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 md:mb-4">
-                {gift.current_price && (
-                  <span className="text-xl md:text-2xl font-bold text-green-600">
-                    ${gift.current_price.toFixed(2)}
-                  </span>
+                {gift.description && (
+                  <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4 line-clamp-2">
+                    {gift.description}
+                  </p>
                 )}
-                {gift.store && (
-                  <span className="text-xs md:text-sm text-gray-500">{gift.store}</span>
-                )}
-              </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 mt-3 md:mt-4 pt-3 md:pt-4 border-t">
+                {gift.recipients && gift.recipients.length > 0 && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3 md:mb-4 pb-3 md:pb-4 border-b">
+                    <span className="text-xs md:text-sm text-gray-500">For:</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {gift.recipients.slice(0, 3).map((recipient) => (
+                        <div key={recipient.id} className="flex items-center gap-1">
+                          <Avatar
+                            type={recipient.avatar_type}
+                            data={recipient.avatar_data}
+                            background={recipient.avatar_background}
+                            name={recipient.name}
+                            size="xs"
+                          />
+                          <span className="text-xs md:text-sm text-gray-700">{recipient.name}</span>
+                        </div>
+                      ))}
+                      {gift.recipients.length > 3 && (
+                        <span className="text-xs text-gray-500">+{gift.recipients.length - 3} more</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 md:mb-4">
+                  {gift.current_price && (
+                    <span className="text-xl md:text-2xl font-bold text-green-600">
+                      ${gift.current_price.toFixed(2)}
+                    </span>
+                  )}
+                  {gift.store && (
+                    <span className="text-xs md:text-sm text-gray-500">{gift.store}</span>
+                  )}
+                </div>
+
                 {gift.url && (
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 h-11 md:h-12"
-                  >
-                    <a href={gift.url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Shop
-                    </a>
-                  </Button>
+                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t">
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="w-full h-11 md:h-12"
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    >
+                      <a href={gift.url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Product
+                      </a>
+                    </Button>
+                  </div>
                 )}
-                <Button
-                  asChild
-                  variant={gift.url ? 'outline' : 'default'}
-                  size="sm"
-                  className="flex-1 h-11 md:h-12"
-                >
-                  <Link href={`/gifts/${gift.id}`}>View Details</Link>
-                </Button>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
