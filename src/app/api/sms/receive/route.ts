@@ -101,68 +101,21 @@ export async function POST(request: NextRequest) {
       console.error('Error logging SMS:', smsError);
     }
 
-    // Download and encode images if present
-    const imageContents: Array<{ type: 'image'; source: { type: 'base64'; media_type: string; data: string } }> = [];
+    // Note: Images received but vision AI not available - we'll save URLs only
+    const hasImages = mediaUrls.length > 0;
 
-    if (mediaUrls.length > 0) {
-      console.log('Downloading images from MMS...');
-      for (let i = 0; i < Math.min(mediaUrls.length, 3); i++) {
-        // Limit to 3 images
-        try {
-          const imageResponse = await fetch(mediaUrls[i]);
-          const imageBuffer = await imageResponse.arrayBuffer();
-          const base64Image = Buffer.from(imageBuffer).toString('base64');
-
-          imageContents.push({
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaTypes[i],
-              data: base64Image,
-            },
-          });
-          console.log(`Downloaded image ${i + 1}/${mediaUrls.length}`);
-        } catch (err) {
-          console.error(`Error downloading image ${i}:`, err);
-        }
-      }
+    if (hasImages) {
+      console.log(
+        `Received ${mediaUrls.length} image(s). Saving URLs (vision AI not available with current API key)`
+      );
     }
 
-    // Use Claude to parse the SMS message (with vision if images present)
-    const hasImages = imageContents.length > 0;
-    const parsePrompt = hasImages
-      ? `You are a gift tracking assistant. Analyze the image(s) and text message to extract gift information.
+    // Parse text message only (vision not available)
+    const parsePrompt = `You are a gift tracking assistant. Parse this SMS message and extract gift information.
 
-Text Message: "${body || '(no text)'}"
+SMS Message: "${body || '(image received - please describe the gift in your message)'}"
 
-Look at the image(s) for:
-- Product name/title
-- Price (if visible)
-- Product URLs or QR codes
-- Product category
-
-Extract the following information:
-- recipient_names: Who is this gift for? Extract ALL names mentioned (array of strings). Examples: ["Sarah"], ["Mom", "Dad"], ["the kids"]
-- gift_name: What is the gift/product shown?
-- price: Estimated or actual price (as a number, no currency symbols). Look for prices in the image!
-- category: What category does this fit in? (Electronics, Books, Toys, Fashion, Home, Sports, Beauty, Food, Games, Art, or Other)
-- url: Any product URL found in the text or image
-- notes: Product details, brand, model, or other relevant information you see
-
-Respond ONLY with valid JSON in this exact format:
-{
-  "recipient_names": ["string"] or [],
-  "gift_name": "string or null",
-  "price": number or null,
-  "category": "string or null",
-  "url": "string or null",
-  "notes": "string or null"
-}
-
-If you can't extract certain information, use null for that field (or empty array for recipient_names).`
-      : `You are a gift tracking assistant. Parse this SMS message and extract gift information.
-
-SMS Message: "${body}"
+${hasImages ? 'Note: User sent image(s) - they may be describing what\'s in the photo.' : ''}
 
 Extract the following information:
 - recipient_names: Who is this gift for? Extract ALL names mentioned (array of strings). Examples: ["Sarah"], ["Mom", "Dad"], ["the kids"]
@@ -184,24 +137,8 @@ Respond ONLY with valid JSON in this exact format:
 
 If you can't extract certain information, use null for that field (or empty array for recipient_names).`;
 
-    // Build content array with text and images
-    const messageContent: Array<
-      | { type: 'text'; text: string }
-      | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
-    > = [
-      ...imageContents,
-      { type: 'text', text: parsePrompt },
-    ];
-
-    // Try multiple model names until one works (API key dependent)
-    const modelsToTry = hasImages
-      ? [
-          'claude-3-5-sonnet-20241022',
-          'claude-3-5-sonnet-20240620',
-          'claude-3-sonnet-20240229',
-          'claude-3-opus-20240229',
-        ]
-      : ['claude-3-5-haiku-20241022', 'claude-3-haiku-20240307'];
+    // Use text-only model (vision not available)
+    const modelsToTry = ['claude-3-5-haiku-20241022', 'claude-3-haiku-20240307'];
 
     let message;
     let lastError;
@@ -215,7 +152,7 @@ If you can't extract certain information, use null for that field (or empty arra
           messages: [
             {
               role: 'user',
-              content: messageContent,
+              content: parsePrompt,
             },
           ],
         });
