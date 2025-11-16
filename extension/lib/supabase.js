@@ -17,8 +17,18 @@ class SupabaseClient {
       throw new Error('Supabase not configured. Please sign in through the extension popup.');
     }
 
+    // Get the Supabase library (try both window.supabase and global supabase)
+    const supabaseLib = window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+
+    if (!supabaseLib || !supabaseLib.createClient) {
+      console.error('Supabase library not found. Available globals:', Object.keys(window));
+      throw new Error('Supabase library not loaded. Please reload the extension.');
+    }
+
+    console.log('Supabase library found, creating client...');
+
     // Initialize Supabase client using the global supabase object from CDN
-    this.client = window.supabase.createClient(
+    this.client = supabaseLib.createClient(
       config.supabaseUrl,
       config.supabaseAnonKey,
       {
