@@ -217,14 +217,45 @@ export default function GiftsPage() {
           {filteredGifts.map((gift) => (
             <Link key={gift.id} href={`/gifts/${gift.id}/edit`} className="block">
               <Card className="p-4 md:p-5 lg:p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
+                {/* Screenshot Preview (from extension) */}
+                {gift.source_metadata?.screenshot && (
+                  <div className="mb-3 md:mb-4 -mx-4 md:-mx-5 lg:-mx-6 -mt-4 md:-mt-5 lg:-mt-6">
+                    <img
+                      src={gift.source_metadata.screenshot}
+                      alt={gift.name}
+                      className="w-full h-32 md:h-40 object-cover rounded-t-lg"
+                    />
+                  </div>
+                )}
+
+                {/* Product Image (from URL or extension) */}
+                {!gift.source_metadata?.screenshot && gift.image_url && (
+                  <div className="mb-3 md:mb-4 -mx-4 md:-mx-5 lg:-mx-6 -mt-4 md:-mt-5 lg:-mt-6">
+                    <img
+                      src={gift.image_url}
+                      alt={gift.name}
+                      className="w-full h-32 md:h-40 object-contain bg-gray-50 rounded-t-lg"
+                    />
+                  </div>
+                )}
+
                 <div className="flex items-start justify-between mb-3 md:mb-4">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-base md:text-lg lg:text-xl font-semibold truncate">{gift.name}</h3>
-                    {gift.category && (
-                      <Badge variant="outline" className="mt-2 capitalize text-xs md:text-sm">
-                        {gift.category}
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {gift.category && (
+                        <Badge variant="outline" className="capitalize text-xs md:text-sm">
+                          {gift.category}
+                        </Badge>
+                      )}
+                      {/* Source Badge */}
+                      {gift.source && gift.source !== 'manual' && (
+                        <Badge variant="secondary" className="text-xs">
+                          {gift.source === 'extension' && '🔗 Browser'}
+                          {gift.source === 'sms' && '💬 SMS'}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <StatusBadge status={gift.status} />
                 </div>

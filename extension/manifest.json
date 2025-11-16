@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Gift Tracker",
+  "version": "1.0.0",
+  "description": "Capture gift ideas from any shopping site with one click",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.amazon.com/*",
+    "https://*.target.com/*",
+    "https://*.walmart.com/*",
+    "https://*.etsy.com/*",
+    "https://*.anthropic.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.amazon.com/*",
+        "https://*.target.com/*",
+        "https://*.walmart.com/*",
+        "https://*.etsy.com/*"
+      ],
+      "js": ["content/detector.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content/*.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

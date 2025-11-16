@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gift Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Loading State -->
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Sign In State -->
+  <div id="signIn" class="sign-in hidden">
+    <div class="header">
+      <h1>🎁 Gift Tracker</h1>
+      <p>Sign in to save gift ideas</p>
+    </div>
+    <button id="signInBtn" class="btn btn-primary">
+      Sign In with Email
+    </button>
+    <p class="hint">Opens your Gift Tracker account</p>
+  </div>
+
+  <!-- No Product Detected State -->
+  <div id="noProduct" class="no-product hidden">
+    <div class="header">
+      <h1>🎁 Gift Tracker</h1>
+    </div>
+    <div class="empty-state">
+      <p class="empty-icon">🔍</p>
+      <p class="empty-text">No product detected</p>
+      <p class="empty-hint">Visit a product page on Amazon, Target, Walmart, or Etsy</p>
+    </div>
+    <div class="footer">
+      <button id="openDashboard" class="btn btn-ghost">Open Dashboard</button>
+      <button id="signOutBtn" class="btn btn-ghost">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Product Detected State -->
+  <div id="productView" class="product-view hidden">
+    <div class="header">
+      <h2>Save Gift Idea</h2>
+    </div>
+
+    <!-- Product Preview -->
+    <div class="product-preview">
+      <img id="productImage" src="" alt="Product" class="product-image">
+      <div class="product-info">
+        <h3 id="productTitle" class="product-title"></h3>
+        <p id="productPrice" class="product-price"></p>
+        <p id="productSite" class="product-site"></p>
+      </div>
+    </div>
+
+    <!-- Recipient Selection -->
+    <div class="form-section">
+      <label for="recipientSelect">Who is this gift for?</label>
+      <select id="recipientSelect" class="select">
+        <option value="">Select recipient...</option>
+      </select>
+      <button id="addRecipientBtn" class="btn-link">+ Add new recipient</button>
+    </div>
+
+    <!-- Category (optional) -->
+    <div class="form-section">
+      <label for="categorySelect">Category (optional)</label>
+      <select id="categorySelect" class="select">
+        <option value="">Select category...</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Books">Books</option>
+        <option value="Toys">Toys</option>
+        <option value="Fashion">Fashion</option>
+        <option value="Home">Home</option>
+        <option value="Sports">Sports</option>
+        <option value="Beauty">Beauty</option>
+        <option value="Food">Food</option>
+        <option value="Games">Games</option>
+        <option value="Art">Art</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <!-- Notes (optional) -->
+    <div class="form-section">
+      <label for="notesInput">Notes (optional)</label>
+      <textarea id="notesInput" class="textarea" placeholder="Add any additional notes..." rows="2"></textarea>
+    </div>
+
+    <!-- Screenshot Preview -->
+    <div id="screenshotSection" class="screenshot-section hidden">
+      <div class="screenshot-header">
+        <span>📸 Screenshot captured</span>
+        <button id="removeScreenshot" class="btn-remove">✕</button>
+      </div>
+      <img id="screenshotPreview" src="" alt="Screenshot" class="screenshot-preview">
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="saveBtn" class="btn btn-primary btn-full">
+        Save Gift Idea
+      </button>
+    </div>
+
+    <div class="footer">
+      <button id="viewGifts" class="btn btn-ghost">View All Gifts</button>
+    </div>
+  </div>
+
+  <!-- Success State -->
+  <div id="success" class="success hidden">
+    <div class="success-content">
+      <div class="success-icon">✓</div>
+      <h2>Gift Saved!</h2>
+      <p id="successMessage"></p>
+      <div class="actions">
+        <button id="saveAnother" class="btn btn-primary">Save Another</button>
+        <button id="viewAllGifts" class="btn btn-ghost">View All Gifts</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Recipient Modal -->
+  <div id="addRecipientModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Add New Recipient</h3>
+      <div class="form-section">
+        <label for="newRecipientName">Name</label>
+        <input type="text" id="newRecipientName" class="input" placeholder="e.g., Sarah">
+      </div>
+      <div class="form-section">
+        <label for="newRecipientRelationship">Relationship (optional)</label>
+        <input type="text" id="newRecipientRelationship" class="input" placeholder="e.g., Sister">
+      </div>
+      <div class="actions">
+        <button id="cancelRecipient" class="btn btn-ghost">Cancel</button>
+        <button id="saveRecipient" class="btn btn-primary">Add Recipient</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Supabase from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../lib/supabase.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
