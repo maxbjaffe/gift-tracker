@@ -191,9 +191,52 @@ function setupEventListeners() {
 }
 
 function setupSignInListeners() {
-  document.getElementById('signInBtn').addEventListener('click', () => {
-    chrome.tabs.create({ url: `${APP_URL}/login` });
+  const signInForm = document.getElementById('signInForm');
+  const createAccountLink = document.getElementById('createAccountLink');
+
+  signInForm.addEventListener('submit', handleSignIn);
+  createAccountLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: `${APP_URL}/signup` });
   });
+}
+
+async function handleSignIn(e) {
+  e.preventDefault();
+
+  const submitBtn = document.getElementById('signInSubmitBtn');
+  const errorDiv = document.getElementById('signInError');
+  const email = document.getElementById('signInEmail').value;
+  const password = document.getElementById('signInPassword').value;
+
+  // Reset error
+  errorDiv.classList.add('hidden');
+  errorDiv.textContent = '';
+
+  // Show loading
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Signing in...';
+
+  try {
+    const client = await window.supabaseClient.getClient();
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    if (data.user) {
+      // Success! Reload to show authenticated state
+      window.location.reload();
+    }
+  } catch (error) {
+    console.error('Sign in error:', error);
+    errorDiv.textContent = error.message || 'Failed to sign in. Please check your credentials.';
+    errorDiv.classList.remove('hidden');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Sign In';
+  }
 }
 
 async function saveGift() {
