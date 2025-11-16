@@ -194,7 +194,8 @@ If you can't extract certain information, use null for that field (or empty arra
     ];
 
     // Use vision-capable model if images present, otherwise use fast Haiku
-    const model = hasImages ? 'claude-3-sonnet-20240229' : 'claude-3-haiku-20240307';
+    // Try latest models first: Claude 3.5 Sonnet has excellent vision capabilities
+    const model = hasImages ? 'claude-3-5-sonnet-20241022' : 'claude-3-5-haiku-20241022';
 
     const message = await anthropic.messages.create({
       model,
