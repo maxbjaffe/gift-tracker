@@ -28,7 +28,7 @@
         "https://*.walmart.com/*",
         "https://*.etsy.com/*"
       ],
-      "js": ["content/detector.js"],
+      "js": ["content/extractors.js", "content/detector.js"],
       "run_at": "document_idle"
     }
   ],

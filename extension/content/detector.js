@@ -1,16 +1,16 @@
-// Content script that detects products and injects the extractors
+// Content script that detects products
+// Note: extractors.js is loaded by manifest.json before this script
 console.log('🎁 Gift Tracker: Detector script starting...');
+console.log('🎁 Gift Tracker: Checking for extractors...');
 
-// Load extractors
-(function() {
-  console.log('🎁 Gift Tracker: Loading extractors...');
-  const script = document.createElement('script');
-  script.src = chrome.runtime.getURL('content/extractors.js');
-  script.onload = () => console.log('🎁 Gift Tracker: Extractors loaded successfully');
-  script.onerror = (e) => console.error('🎁 Gift Tracker: Error loading extractors', e);
-  (document.head || document.documentElement).appendChild(script);
-  console.log('🎁 Gift Tracker: Extractors script tag added');
-})();
+// Wait a moment for extractors to be available
+setTimeout(() => {
+  if (typeof window.detectProduct === 'function') {
+    console.log('🎁 Gift Tracker: ✅ Extractors loaded successfully');
+  } else {
+    console.error('🎁 Gift Tracker: ❌ Extractors not available');
+  }
+}, 100);
 
 // Wait for page to be ready and detect product
 let productData = null;
