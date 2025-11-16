@@ -193,8 +193,11 @@ If you can't extract certain information, use null for that field (or empty arra
       { type: 'text', text: parsePrompt },
     ];
 
+    // Use vision-capable model if images present, otherwise use fast Haiku
+    const model = hasImages ? 'claude-3-sonnet-20240229' : 'claude-3-haiku-20240307';
+
     const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model,
       max_tokens: 1024,
       messages: [
         {
