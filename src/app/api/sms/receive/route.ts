@@ -193,20 +193,45 @@ If you can't extract certain information, use null for that field (or empty arra
       { type: 'text', text: parsePrompt },
     ];
 
-    // Use vision-capable model if images present, otherwise use fast Haiku
-    // Try latest models first: Claude 3.5 Sonnet has excellent vision capabilities
-    const model = hasImages ? 'claude-3-5-sonnet-20241022' : 'claude-3-5-haiku-20241022';
+    // Try multiple model names until one works (API key dependent)
+    const modelsToTry = hasImages
+      ? [
+          'claude-3-5-sonnet-20241022',
+          'claude-3-5-sonnet-20240620',
+          'claude-3-sonnet-20240229',
+          'claude-3-opus-20240229',
+        ]
+      : ['claude-3-5-haiku-20241022', 'claude-3-haiku-20240307'];
 
-    const message = await anthropic.messages.create({
-      model,
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: messageContent,
-        },
-      ],
-    });
+    let message;
+    let lastError;
+
+    for (const model of modelsToTry) {
+      try {
+        console.log(`Trying model: ${model}`);
+        message = await anthropic.messages.create({
+          model,
+          max_tokens: 1024,
+          messages: [
+            {
+              role: 'user',
+              content: messageContent,
+            },
+          ],
+        });
+        console.log(`✓ Successfully used model: ${model}`);
+        break; // Success! Exit loop
+      } catch (error: any) {
+        console.log(`✗ Model ${model} failed:`, error.message);
+        lastError = error;
+        continue; // Try next model
+      }
+    }
+
+    if (!message) {
+      console.error('All models failed. Last error:', lastError);
+      throw lastError;
+    }
 
     // Extract the JSON from Claude's response
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
