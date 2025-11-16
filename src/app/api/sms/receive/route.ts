@@ -93,22 +93,24 @@ export async function POST(request: NextRequest) {
 SMS Message: "${body}"
 
 Extract the following information:
-- recipient_name: Who is this gift for?
+- recipient_names: Who is this gift for? Extract ALL names mentioned (array of strings). Examples: ["Sarah"], ["Mom", "Dad"], ["the kids"]
 - gift_name: What is the gift?
 - price: Estimated or actual price (as a number, no currency symbols)
 - category: What category does this fit in? (Electronics, Books, Toys, Fashion, Home, Sports, Beauty, Food, Games, Art, or Other)
+- url: Any product URL found in the message (Amazon, Target, etc.)
 - notes: Any additional notes or context
 
 Respond ONLY with valid JSON in this exact format:
 {
-  "recipient_name": "string or null",
+  "recipient_names": ["string"] or [],
   "gift_name": "string or null",
   "price": number or null,
   "category": "string or null",
+  "url": "string or null",
   "notes": "string or null"
 }
 
-If you can't extract certain information, use null for that field.`;
+If you can't extract certain information, use null for that field (or empty array for recipient_names).`;
 
     const message = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
@@ -136,10 +138,11 @@ If you can't extract certain information, use null for that field.`;
     } catch (parseError) {
       console.error('Error parsing Claude response:', parseError);
       parsedData = {
-        recipient_name: null,
+        recipient_names: [],
         gift_name: null,
         price: null,
         category: null,
+        url: null,
         notes: body,
       };
     }
@@ -156,21 +159,25 @@ If you can't extract certain information, use null for that field.`;
 
     // If we have a gift name, try to create the gift
     let createdGift = null;
-    let recipientId = null;
+    let recipientIds: string[] = [];
 
     if (parsedData.gift_name) {
-      // Try to find matching recipient
-      if (parsedData.recipient_name) {
-        const { data: recipientData } = await supabase
-          .from('recipients')
-          .select('id')
-          .eq('user_id', userId)
-          .ilike('name', `%${parsedData.recipient_name}%`)
-          .limit(1)
-          .single();
+      // Try to find matching recipients (support multiple)
+      if (parsedData.recipient_names && parsedData.recipient_names.length > 0) {
+        for (const recipientName of parsedData.recipient_names) {
+          const { data: recipientData } = await supabase
+            .from('recipients')
+            .select('id')
+            .eq('user_id', userId)
+            .ilike('name', `%${recipientName}%`)
+            .limit(1)
+            .single();
 
-        if (recipientData) {
-          recipientId = recipientData.id;
+          if (recipientData) {
+            recipientIds.push(recipientData.id);
+          } else {
+            console.log(`Recipient not found: ${recipientName}`);
+          }
         }
       }
 
@@ -183,6 +190,7 @@ If you can't extract certain information, use null for that field.`;
           description: parsedData.notes || '',
           current_price: parsedData.price || null,
           category: parsedData.category || null,
+          url: parsedData.url || null,
           status: 'idea',
           source: 'sms',
           source_metadata: {
@@ -199,12 +207,14 @@ If you can't extract certain information, use null for that field.`;
       } else {
         createdGift = giftData;
 
-        // Link to recipient if found
-        if (recipientId && createdGift) {
-          await supabase.from('gift_recipients').insert({
+        // Link to ALL matched recipients
+        if (recipientIds.length > 0 && createdGift) {
+          const associations = recipientIds.map((recipientId) => ({
             gift_id: createdGift.id,
             recipient_id: recipientId,
-          });
+          }));
+
+          await supabase.from('gift_recipients').insert(associations);
         }
 
         // Update SMS record with created gift ID
@@ -224,20 +234,23 @@ If you can't extract certain information, use null for that field.`;
     const twiml = new MessagingResponse();
 
     if (createdGift) {
-      const recipientText = recipientId
-        ? ` for ${parsedData.recipient_name}`
-        : parsedData.recipient_name
-        ? ` (couldn't find recipient "${parsedData.recipient_name}" - you can assign it later)`
-        : '';
+      let recipientText = '';
+      if (recipientIds.length > 0) {
+        const names = parsedData.recipient_names?.slice(0, recipientIds.length).join(', ') || '';
+        recipientText = ` for ${names}`;
+      } else if (parsedData.recipient_names && parsedData.recipient_names.length > 0) {
+        recipientText = ` (couldn't find: ${parsedData.recipient_names.join(', ')} - you can assign later)`;
+      }
 
       const priceText = parsedData.price ? ` ($${parsedData.price})` : '';
+      const urlText = parsedData.url ? ' (with link)' : '';
 
       twiml.message(
-        `✓ Gift saved: "${parsedData.gift_name}"${priceText}${recipientText}. View it at ${process.env.NEXT_PUBLIC_APP_URL}/gifts`
+        `✓ Gift saved: "${parsedData.gift_name}"${priceText}${recipientText}${urlText}. View at ${process.env.NEXT_PUBLIC_APP_URL}/gifts`
       );
     } else {
       twiml.message(
-        `I received your message but couldn't extract a clear gift idea. Try something like: "AirPods Pro for Sarah - $249"`
+        `I received your message but couldn't extract a clear gift idea. Try: "AirPods Pro for Sarah and Jake - $249 https://amazon.com/..."`
       );
 
       // Update SMS status to error
