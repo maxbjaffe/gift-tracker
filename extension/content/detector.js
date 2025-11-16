@@ -1,10 +1,15 @@
 // Content script that detects products and injects the extractors
+console.log('🎁 Gift Tracker: Detector script starting...');
 
 // Load extractors
 (function() {
+  console.log('🎁 Gift Tracker: Loading extractors...');
   const script = document.createElement('script');
   script.src = chrome.runtime.getURL('content/extractors.js');
+  script.onload = () => console.log('🎁 Gift Tracker: Extractors loaded successfully');
+  script.onerror = (e) => console.error('🎁 Gift Tracker: Error loading extractors', e);
   (document.head || document.documentElement).appendChild(script);
+  console.log('🎁 Gift Tracker: Extractors script tag added');
 })();
 
 // Wait for page to be ready and detect product
@@ -12,6 +17,8 @@ let productData = null;
 let detectionTimeout = null;
 
 function detectAndNotify() {
+  console.log('🎁 Gift Tracker: detectAndNotify called');
+
   // Clear previous timeout
   if (detectionTimeout) {
     clearTimeout(detectionTimeout);
@@ -19,12 +26,16 @@ function detectAndNotify() {
 
   // Wait a bit for page to fully load
   detectionTimeout = setTimeout(() => {
+    console.log('🎁 Gift Tracker: Attempting detection...');
+    console.log('🎁 Gift Tracker: window.detectProduct exists?', typeof window.detectProduct === 'function');
+
     if (typeof window.detectProduct === 'function') {
       const detected = window.detectProduct();
+      console.log('🎁 Gift Tracker: Detection result:', detected);
 
       if (detected && JSON.stringify(detected) !== JSON.stringify(productData)) {
         productData = detected;
-        console.log('Gift Tracker: Product detected', productData);
+        console.log('🎁 Gift Tracker: ✅ Product detected!', productData);
 
         // Store product data in chrome.storage for popup to access
         chrome.storage.local.set({
@@ -37,9 +48,13 @@ function detectAndNotify() {
           type: 'PRODUCT_DETECTED',
           payload: productData
         }).catch(err => {
-          console.log('Gift Tracker: Could not send message to background', err);
+          console.log('🎁 Gift Tracker: Could not send message to background', err);
         });
+      } else if (!detected) {
+        console.log('🎁 Gift Tracker: ❌ No product detected on this page');
       }
+    } else {
+      console.error('🎁 Gift Tracker: ❌ window.detectProduct is not available');
     }
   }, 1000);
 }
