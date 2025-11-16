@@ -20,7 +20,21 @@ export async function POST(request: NextRequest) {
     const body = formData.get('Body') as string;
     const twilioSignature = request.headers.get('x-twilio-signature') || '';
 
-    console.log('Received SMS from:', from, 'Message:', body);
+    // Check for MMS media (images)
+    const numMedia = parseInt(formData.get('NumMedia') as string) || 0;
+    const mediaUrls: string[] = [];
+    const mediaTypes: string[] = [];
+
+    for (let i = 0; i < numMedia; i++) {
+      const mediaUrl = formData.get(`MediaUrl${i}`) as string;
+      const mediaType = formData.get(`MediaContentType${i}`) as string;
+      if (mediaUrl && mediaType?.startsWith('image/')) {
+        mediaUrls.push(mediaUrl);
+        mediaTypes.push(mediaType);
+      }
+    }
+
+    console.log('Received SMS from:', from, 'Message:', body, 'Images:', mediaUrls.length);
     console.log('Environment check:', {
       hasSupabaseUrl: !!supabaseUrl,
       hasServiceKey: !!supabaseServiceKey,
@@ -87,8 +101,66 @@ export async function POST(request: NextRequest) {
       console.error('Error logging SMS:', smsError);
     }
 
-    // Use Claude to parse the SMS message
-    const parsePrompt = `You are a gift tracking assistant. Parse this SMS message and extract gift information.
+    // Download and encode images if present
+    const imageContents: Array<{ type: 'image'; source: { type: 'base64'; media_type: string; data: string } }> = [];
+
+    if (mediaUrls.length > 0) {
+      console.log('Downloading images from MMS...');
+      for (let i = 0; i < Math.min(mediaUrls.length, 3); i++) {
+        // Limit to 3 images
+        try {
+          const imageResponse = await fetch(mediaUrls[i]);
+          const imageBuffer = await imageResponse.arrayBuffer();
+          const base64Image = Buffer.from(imageBuffer).toString('base64');
+
+          imageContents.push({
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: mediaTypes[i],
+              data: base64Image,
+            },
+          });
+          console.log(`Downloaded image ${i + 1}/${mediaUrls.length}`);
+        } catch (err) {
+          console.error(`Error downloading image ${i}:`, err);
+        }
+      }
+    }
+
+    // Use Claude to parse the SMS message (with vision if images present)
+    const hasImages = imageContents.length > 0;
+    const parsePrompt = hasImages
+      ? `You are a gift tracking assistant. Analyze the image(s) and text message to extract gift information.
+
+Text Message: "${body || '(no text)'}"
+
+Look at the image(s) for:
+- Product name/title
+- Price (if visible)
+- Product URLs or QR codes
+- Product category
+
+Extract the following information:
+- recipient_names: Who is this gift for? Extract ALL names mentioned (array of strings). Examples: ["Sarah"], ["Mom", "Dad"], ["the kids"]
+- gift_name: What is the gift/product shown?
+- price: Estimated or actual price (as a number, no currency symbols). Look for prices in the image!
+- category: What category does this fit in? (Electronics, Books, Toys, Fashion, Home, Sports, Beauty, Food, Games, Art, or Other)
+- url: Any product URL found in the text or image
+- notes: Product details, brand, model, or other relevant information you see
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "recipient_names": ["string"] or [],
+  "gift_name": "string or null",
+  "price": number or null,
+  "category": "string or null",
+  "url": "string or null",
+  "notes": "string or null"
+}
+
+If you can't extract certain information, use null for that field (or empty array for recipient_names).`
+      : `You are a gift tracking assistant. Parse this SMS message and extract gift information.
 
 SMS Message: "${body}"
 
@@ -112,13 +184,22 @@ Respond ONLY with valid JSON in this exact format:
 
 If you can't extract certain information, use null for that field (or empty array for recipient_names).`;
 
+    // Build content array with text and images
+    const messageContent: Array<
+      | { type: 'text'; text: string }
+      | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+    > = [
+      ...imageContents,
+      { type: 'text', text: parsePrompt },
+    ];
+
     const message = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 1024,
       messages: [
         {
           role: 'user',
-          content: parsePrompt,
+          content: messageContent,
         },
       ],
     });
@@ -197,6 +278,9 @@ If you can't extract certain information, use null for that field (or empty arra
             original_sms: body,
             parsed_data: parsedData,
             phone_number: from,
+            has_images: mediaUrls.length > 0,
+            num_images: mediaUrls.length,
+            media_urls: mediaUrls,
           },
         })
         .select()
