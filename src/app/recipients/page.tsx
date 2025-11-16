@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import Avatar from '@/components/Avatar';
+import { RecipientModal } from '@/components/RecipientModal';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 
 type Recipient = {
   id: string;
@@ -20,6 +23,8 @@ type Recipient = {
 export default function RecipientsPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
 
   useEffect(() => {
     fetchRecipients();
@@ -88,12 +93,15 @@ export default function RecipientsPage() {
               Manage the people you're buying gifts for
             </p>
           </div>
-          <Link
-            href="/recipients/new"
-            className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 md:px-6 h-11 md:h-12 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center text-sm md:text-base whitespace-nowrap"
+          <Button
+            onClick={() => {
+              setSelectedRecipient(null);
+              setIsModalOpen(true);
+            }}
+            className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap h-11 md:h-12 px-4 md:px-6"
           >
             + Add Recipient
-          </Link>
+          </Button>
         </div>
 
         {recipients.length === 0 ? (
@@ -105,62 +113,93 @@ export default function RecipientsPage() {
             <p className="text-sm md:text-base text-gray-600 mb-6">
               Start by adding someone you'd like to track gifts for
             </p>
-            <Link
-              href="/recipients/new"
-              className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 md:px-6 h-11 md:h-12 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all text-sm md:text-base"
+            <Button
+              onClick={() => {
+                setSelectedRecipient(null);
+                setIsModalOpen(true);
+              }}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-sm md:text-base h-11 md:h-12 px-4 md:px-6"
             >
               Add Your First Recipient
-            </Link>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
             {recipients.map((recipient) => (
-              <Link
+              <div
                 key={recipient.id}
-                href={`/recipients/${recipient.id}`}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all p-4 md:p-5 lg:p-6 group hover:scale-105 duration-300"
+                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all p-4 md:p-5 lg:p-6 group relative"
               >
-                <div className="flex justify-center mb-3 md:mb-4">
-                  <Avatar
-                    type={recipient.avatar_type}
-                    data={recipient.avatar_data}
-                    background={recipient.avatar_background}
-                    name={recipient.name}
-                    size="lg"
-                    showBorder
-                  />
-                </div>
+                {/* Edit Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedRecipient(recipient);
+                    setIsModalOpen(true);
+                  }}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
 
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-center text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
-                  {recipient.name}
-                </h2>
+                <Link href={`/recipients/${recipient.id}`} className="block">
+                  <div className="flex justify-center mb-3 md:mb-4">
+                    <Avatar
+                      type={recipient.avatar_type}
+                      data={recipient.avatar_data}
+                      background={recipient.avatar_background}
+                      name={recipient.name}
+                      size="lg"
+                      showBorder
+                    />
+                  </div>
 
-                {recipient.relationship && (
-                  <p className="text-center text-sm md:text-base text-gray-600 mb-3 md:mb-4">
-                    {recipient.relationship}
-                  </p>
-                )}
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-center text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                    {recipient.name}
+                  </h2>
 
-                <div className="space-y-2 text-xs md:text-sm">
-                  {recipient.age_range && (
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <span>🎂</span>
-                      <span>Age: {recipient.age_range}</span>
-                    </div>
+                  {recipient.relationship && (
+                    <p className="text-center text-sm md:text-base text-gray-600 mb-3 md:mb-4">
+                      {recipient.relationship}
+                    </p>
                   )}
 
-                  {recipient.interests && (
-                    <div className="flex items-start gap-2 text-gray-700">
-                      <span className="mt-0.5">🎨</span>
-                      <span className="flex-1">{formatInterests(recipient.interests)}</span>
-                    </div>
-                  )}
-                </div>
-              </Link>
+                  <div className="space-y-2 text-xs md:text-sm">
+                    {recipient.age_range && (
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <span>🎂</span>
+                        <span>Age: {recipient.age_range}</span>
+                      </div>
+                    )}
+
+                    {recipient.interests && (
+                      <div className="flex items-start gap-2 text-gray-700">
+                        <span className="mt-0.5">🎨</span>
+                        <span className="flex-1">{formatInterests(recipient.interests)}</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Recipient Modal */}
+      <RecipientModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedRecipient(null);
+        }}
+        onSuccess={() => {
+          fetchRecipients();
+        }}
+        recipient={selectedRecipient}
+      />
     </div>
   );
 }

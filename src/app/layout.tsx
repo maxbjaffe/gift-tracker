@@ -70,6 +70,12 @@ export default async function RootLayout({
                 💬 Gift Finder
               </Link>
               <Link
+                href="/chat"
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              >
+                ✨ AI Chat
+              </Link>
+              <Link
                 href="/analytics"
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >

@@ -40,6 +40,7 @@ export function MobileNav({ user }: MobileNavProps) {
     { href: '/gifts', label: 'Gifts', icon: Gift },
     { href: '/inspiration', label: 'Inspiration', icon: Sparkles },
     { href: '/gift-finder', label: 'Gift Finder', icon: MessageCircle },
+    { href: '/chat', label: 'AI Chat', icon: Sparkles },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ]
 

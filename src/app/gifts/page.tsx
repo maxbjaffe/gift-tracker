@@ -1,326 +1,377 @@
-'use client'
+'use client';
 
-import { useState, useMemo } from 'react'
-import { useGifts } from '@/lib/hooks/useGifts'
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
-import { EmptyState } from '@/components/shared/EmptyState'
-import { StatusBadge } from '@/components/shared/StatusBadge'
-import { FilterDropdown } from '@/components/shared/FilterDropdown'
-import { ExportButtons } from '@/components/shared/ExportButtons'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import Link from 'next/link'
-import { Plus, ExternalLink, Lightbulb, ShoppingCart } from 'lucide-react'
-import { GIFT_STATUSES, GIFT_CATEGORIES } from '@/Types/database.types'
-import Avatar from '@/components/Avatar'
+import { useState, useMemo } from 'react';
+import { useRecipients } from '@/lib/hooks/useRecipients';
+import { useGifts } from '@/lib/hooks/useGifts';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Search, ChevronDown, ExternalLink, User, UserPlus } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
+import Avatar from '@/components/Avatar';
+import { AIRecommendations } from '@/components/AIRecommendations';
+import { RecipientModal } from '@/components/RecipientModal';
 
-export default function GiftsPage() {
-  const { gifts, loading } = useGifts()
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [viewMode, setViewMode] = useState<'all' | 'ideas' | 'confirmed'>('all')
+type StatusType = 'idea' | 'considering' | 'purchased' | 'wrapped' | 'given';
 
-  // Filter gifts based on filters and view mode
+export default function SimpleGiftsPage() {
+  const { recipients, loading: recipientsLoading, refetch: refetchRecipients } = useRecipients();
+  const { gifts, loading: giftsLoading, refetch } = useGifts();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | StatusType>('all');
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
+  const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
+
+  const loading = recipientsLoading || giftsLoading;
+
+  // Group gifts by recipient
+  const giftsByRecipient = useMemo(() => {
+    const grouped: Record<string, typeof gifts> = {};
+
+    // Initialize with all recipients
+    recipients.forEach((recipient) => {
+      grouped[recipient.id] = [];
+    });
+
+    // Group gifts
+    gifts.forEach((gift) => {
+      if (gift.recipients && gift.recipients.length > 0) {
+        gift.recipients.forEach((recipient) => {
+          if (!grouped[recipient.id]) {
+            grouped[recipient.id] = [];
+          }
+          grouped[recipient.id].push(gift);
+        });
+      } else {
+        // Gifts without recipients
+        if (!grouped['unassigned']) {
+          grouped['unassigned'] = [];
+        }
+        grouped['unassigned'].push(gift);
+      }
+    });
+
+    return grouped;
+  }, [gifts, recipients]);
+
+  // Filter gifts
   const filteredGifts = useMemo(() => {
-    return gifts.filter((gift) => {
-      // Category filter
-      if (categoryFilter !== 'all' && gift.category !== categoryFilter) {
-        return false
+    return Object.entries(giftsByRecipient).reduce((acc, [recipientId, recipientGifts]) => {
+      const filtered = recipientGifts.filter((gift) => {
+        // Status filter
+        if (statusFilter !== 'all' && gift.status !== statusFilter) {
+          return false;
+        }
+
+        // Search filter
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          return (
+            gift.name.toLowerCase().includes(query) ||
+            gift.description?.toLowerCase().includes(query) ||
+            gift.category?.toLowerCase().includes(query)
+          );
+        }
+
+        return true;
+      });
+
+      if (filtered.length > 0) {
+        acc[recipientId] = filtered;
       }
 
-      // Status filter
-      if (statusFilter !== 'all' && gift.status !== statusFilter) {
-        return false
-      }
+      return acc;
+    }, {} as Record<string, typeof gifts>);
+  }, [giftsByRecipient, statusFilter, searchQuery]);
 
-      // View mode filter
-      if (viewMode === 'ideas' && gift.status !== 'idea') {
-        return false
-      }
-      if (viewMode === 'confirmed' && gift.status === 'idea') {
-        return false
-      }
+  const toggleSection = (recipientId: string) => {
+    const newOpen = new Set(openSections);
+    if (newOpen.has(recipientId)) {
+      newOpen.delete(recipientId);
+    } else {
+      newOpen.add(recipientId);
+    }
+    setOpenSections(newOpen);
+  };
 
-      return true
-    })
-  }, [gifts, categoryFilter, statusFilter, viewMode])
+  const updateGiftStatus = async (giftId: string, newStatus: StatusType) => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('gifts')
+      .update({ status: newStatus })
+      .eq('id', giftId);
 
-  // Calculate stats
-  const stats = useMemo(() => {
-    const ideaCount = gifts.filter((g) => g.status === 'idea').length
-    const confirmedCount = gifts.filter((g) => g.status !== 'idea').length
-    const totalValue = filteredGifts.reduce(
-      (sum, g) => sum + (g.current_price || 0),
-      0
-    )
+    if (error) {
+      toast.error('Failed to update status');
+      return;
+    }
 
-    return { ideaCount, confirmedCount, totalValue }
-  }, [gifts, filteredGifts])
+    toast.success('Status updated');
+    refetch();
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'idea':
+        return 'bg-blue-100 text-blue-700';
+      case 'considering':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'purchased':
+        return 'bg-green-100 text-green-700';
+      case 'wrapped':
+        return 'bg-purple-100 text-purple-700';
+      case 'given':
+        return 'bg-gray-100 text-gray-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4 md:p-6 lg:p-8">
-        <LoadingSpinner type="card" count={6} />
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+        <LoadingSpinner type="card" count={3} />
       </div>
-    )
-  }
-
-  if (gifts.length === 0) {
-    return (
-      <div className="container mx-auto p-4 md:p-6 lg:p-8">
-        <EmptyState
-          icon="🎁"
-          title="No gifts yet"
-          description="Start tracking gift ideas for your loved ones"
-          actionLabel="Add Your First Gift"
-          actionHref="/gifts/new"
-        />
-      </div>
-    )
+    );
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Gifts</h1>
-          <p className="text-sm md:text-base text-gray-600 mt-2">
-            Track and manage gift ideas for everyone
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          <ExportButtons data={gifts} type="gifts" />
-          <Button asChild className="h-11 md:h-12">
-            <Link href="/gifts/new">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Gift
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* Header */}
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              My Gifts
+            </h1>
+            <p className="text-gray-600 mt-1">Simple, organized gift tracking</p>
+          </div>
+          <Button
+            onClick={() => setIsRecipientModalOpen(true)}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Add Recipient
           </Button>
         </div>
-      </div>
 
-      {/* Stats Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
-        <Card className="p-4 md:p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs md:text-sm text-gray-600">Gift Ideas</p>
-              <p className="text-xl md:text-2xl font-bold text-blue-600">{stats.ideaCount}</p>
-            </div>
-            <Lightbulb className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Input
+              type="search"
+              placeholder="Search gifts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
-        </Card>
-        <Card className="p-4 md:p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs md:text-sm text-gray-600">Confirmed Gifts</p>
-              <p className="text-xl md:text-2xl font-bold text-green-600">{stats.confirmedCount}</p>
-            </div>
-            <ShoppingCart className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
-          </div>
-        </Card>
-        <Card className="p-4 md:p-5 sm:col-span-2 md:col-span-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs md:text-sm text-gray-600">Total Value</p>
-              <p className="text-xl md:text-2xl font-bold text-purple-600">
-                ${stats.totalValue.toFixed(2)}
-              </p>
-            </div>
-            <span className="text-2xl md:text-3xl">💰</span>
-          </div>
-        </Card>
-      </div>
 
-      {/* Filters and View Mode */}
-      <Card className="p-4 md:p-5 lg:p-6 mb-4 md:mb-6">
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="mb-4">
-          <TabsList className="grid w-full grid-cols-3 h-auto">
-            <TabsTrigger value="all" className="text-xs md:text-sm h-11 md:h-12">All ({gifts.length})</TabsTrigger>
-            <TabsTrigger value="ideas" className="text-xs md:text-sm h-11 md:h-12">Ideas ({stats.ideaCount})</TabsTrigger>
-            <TabsTrigger value="confirmed" className="text-xs md:text-sm h-11 md:h-12">Confirmed ({stats.confirmedCount})</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          <FilterDropdown
-            label="Category"
-            value={categoryFilter}
-            onValueChange={setCategoryFilter}
-            options={GIFT_CATEGORIES}
-            placeholder="All Categories"
-          />
-          <FilterDropdown
-            label="Status"
-            value={statusFilter}
-            onValueChange={setStatusFilter}
-            options={GIFT_STATUSES}
-            placeholder="All Statuses"
-          />
-        </div>
-
-        {(categoryFilter !== 'all' || statusFilter !== 'all') && (
-          <div className="mt-4 pt-4 border-t flex flex-wrap items-center gap-2">
-            <span className="text-xs md:text-sm text-gray-600">Active filters:</span>
-            {categoryFilter !== 'all' && (
-              <Badge variant="secondary" className="capitalize text-xs md:text-sm">
-                {categoryFilter}
-              </Badge>
-            )}
-            {statusFilter !== 'all' && (
-              <Badge variant="secondary" className="capitalize text-xs md:text-sm">
-                {statusFilter}
-              </Badge>
-            )}
+          <div className="flex gap-2 overflow-x-auto pb-2">
             <Button
-              variant="ghost"
+              variant={statusFilter === 'all' ? 'default' : 'outline'}
               size="sm"
-              className="h-11 md:h-auto"
-              onClick={() => {
-                setCategoryFilter('all')
-                setStatusFilter('all')
-              }}
+              onClick={() => setStatusFilter('all')}
+              className={statusFilter === 'all' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : ''}
             >
-              Clear filters
+              All
+            </Button>
+            <Button
+              variant={statusFilter === 'idea' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('idea')}
+              className={statusFilter === 'idea' ? 'bg-blue-600' : ''}
+            >
+              Ideas
+            </Button>
+            <Button
+              variant={statusFilter === 'purchased' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('purchased')}
+              className={statusFilter === 'purchased' ? 'bg-green-600' : ''}
+            >
+              Purchased
+            </Button>
+            <Button
+              variant={statusFilter === 'wrapped' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('wrapped')}
+              className={statusFilter === 'wrapped' ? 'bg-purple-600' : ''}
+            >
+              Wrapped
             </Button>
           </div>
-        )}
-      </Card>
+        </div>
 
-      {/* Results count */}
-      <div className="mb-4">
-        <p className="text-xs md:text-sm text-gray-600">
-          Showing {filteredGifts.length} of {gifts.length} gifts
-        </p>
-      </div>
+        {/* Recipient Sections */}
+        <div className="space-y-4">
+          {Object.entries(filteredGifts).map(([recipientId, recipientGifts]) => {
+            const recipient = recipients.find((r) => r.id === recipientId);
+            const isOpen = openSections.has(recipientId);
 
-      {/* Gifts Grid */}
-      {filteredGifts.length === 0 ? (
-        <Card className="p-6 md:p-8 lg:p-12 text-center">
-          <p className="text-sm md:text-base text-gray-500 mb-4">No gifts match your filters</p>
-          <Button
-            variant="outline"
-            className="h-11 md:h-12"
-            onClick={() => {
-              setCategoryFilter('all')
-              setStatusFilter('all')
-              setViewMode('all')
-            }}
-          >
-            Clear all filters
-          </Button>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
-          {filteredGifts.map((gift) => (
-            <Link key={gift.id} href={`/gifts/${gift.id}/edit`} className="block">
-              <Card className="p-4 md:p-5 lg:p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                {/* Screenshot Preview (from extension) */}
-                {gift.source_metadata?.screenshot && (
-                  <div className="mb-3 md:mb-4 -mx-4 md:-mx-5 lg:-mx-6 -mt-4 md:-mt-5 lg:-mt-6">
-                    <img
-                      src={gift.source_metadata.screenshot}
-                      alt={gift.name}
-                      className="w-full h-32 md:h-40 object-cover rounded-t-lg"
-                    />
-                  </div>
-                )}
+            if (!recipient && recipientId !== 'unassigned') return null;
 
-                {/* Product Image (from URL or extension) */}
-                {!gift.source_metadata?.screenshot && gift.image_url && (
-                  <div className="mb-3 md:mb-4 -mx-4 md:-mx-5 lg:-mx-6 -mt-4 md:-mt-5 lg:-mt-6">
-                    <img
-                      src={gift.image_url}
-                      alt={gift.name}
-                      className="w-full h-32 md:h-40 object-contain bg-gray-50 rounded-t-lg"
-                    />
-                  </div>
-                )}
-
-                <div className="flex items-start justify-between mb-3 md:mb-4">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base md:text-lg lg:text-xl font-semibold truncate">{gift.name}</h3>
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      {gift.category && (
-                        <Badge variant="outline" className="capitalize text-xs md:text-sm">
-                          {gift.category}
-                        </Badge>
-                      )}
-                      {/* Source Badge */}
-                      {gift.source && gift.source !== 'manual' && (
-                        <Badge variant="secondary" className="text-xs">
-                          {gift.source === 'extension' && '🔗 Browser'}
-                          {gift.source === 'sms' && '💬 SMS'}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <StatusBadge status={gift.status} />
-                </div>
-
-                {gift.description && (
-                  <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4 line-clamp-2">
-                    {gift.description}
-                  </p>
-                )}
-
-                {gift.recipients && gift.recipients.length > 0 && (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3 md:mb-4 pb-3 md:pb-4 border-b">
-                    <span className="text-xs md:text-sm text-gray-500">For:</span>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {gift.recipients.slice(0, 3).map((recipient) => (
-                        <div key={recipient.id} className="flex items-center gap-1">
+            return (
+              <Card key={recipientId} className="overflow-hidden">
+                <Collapsible open={isOpen} onOpenChange={() => toggleSection(recipientId)}>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        {recipient ? (
                           <Avatar
                             type={recipient.avatar_type}
                             data={recipient.avatar_data}
                             background={recipient.avatar_background}
                             name={recipient.name}
-                            size="xs"
+                            size="md"
                           />
-                          <span className="text-xs md:text-sm text-gray-700">{recipient.name}</span>
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <User className="h-5 w-5 text-gray-500" />
+                          </div>
+                        )}
+                        <div className="text-left">
+                          <h3 className="font-semibold text-lg">
+                            {recipient?.name || 'Unassigned'}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {recipientGifts.length} {recipientGifts.length === 1 ? 'gift' : 'gifts'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {recipient && (
+                          <AIRecommendations
+                            recipientId={recipient.id}
+                            recipientName={recipient.name}
+                            onGiftAdded={refetch}
+                          />
+                        )}
+                        <ChevronDown
+                          className={`h-5 w-5 text-gray-400 transition-transform ${
+                            isOpen ? 'transform rotate-180' : ''
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <div className="border-t divide-y">
+                      {recipientGifts.map((gift) => (
+                        <div key={gift.id} className="p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex gap-4">
+                            {/* Image */}
+                            {(gift.source_metadata?.screenshot || gift.image_url) && (
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={gift.source_metadata?.screenshot || gift.image_url || ''}
+                                  alt={gift.name}
+                                  className="h-20 w-20 object-cover rounded-lg"
+                                />
+                              </div>
+                            )}
+
+                            {/* Details */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900 line-clamp-1">
+                                    {gift.name}
+                                  </h4>
+                                  {gift.description && (
+                                    <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                                      {gift.description}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                    {gift.current_price && (
+                                      <span className="text-lg font-semibold text-green-600">
+                                        ${gift.current_price.toFixed(2)}
+                                      </span>
+                                    )}
+                                    {gift.category && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {gift.category}
+                                      </Badge>
+                                    )}
+                                    {gift.source && gift.source !== 'manual' && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {gift.source === 'extension' && '🔗'}
+                                        {gift.source === 'sms' && '💬'}
+                                        {' '}{gift.source}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {gift.url && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    asChild
+                                    className="flex-shrink-0"
+                                  >
+                                    <a href={gift.url} target="_blank" rel="noopener noreferrer">
+                                      <ExternalLink className="h-4 w-4" />
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+
+                              {/* Status Toggle */}
+                              <div className="flex gap-2 mt-3">
+                                {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => (
+                                  <button
+                                    key={status}
+                                    onClick={() => updateGiftStatus(gift.id, status)}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                                      gift.status === status
+                                        ? getStatusColor(status)
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
-                      {gift.recipients.length > 3 && (
-                        <span className="text-xs text-gray-500">+{gift.recipients.length - 3} more</span>
-                      )}
                     </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 md:mb-4">
-                  {gift.current_price && (
-                    <span className="text-xl md:text-2xl font-bold text-green-600">
-                      ${gift.current_price.toFixed(2)}
-                    </span>
-                  )}
-                  {gift.store && (
-                    <span className="text-xs md:text-sm text-gray-500">{gift.store}</span>
-                  )}
-                </div>
-
-                {gift.url && (
-                  <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t">
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="w-full h-11 md:h-12"
-                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    >
-                      <a href={gift.url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View Product
-                      </a>
-                    </Button>
-                  </div>
-                )}
+                  </CollapsibleContent>
+                </Collapsible>
               </Card>
-            </Link>
-          ))}
+            );
+          })}
         </div>
-      )}
+
+        {Object.keys(filteredGifts).length === 0 && (
+          <Card className="p-12 text-center">
+            <p className="text-gray-500">No gifts found. Try adjusting your filters or search.</p>
+          </Card>
+        )}
+      </div>
+
+      {/* Recipient Modal */}
+      <RecipientModal
+        isOpen={isRecipientModalOpen}
+        onClose={() => setIsRecipientModalOpen(false)}
+        onSuccess={() => {
+          refetchRecipients();
+          refetch();
+        }}
+      />
     </div>
-  )
+  );
 }
