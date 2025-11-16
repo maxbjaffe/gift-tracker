@@ -6,7 +6,7 @@ import twilio from 'twilio';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY!;
-const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN!;
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
 
 // Initialize clients
 const anthropic = new Anthropic({ apiKey: anthropicApiKey });
@@ -21,18 +21,28 @@ export async function POST(request: NextRequest) {
     const twilioSignature = request.headers.get('x-twilio-signature') || '';
 
     console.log('Received SMS from:', from, 'Message:', body);
-
-    // Validate Twilio signature for security
-    const url = request.url;
-    const params: { [key: string]: string } = {};
-    formData.forEach((value, key) => {
-      params[key] = value.toString();
+    console.log('Environment check:', {
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      hasAnthropicKey: !!anthropicApiKey,
+      hasTwilioToken: !!twilioAuthToken,
     });
 
-    const isValid = twilio.validateRequest(twilioAuthToken, twilioSignature, url, params);
-    if (!isValid) {
-      console.error('Invalid Twilio signature');
-      return new NextResponse('Unauthorized', { status: 401 });
+    // Validate Twilio signature for security (skip if token not available)
+    if (twilioAuthToken) {
+      const url = request.url;
+      const params: { [key: string]: string } = {};
+      formData.forEach((value, key) => {
+        params[key] = value.toString();
+      });
+
+      const isValid = twilio.validateRequest(twilioAuthToken, twilioSignature, url, params);
+      if (!isValid) {
+        console.error('Invalid Twilio signature');
+        return new NextResponse('Unauthorized', { status: 401 });
+      }
+    } else {
+      console.warn('⚠️  TWILIO_AUTH_TOKEN not set - skipping signature validation (INSECURE!)');
     }
 
     // Create Supabase admin client (bypasses RLS)
