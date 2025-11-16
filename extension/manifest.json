@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Gift Tracker",
-  "version": "1.0.0",
-  "description": "Capture gift ideas from any shopping site with one click",
+  "version": "1.1.0",
+  "description": "Capture gift ideas from Amazon, Target, Walmart, Etsy, Best Buy, eBay, Wayfair, Sephora, and Barnes & Noble",
   "permissions": [
     "activeTab",
     "tabs",
@@ -14,6 +14,11 @@
     "https://*.target.com/*",
     "https://*.walmart.com/*",
     "https://*.etsy.com/*",
+    "https://*.bestbuy.com/*",
+    "https://*.ebay.com/*",
+    "https://*.wayfair.com/*",
+    "https://*.sephora.com/*",
+    "https://*.barnesandnoble.com/*",
     "https://*.anthropic.com/*"
   ],
   "background": {
@@ -26,7 +31,12 @@
         "https://*.amazon.com/*",
         "https://*.target.com/*",
         "https://*.walmart.com/*",
-        "https://*.etsy.com/*"
+        "https://*.etsy.com/*",
+        "https://*.bestbuy.com/*",
+        "https://*.ebay.com/*",
+        "https://*.wayfair.com/*",
+        "https://*.sephora.com/*",
+        "https://*.barnesandnoble.com/*"
       ],
       "js": ["content/extractors.js", "content/detector.js"],
       "run_at": "document_idle"

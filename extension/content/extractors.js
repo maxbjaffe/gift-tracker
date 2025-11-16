@@ -177,6 +177,186 @@ function extractEtsyProduct() {
 }
 
 /**
+ * Extract product data from Best Buy
+ */
+function extractBestBuyProduct() {
+  const productTitle = document.querySelector('.sku-title h1, [data-testid="product-title"]');
+  if (!productTitle) return null;
+
+  let price = null;
+  const priceElement = document.querySelector('[data-testid="customer-price"] span, .priceView-hero-price span');
+  if (priceElement) {
+    const priceText = priceElement.textContent.replace(/[^0-9.]/g, '');
+    price = parseFloat(priceText) || null;
+  }
+
+  let image = null;
+  const mainImage = document.querySelector('.primary-image, [data-testid="product-image"]');
+  if (mainImage) {
+    image = mainImage.src;
+  }
+
+  let description = null;
+  const descElement = document.querySelector('.product-data-value, [data-testid="product-description"]');
+  if (descElement) {
+    description = descElement.textContent.trim().substring(0, 200);
+  }
+
+  return {
+    url: window.location.href.split('?')[0],
+    title: productTitle.textContent.trim(),
+    price,
+    image,
+    description,
+    site: 'bestbuy',
+  };
+}
+
+/**
+ * Extract product data from eBay
+ */
+function extractEbayProduct() {
+  const productTitle = document.querySelector('.x-item-title__mainTitle, h1.it-ttl');
+  if (!productTitle) return null;
+
+  let price = null;
+  const priceElement = document.querySelector('.x-price-primary span, #prcIsum, .display-price');
+  if (priceElement) {
+    const priceText = priceElement.textContent.replace(/[^0-9.]/g, '');
+    price = parseFloat(priceText) || null;
+  }
+
+  let image = null;
+  const mainImage = document.querySelector('.ux-image-carousel-item img, #icImg');
+  if (mainImage) {
+    image = mainImage.src;
+  }
+
+  let description = null;
+  const descElement = document.querySelector('.x-item-description, #desc_div');
+  if (descElement) {
+    description = descElement.textContent.trim().substring(0, 200);
+  }
+
+  return {
+    url: window.location.href.split('?')[0],
+    title: productTitle.textContent.trim(),
+    price,
+    image,
+    description,
+    site: 'ebay',
+  };
+}
+
+/**
+ * Extract product data from Wayfair
+ */
+function extractWayfairProduct() {
+  const productTitle = document.querySelector('[data-enzyme-id="ProductTitle"] h1, .ProductDetailInfoBlock h1');
+  if (!productTitle) return null;
+
+  let price = null;
+  const priceElement = document.querySelector('[data-enzyme-id="PriceBlock"] .BasePriceBlock, .pl-PricingDisplay');
+  if (priceElement) {
+    const priceText = priceElement.textContent.replace(/[^0-9.]/g, '');
+    price = parseFloat(priceText) || null;
+  }
+
+  let image = null;
+  const mainImage = document.querySelector('.ProductImageCarousel img, [data-hb-id="Image"]');
+  if (mainImage) {
+    image = mainImage.src;
+  }
+
+  let description = null;
+  const descElement = document.querySelector('[data-enzyme-id="ProductDescription"]');
+  if (descElement) {
+    description = descElement.textContent.trim().substring(0, 200);
+  }
+
+  return {
+    url: window.location.href.split('?')[0],
+    title: productTitle.textContent.trim(),
+    price,
+    image,
+    description,
+    site: 'wayfair',
+  };
+}
+
+/**
+ * Extract product data from Sephora
+ */
+function extractSephoraProduct() {
+  const productTitle = document.querySelector('[data-at="product_name"], .css-euydo4');
+  if (!productTitle) return null;
+
+  let price = null;
+  const priceElement = document.querySelector('[data-at="price"], .css-18suhm');
+  if (priceElement) {
+    const priceText = priceElement.textContent.replace(/[^0-9.]/g, '');
+    price = parseFloat(priceText) || null;
+  }
+
+  let image = null;
+  const mainImage = document.querySelector('[data-at="product_image"] img, .css-1s178v7 img');
+  if (mainImage) {
+    image = mainImage.src;
+  }
+
+  let description = null;
+  const descElement = document.querySelector('[data-at="product_description"]');
+  if (descElement) {
+    description = descElement.textContent.trim().substring(0, 200);
+  }
+
+  return {
+    url: window.location.href.split('?')[0],
+    title: productTitle.textContent.trim(),
+    price,
+    image,
+    description,
+    site: 'sephora',
+  };
+}
+
+/**
+ * Extract product data from Barnes & Noble
+ */
+function extractBarnesNobleProduct() {
+  const productTitle = document.querySelector('h1.pdp-header-title, .product-info-header h1');
+  if (!productTitle) return null;
+
+  let price = null;
+  const priceElement = document.querySelector('.price-value, .current-price');
+  if (priceElement) {
+    const priceText = priceElement.textContent.replace(/[^0-9.]/g, '');
+    price = parseFloat(priceText) || null;
+  }
+
+  let image = null;
+  const mainImage = document.querySelector('.product-image img, .pdp-image img');
+  if (mainImage) {
+    image = mainImage.src;
+  }
+
+  let description = null;
+  const descElement = document.querySelector('.product-description, .overview-content');
+  if (descElement) {
+    description = descElement.textContent.trim().substring(0, 200);
+  }
+
+  return {
+    url: window.location.href.split('?')[0],
+    title: productTitle.textContent.trim(),
+    price,
+    image,
+    description,
+    site: 'barnesnoble',
+  };
+}
+
+/**
  * Main detector - tries all extractors based on current site
  */
 function detectProduct() {
@@ -190,6 +370,16 @@ function detectProduct() {
     return extractWalmartProduct();
   } else if (hostname.includes('etsy.com')) {
     return extractEtsyProduct();
+  } else if (hostname.includes('bestbuy.com')) {
+    return extractBestBuyProduct();
+  } else if (hostname.includes('ebay.com')) {
+    return extractEbayProduct();
+  } else if (hostname.includes('wayfair.com')) {
+    return extractWayfairProduct();
+  } else if (hostname.includes('sephora.com')) {
+    return extractSephoraProduct();
+  } else if (hostname.includes('barnesandnoble.com')) {
+    return extractBarnesNobleProduct();
   }
 
   return null;
