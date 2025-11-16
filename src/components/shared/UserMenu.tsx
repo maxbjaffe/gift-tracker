@@ -64,6 +64,9 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push('/settings')} className="cursor-pointer">
+          Settings
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
           Sign Out
         </DropdownMenuItem>
