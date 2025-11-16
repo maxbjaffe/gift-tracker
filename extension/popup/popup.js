@@ -2,7 +2,7 @@
 
 // Configuration - these will be set during initial setup
 const SUPABASE_URL = 'https://xjeemfudbujwqrnkuwvb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqZWVtZnVkYnVqd3FybmN1d3ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1MzcxMTksImV4cCI6MjA0NzExMzExOX0.8vjFXa9u4E5JfcM4w-cKWQBIhD4zz_81V_U9qnLVRzQ';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqZWVtZnVkYnVqd3Fybmt1d3ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2NTk1MTksImV4cCI6MjA3ODIzNTUxOX0.dYx5Lx5fAxHYjL1A1LIZ4u49nUzDUNoYr0LHItxQLtI';
 const APP_URL = 'https://gift-tracker-black.vercel.app';
 
 // State
