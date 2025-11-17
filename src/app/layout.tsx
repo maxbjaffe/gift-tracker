@@ -81,6 +81,12 @@ export default async function RootLayout({
               >
                 Analytics
               </Link>
+              <Link
+                href="/accountability"
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              >
+                🎯 Accountability
+              </Link>
               <UserMenu user={user} />
             </nav>
 
