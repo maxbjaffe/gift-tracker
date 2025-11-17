@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS consequences (
   lifted_at timestamp with time zone,
 
   -- Context
-  related_commitment_id uuid REFERENCES commitments(id),
+  related_commitment_id uuid, -- FK added later to avoid circular dependency
   notes text,
 
   -- Metadata
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS commitments (
   completed_on_time boolean,
 
   -- Context
-  related_consequence_id uuid REFERENCES consequences(id),
+  related_consequence_id uuid, -- FK added later to avoid circular dependency
   extension_reason text,
   notes text
 );
@@ -395,6 +395,15 @@ BEGIN
   RETURN v_score;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Add circular foreign key constraints (after both tables exist)
+ALTER TABLE consequences
+  ADD CONSTRAINT fk_consequences_related_commitment
+  FOREIGN KEY (related_commitment_id) REFERENCES commitments(id);
+
+ALTER TABLE commitments
+  ADD CONSTRAINT fk_commitments_related_consequence
+  FOREIGN KEY (related_consequence_id) REFERENCES consequences(id);
 
 -- Trigger to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
