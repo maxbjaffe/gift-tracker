@@ -1,0 +1,24 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/expire-consequences",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/commitment-reminders",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/consequence-warnings",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/calculate-reliability",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-report",
+      "schedule": "0 18 * * 0"
+    }
+  ]
+}
