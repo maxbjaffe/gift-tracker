@@ -17,7 +17,7 @@ import {
   updateCommitmentStatus,
 } from '@/lib/services/accountability';
 import { toast } from 'sonner';
-import { Shield, Target, TrendingUp, UserPlus, AlertCircle } from 'lucide-react';
+import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AccountabilityPage() {
@@ -221,6 +221,18 @@ export default function AccountabilityPage() {
 
               <div className="flex gap-2">
                 <Button variant="outline" asChild>
+                  <Link href="/accountability/sms-guide">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    SMS Commands
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/accountability/analytics">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Analytics
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
                   <Link href="/accountability/children/new">
                     <UserPlus className="h-4 w-4 mr-2" />
                     Add Child
@@ -247,63 +259,86 @@ export default function AccountabilityPage() {
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
-                {/* Active Consequences */}
-                {filteredConsequences.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-red-600" />
-                      Active Consequences
-                    </h3>
-                    <div className="space-y-3">
-                      {filteredConsequences.slice(0, 3).map((consequence) => (
-                        <ConsequenceCard
-                          key={consequence.id}
-                          consequence={consequence}
-                          onLift={handleLiftConsequence}
-                          onConfirm={handleConfirmConsequence}
-                        />
-                      ))}
+                {/* Side-by-Side Layout for Consequences and Commitments */}
+                {(filteredConsequences.length > 0 || filteredCommitments.length > 0) && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Active Consequences Column */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-red-600" />
+                        Active Consequences ({filteredConsequences.length})
+                      </h3>
+                      {filteredConsequences.length > 0 ? (
+                        <>
+                          <div className="space-y-3">
+                            {filteredConsequences.slice(0, 5).map((consequence) => (
+                              <ConsequenceCard
+                                key={consequence.id}
+                                consequence={consequence}
+                                onLift={handleLiftConsequence}
+                                onConfirm={handleConfirmConsequence}
+                              />
+                            ))}
+                          </div>
+                          {filteredConsequences.length > 5 && (
+                            <Button variant="link" className="mt-2 w-full" asChild>
+                              <Link href="/accountability/consequences">
+                                View all {filteredConsequences.length} consequences →
+                              </Link>
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <Card className="p-8 text-center">
+                          <Shield className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                          <p className="text-gray-500 text-sm">No active consequences</p>
+                        </Card>
+                      )}
                     </div>
-                    {filteredConsequences.length > 3 && (
-                      <Button variant="link" className="mt-2" asChild>
-                        <Link href="/accountability/consequences">
-                          View all {filteredConsequences.length} consequences →
-                        </Link>
-                      </Button>
-                    )}
+
+                    {/* Active Commitments Column */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Target className="h-5 w-5 text-blue-600" />
+                        Active Commitments ({filteredCommitments.length})
+                      </h3>
+                      {filteredCommitments.length > 0 ? (
+                        <>
+                          <div className="space-y-3">
+                            {filteredCommitments.slice(0, 5).map((commitment) => (
+                              <CommitmentCard
+                                key={commitment.id}
+                                commitment={commitment}
+                                onComplete={handleCompleteCommitment}
+                                onMissed={handleMissedCommitment}
+                              />
+                            ))}
+                          </div>
+                          {filteredCommitments.length > 5 && (
+                            <Button variant="link" className="mt-2 w-full" asChild>
+                              <Link href="/accountability/commitments">
+                                View all {filteredCommitments.length} commitments →
+                              </Link>
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <Card className="p-8 text-center">
+                          <Target className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                          <p className="text-gray-500 text-sm">No active commitments</p>
+                        </Card>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {/* Active Commitments */}
-                {filteredCommitments.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Target className="h-5 w-5 text-blue-600" />
-                      Active Commitments
-                    </h3>
-                    <div className="space-y-3">
-                      {filteredCommitments.slice(0, 3).map((commitment) => (
-                        <CommitmentCard
-                          key={commitment.id}
-                          commitment={commitment}
-                          onComplete={handleCompleteCommitment}
-                          onMissed={handleMissedCommitment}
-                        />
-                      ))}
-                    </div>
-                    {filteredCommitments.length > 3 && (
-                      <Button variant="link" className="mt-2" asChild>
-                        <Link href="/accountability/commitments">
-                          View all {filteredCommitments.length} commitments →
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
-                )}
-
-                {/* Empty State */}
+                {/* Empty State - Both Empty */}
                 {filteredConsequences.length === 0 && filteredCommitments.length === 0 && (
                   <Card className="p-12 text-center">
+                    <div className="flex gap-4 justify-center mb-4">
+                      <Shield className="h-12 w-12 text-gray-300" />
+                      <Target className="h-12 w-12 text-gray-300" />
+                    </div>
                     <p className="text-gray-500">
                       {selectedChild
                         ? `No active consequences or commitments for ${selectedChild.name}`

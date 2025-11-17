@@ -29,11 +29,12 @@ export async function GET(request: NextRequest) {
 
     const userId = users[0].id;
 
-      // Create 3 children
+      // Create 4 children with varied ages
       const childrenData = [
         { name: 'Emma', age: 12, avatar_color: '#3B82F6', user_id: userId },
         { name: 'Jake', age: 10, avatar_color: '#10B981', user_id: userId },
         { name: 'Sarah', age: 14, avatar_color: '#F59E0B', user_id: userId },
+        { name: 'Liam', age: 8, avatar_color: '#8B5CF6', user_id: userId },
       ];
 
       const { data: children, error: childrenError } = await supabase
@@ -45,15 +46,20 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: childrenError.message }, { status: 500 });
       }
 
-      // Create consequences for the past 3 months
+      // Create consequences for the past 6 months + some active ones
       const now = new Date();
       const consequences = [];
 
       for (const child of children) {
-        const numConsequences = 3 + Math.floor(Math.random() * 3);
+        // More consequences for richer analytics (10-15 per child)
+        const numConsequences = 10 + Math.floor(Math.random() * 6);
 
         for (let i = 0; i < numConsequences; i++) {
-          const daysAgo = Math.floor(Math.random() * 90);
+          // 20% chance of being very recent (active), 80% historical
+          const isActive = Math.random() < 0.2;
+          const daysAgo = isActive
+            ? Math.floor(Math.random() * 3) // 0-3 days ago
+            : 3 + Math.floor(Math.random() * 177); // 3-180 days ago
           const createdAt = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
 
           const restrictionTypes = ['device', 'activity', 'privilege', 'location'];
@@ -99,15 +105,17 @@ export async function GET(request: NextRequest) {
 
       await supabase.from('consequences').insert(consequences);
 
-      // Create commitments for the past 3 months
+      // Create commitments for the past 6 months + some active/upcoming ones
       const commitments = [];
 
       for (const child of children) {
-        const numCommitments = 20 + Math.floor(Math.random() * 11);
-        const baseReliability = [0.85, 0.65, 0.75][children.indexOf(child)];
+        // Significantly more commitments for better analytics (40-60 per child)
+        const numCommitments = 40 + Math.floor(Math.random() * 21);
+        // Varied reliability profiles: Emma=85%, Jake=65%, Sarah=75%, Liam=55%
+        const baseReliability = [0.85, 0.65, 0.75, 0.55][children.indexOf(child)] || 0.70;
 
         for (let i = 0; i < numCommitments; i++) {
-          const daysAgo = Math.floor(Math.random() * 90);
+          const daysAgo = Math.floor(Math.random() * 180); // 0-180 days ago
           const createdAt = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
 
           const categories = ['homework', 'chores', 'responsibilities', 'behavior', 'other'];
@@ -159,13 +167,50 @@ export async function GET(request: NextRequest) {
             reminded_at: dueDate < now ? new Date(dueDate.getTime() - 30 * 60 * 1000).toISOString() : null,
           });
         }
+
+        // Add 3-5 ACTIVE commitments for the future (for DAKboard display)
+        const numActiveCommitments = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < numActiveCommitments; i++) {
+          const categories = ['homework', 'chores', 'responsibilities', 'behavior', 'other'];
+          const category = categories[Math.floor(Math.random() * categories.length)];
+
+          const commitmentTexts: Record<string, string[]> = {
+            homework: ['Finish math homework', 'Complete reading assignment', 'Study for test', 'Do science project'],
+            chores: ['Clean room', 'Take out trash', 'Do dishes', 'Vacuum living room', 'Feed the dog'],
+            responsibilities: ['Practice piano', 'Soccer practice', 'Walk the dog', 'Help with dinner'],
+            behavior: ['Be respectful to siblings', 'No fighting', 'Use kind words'],
+            other: ['Read for 30 minutes', 'Limited screen time', 'Bedtime on time'],
+          };
+
+          const commitmentText =
+            commitmentTexts[category][Math.floor(Math.random() * commitmentTexts[category].length)];
+
+          // Create commitments due today, tomorrow, or within next 3 days
+          const daysInFuture = Math.floor(Math.random() * 4); // 0-3 days
+          const dueDate = new Date(now.getTime() + daysInFuture * 24 * 60 * 60 * 1000);
+          const dueHour = 17 + Math.floor(Math.random() * 4);
+          dueDate.setHours(dueHour, 0, 0, 0);
+
+          commitments.push({
+            child_id: child.id,
+            commitment_text: commitmentText,
+            due_date: dueDate.toISOString(),
+            status: 'active',
+            category,
+            committed_by: userId,
+            created_at: now.toISOString(),
+            completed_on_time: null,
+            completed_at: null,
+            reminded_at: null,
+          });
+        }
       }
 
       await supabase.from('commitments').insert(commitments);
 
-      // Calculate and insert commitment stats
+      // Calculate and insert commitment stats for past 6 months
       for (const child of children) {
-        for (let monthsAgo = 0; monthsAgo < 3; monthsAgo++) {
+        for (let monthsAgo = 0; monthsAgo < 6; monthsAgo++) {
           const month = new Date();
           month.setMonth(month.getMonth() - monthsAgo);
           const monthStr = month.toISOString().slice(0, 7) + '-01';

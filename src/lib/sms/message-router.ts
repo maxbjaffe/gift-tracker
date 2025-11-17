@@ -1,9 +1,16 @@
-export type MessageIntent = 'consequence' | 'commitment' | 'query' | 'response' | 'unknown';
+import { detectShortcut, handleShortcut } from './shortcuts';
+import { detectBulkOperation } from './bulk-operations';
+import { getSMSContext, saveSMSContext, hasPendingClarification, mergeClarificationResponse } from './context-manager';
+
+export type MessageIntent = 'consequence' | 'commitment' | 'query' | 'response' | 'unknown' | 'shortcut' | 'bulk';
 
 export interface RouterResult {
   intent: MessageIntent;
   confidence: 'high' | 'medium' | 'low';
   message: string;
+  isBulk?: boolean;
+  bulkTargets?: 'all' | 'multiple' | 'single';
+  childNames?: string[];
 }
 
 // Keywords that indicate different message types
@@ -77,7 +84,30 @@ const RESPONSE_KEYWORDS = [
 export function detectMessageIntent(message: string): RouterResult {
   const normalized = message.toLowerCase().trim();
 
-  // Check for response keywords first (CONFIRM, DONE, etc.)
+  // 1. Check for shortcuts first (STATUS, HELP, CLEAR ALL, etc.)
+  const shortcut = detectShortcut(message);
+  if (shortcut) {
+    return {
+      intent: 'shortcut',
+      confidence: 'high',
+      message: normalized,
+    };
+  }
+
+  // 2. Check for bulk operations (all kids, everyone, Emma and Jake)
+  const bulkDetection = detectBulkOperation(message);
+  if (bulkDetection.isBulk) {
+    return {
+      intent: 'bulk',
+      confidence: 'high',
+      message: normalized,
+      isBulk: true,
+      bulkTargets: bulkDetection.targets,
+      childNames: bulkDetection.childNames,
+    };
+  }
+
+  // 3. Check for response keywords (CONFIRM, DONE, etc.)
   if (containsKeywords(normalized, RESPONSE_KEYWORDS)) {
     return {
       intent: 'response',
@@ -86,7 +116,7 @@ export function detectMessageIntent(message: string): RouterResult {
     };
   }
 
-  // Check for query keywords (what, show, status, etc.)
+  // 4. Check for query keywords (what, show, status, etc.)
   if (containsKeywords(normalized, QUERY_KEYWORDS)) {
     return {
       intent: 'query',
@@ -95,7 +125,7 @@ export function detectMessageIntent(message: string): RouterResult {
     };
   }
 
-  // Check for consequence keywords (no, restrict, etc.)
+  // 5. Check for consequence keywords (no, restrict, etc.)
   const hasConsequenceKeywords = containsKeywords(normalized, CONSEQUENCE_KEYWORDS);
   const hasCommitmentKeywords = containsKeywords(normalized, COMMITMENT_KEYWORDS);
 
@@ -214,34 +244,104 @@ export function extractChildName(message: string): string | null {
 
 /**
  * Route message to appropriate handler based on intent
+ * Now with context management, shortcuts, and bulk operations support
  */
 export async function routeMessage(
   intent: MessageIntent,
   message: string,
-  fromNumber: string
+  fromNumber: string,
+  userId?: string
 ): Promise<string> {
+  // Load SMS context for this phone number
+  const context = await getSMSContext(fromNumber);
+
+  // If user has pending clarification, merge response with context
+  if (context && hasPendingClarification(context)) {
+    const mergedData = mergeClarificationResponse(context, message);
+    // Save updated context
+    await saveSMSContext(
+      fromNumber,
+      context.userId,
+      message,
+      context.lastIntent,
+      mergedData,
+      null // Clear pending clarification
+    );
+    // Re-route the original intent with merged data
+    // TODO: Pass mergedData to handlers
+  }
+
   switch (intent) {
+    case 'shortcut':
+      // Handle shortcut commands (STATUS, HELP, CLEAR ALL, etc.)
+      if (!userId) {
+        return 'Please authenticate first by logging in through the app.';
+      }
+      const shortcutCommand = detectShortcut(message);
+      if (shortcutCommand) {
+        const response = await handleShortcut(shortcutCommand, userId, fromNumber);
+        await saveSMSContext(fromNumber, userId, message, 'shortcut', {}, null);
+        return response;
+      }
+      return 'Shortcut command not recognized.';
+
+    case 'bulk':
+      // Handle bulk operations (all kids, Emma and Jake, etc.)
+      if (!userId) {
+        return 'Please authenticate first by logging in through the app.';
+      }
+      const { handleBulkMessage } = await import('./bulk-handler');
+      const bulkDetection = detectBulkOperation(message);
+      const bulkResponse = await handleBulkMessage(
+        message,
+        fromNumber,
+        userId,
+        bulkDetection.targets,
+        bulkDetection.childNames
+      );
+      await saveSMSContext(fromNumber, userId, message, 'bulk', {
+        lastChildMentioned: bulkDetection.childNames?.[0],
+      }, null);
+      return bulkResponse;
+
     case 'consequence':
       const { handleConsequenceMessage } = await import('./consequence-handler');
-      return handleConsequenceMessage(message, fromNumber);
+      const consequenceResponse = await handleConsequenceMessage(message, fromNumber);
+      if (userId) {
+        await saveSMSContext(fromNumber, userId, message, 'consequence', {}, null);
+      }
+      return consequenceResponse;
 
     case 'commitment':
       const { handleCommitmentMessage } = await import('./commitment-handler');
-      return handleCommitmentMessage(message, fromNumber);
+      const commitmentResponse = await handleCommitmentMessage(message, fromNumber);
+      if (userId) {
+        await saveSMSContext(fromNumber, userId, message, 'commitment', {}, null);
+      }
+      return commitmentResponse;
 
     case 'query':
       const { handleQueryMessage } = await import('./query-handler');
-      return handleQueryMessage(message, fromNumber);
+      const queryResponse = await handleQueryMessage(message, fromNumber);
+      if (userId) {
+        await saveSMSContext(fromNumber, userId, message, 'query', {}, null);
+      }
+      return queryResponse;
 
     case 'response':
       const { handleResponseMessage } = await import('./response-handler');
-      return handleResponseMessage(message, fromNumber);
+      const responseMessage = await handleResponseMessage(message, fromNumber);
+      if (userId) {
+        await saveSMSContext(fromNumber, userId, message, 'response', {}, null);
+      }
+      return responseMessage;
 
     case 'unknown':
       return "I didn't understand that message. Reply HELP for command examples or try:\n\n" +
-        "• 'No iPad 3 days Kid A' (consequence)\n" +
-        "• 'Kid A will finish homework by 7pm' (commitment)\n" +
-        "• 'What's Kid A restricted from?' (query)";
+        "• 'No iPad 3 days Emma' (consequence)\n" +
+        "• 'Emma will finish homework by 7pm' (commitment)\n" +
+        "• STATUS - see all restrictions\n" +
+        "• HELP - see all commands";
 
     default:
       return 'Error processing message. Please try again.';
