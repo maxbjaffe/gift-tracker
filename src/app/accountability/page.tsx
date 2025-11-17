@@ -17,7 +17,7 @@ import {
   updateCommitmentStatus,
 } from '@/lib/services/accountability';
 import { toast } from 'sonner';
-import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare } from 'lucide-react';
+import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AccountabilityPage() {
@@ -220,6 +220,12 @@ export default function AccountabilityPage() {
               />
 
               <div className="flex gap-2">
+                <Button variant="outline" asChild>
+                  <Link href="/accountability/dakboard">
+                    <Monitor className="h-4 w-4 mr-2" />
+                    DAKboard
+                  </Link>
+                </Button>
                 <Button variant="outline" asChild>
                   <Link href="/accountability/sms-guide">
                     <MessageSquare className="h-4 w-4 mr-2" />
