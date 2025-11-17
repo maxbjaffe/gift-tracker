@@ -14,21 +14,20 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get current user from session
-    const sessionSupabase = createClient(
-      supabaseUrl,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    // Get the first user from the database (for development/testing)
+    const { data: users, error: usersError } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1);
 
-    const authHeader = request.headers.get('cookie');
-    if (authHeader) {
-      const { data: { user }, error: authError } = await sessionSupabase.auth.getUser();
+    if (usersError || !users || users.length === 0) {
+      return NextResponse.json({
+        error: 'No users found. Please sign up first.',
+        details: usersError?.message
+      }, { status: 404 });
+    }
 
-      if (authError || !user) {
-        return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-      }
-
-      const userId = user.id;
+    const userId = users[0].id;
 
       // Create 3 children
       const childrenData = [
@@ -219,9 +218,6 @@ export async function GET(request: NextRequest) {
           commitments: commitments.length,
         },
       });
-    }
-
-    return NextResponse.json({ error: 'No session found' }, { status: 401 });
   } catch (error) {
     console.error('Error seeding data:', error);
     return NextResponse.json(
