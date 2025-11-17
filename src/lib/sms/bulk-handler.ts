@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { parseConsequenceMessage } from './ai-parser';
 import {
   applyConsequenceToAll,
   applyConsequenceToMultiple,
@@ -9,6 +8,39 @@ import {
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+/**
+ * Simple parser for bulk messages
+ */
+function parseBulkMessage(message: string) {
+  const lowerMsg = message.toLowerCase();
+
+  // Extract duration (e.g., "3 days", "2 hours")
+  const durationMatch = message.match(/(\d+)\s*(day|hour|week)/i);
+  const durationDays = durationMatch
+    ? parseInt(durationMatch[1]) * (durationMatch[2].toLowerCase() === 'week' ? 7 : 1)
+    : 1;
+
+  // Check if it's a commitment
+  const isCommitment = lowerMsg.includes('will') || lowerMsg.includes('by ');
+
+  // Extract restriction item (first capitalized word or word after "no")
+  const noMatch = message.match(/no\s+([a-z]+)/i);
+  const restrictionItem = noMatch ? noMatch[1] : 'privileges';
+
+  // Extract reason (after "because", "for", or last part of message)
+  const reasonMatch = message.match(/(?:because|for|due to)\s+(.+)/i);
+  const reason = reasonMatch ? reasonMatch[1].trim() : 'behavior';
+
+  return {
+    isCommitment,
+    durationDays,
+    restrictionItem,
+    restrictionType: 'privilege' as const,
+    reason,
+    severity: 'medium' as const,
+  };
+}
 
 /**
  * Handle bulk operations (messages targeting multiple children)
@@ -22,62 +54,39 @@ export async function handleBulkMessage(
 ): Promise<string> {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  // Parse the message to determine what action to take
-  const parsed = await parseConsequenceMessage(message);
-
-  if (!parsed.success) {
-    return `I couldn't understand that bulk action. Try:\n\n• "No iPad for all kids 2 days"\n• "Emma and Jake grounded 1 day"\n• "Everyone will clean room by 7pm"`;
-  }
-
-  // Determine if this is a consequence or commitment
-  const isCommitment = message.toLowerCase().includes('will') || parsed.dueDate;
+  // Parse the message
+  const parsed = parseBulkMessage(message);
 
   if (targets === 'all') {
-    // Apply to all children
-    if (isCommitment && parsed.dueDate) {
-      const result = await applyCommitmentToAll(
-        userId,
-        parsed.commitmentText || message,
-        new Date(parsed.dueDate),
-        parsed.category || 'other'
-      );
+    // Apply consequence to all children
+    const result = await applyConsequenceToAll(
+      userId,
+      parsed.restrictionType,
+      parsed.restrictionItem,
+      parsed.reason,
+      parsed.durationDays,
+      parsed.severity
+    );
 
-      if (result.success) {
-        return `✓ Commitment set for all ${result.affected} children:\n${result.children.map((c) => `  • ${c}`).join('\n')}\n\nDue: ${new Date(parsed.dueDate).toLocaleString()}`;
-      } else {
-        return result.message;
-      }
+    if (result.success) {
+      return `✓ ${result.message}\n${result.children.map((c) => `  • ${c}`).join('\n')}\n\nDuration: ${parsed.durationDays} day(s)`;
     } else {
-      // Apply consequence to all
-      const result = await applyConsequenceToAll(
-        userId,
-        parsed.restrictionType || 'device',
-        parsed.restrictionItem || 'privileges',
-        parsed.reason || 'parent decision',
-        parsed.durationDays,
-        parsed.severity || 'medium'
-      );
-
-      if (result.success) {
-        return `✓ ${result.message}\n${result.children.map((c) => `  • ${c}`).join('\n')}\n\nDuration: ${parsed.durationDays} days`;
-      } else {
-        return result.message;
-      }
+      return result.message;
     }
   } else if (targets === 'multiple' && childNames && childNames.length > 0) {
     // Apply to specific children
     const result = await applyConsequenceToMultiple(
       userId,
       childNames,
-      parsed.restrictionType || 'device',
-      parsed.restrictionItem || 'privileges',
-      parsed.reason || 'parent decision',
+      parsed.restrictionType,
+      parsed.restrictionItem,
+      parsed.reason,
       parsed.durationDays,
-      parsed.severity || 'medium'
+      parsed.severity
     );
 
     if (result.success) {
-      return `✓ ${result.message}\n\nDuration: ${parsed.durationDays || 'indefinite'} days`;
+      return `✓ ${result.message}\n\nDuration: ${parsed.durationDays} day(s)`;
     } else {
       return result.message;
     }
