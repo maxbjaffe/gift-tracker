@@ -2,15 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/expire-consequences",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/commitment-reminders",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/consequence-warnings",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 */6 * * *"
     },
     {
       "path": "/api/cron/calculate-reliability",
@@ -19,10 +11,6 @@
     {
       "path": "/api/cron/weekly-report",
       "schedule": "0 18 * * 0"
-    },
-    {
-      "path": "/api/cron/cleanup-sms-context",
-      "schedule": "0 * * * *"
     }
   ]
 }
