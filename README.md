@@ -377,3 +377,4 @@ This project is private and proprietary.
 ---
 
 **© 2025 Family Hub. Built with Next.js, Supabase, and Claude AI.**
+# Family Hub - Production deployed Mon Nov 17 15:43:25 EST 2025
