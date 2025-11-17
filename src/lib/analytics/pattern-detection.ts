@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
@@ -28,7 +28,7 @@ export interface CommitmentPattern {
 export async function detectCommitmentPatterns(
   userId: string
 ): Promise<DetectedPattern[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
   const patterns: DetectedPattern[] = [];
 
   // Get all children
@@ -74,7 +74,7 @@ async function detectTimeBasedPatterns(
   userId: string,
   children: Array<{ id: string; name: string }>
 ): Promise<DetectedPattern[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
   const patterns: DetectedPattern[] = [];
 
   for (const child of children) {
@@ -124,7 +124,7 @@ async function detectCategoryPatterns(
   userId: string,
   children: Array<{ id: string; name: string }>
 ): Promise<DetectedPattern[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
   const patterns: DetectedPattern[] = [];
 
   for (const child of children) {
@@ -187,7 +187,7 @@ async function detectTrendPatterns(
   userId: string,
   children: Array<{ id: string; name: string }>
 ): Promise<DetectedPattern[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
   const patterns: DetectedPattern[] = [];
 
   const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
@@ -232,7 +232,7 @@ async function detectDayOfWeekPatterns(
   userId: string,
   children: Array<{ id: string; name: string }>
 ): Promise<DetectedPattern[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
   const patterns: DetectedPattern[] = [];
 
   for (const child of children) {
@@ -296,7 +296,7 @@ export async function generateInsights(
     return 'Great job! No concerning patterns detected. Keep up the consistent approach.';
   }
 
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   // Get children names
   const { data: children } = await supabase

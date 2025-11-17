@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export interface ConsequenceEffectiveness {
   restrictionType: string;
@@ -27,7 +27,7 @@ export async function getConsequenceEffectiveness(
   userId: string,
   monthsBack: number = 6
 ): Promise<ConsequenceEffectiveness[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - monthsBack);
@@ -148,7 +148,7 @@ export async function getChildConsequencePatterns(
   userId: string,
   monthsBack: number = 6
 ): Promise<ConsequencePattern[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - monthsBack);
@@ -254,7 +254,7 @@ export async function getConsequenceTimingPatterns(userId: string): Promise<{
   byTimeOfDay: Array<{ hour: number; count: number }>;
   byMonth: Array<{ month: string; count: number }>;
 }> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   // Get consequences for the past year
   const startDate = new Date();

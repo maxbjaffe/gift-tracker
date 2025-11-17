@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export interface ReliabilityTrend {
   month: string; // YYYY-MM
@@ -29,7 +29,7 @@ export async function getMonthlyReliabilityTrends(
   userId: string,
   monthsBack: number = 6
 ): Promise<ReliabilityTrend[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   // Get all children for this user
   const { data: children } = await supabase
@@ -84,7 +84,7 @@ export async function getWeeklyTrends(
   childId: string,
   weeksBack: number = 12
 ): Promise<WeeklyTrend[]> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   // Get child info
   const { data: child } = await supabase
@@ -170,7 +170,7 @@ export async function getChildrenComparison(userId: string): Promise<{
   }>;
   average: number;
 }> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
   const lastMonth = new Date();
@@ -251,7 +251,7 @@ export async function getCategoryPerformance(childId: string, monthsBack: number
     reliabilityScore: number;
   }>;
 }> {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - monthsBack);

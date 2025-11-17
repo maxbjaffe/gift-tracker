@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getWeeklyTrends, getCategoryPerformance } from '@/lib/analytics/reliability-trends';
 
 /**
@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: { childId: string } }
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
 
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
