@@ -23,12 +23,14 @@ import {
   Brain,
   Inbox,
   CheckSquare,
+  BarChart3,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { EmailList } from '@/components/email/EmailList';
 import { TeachersTab } from '@/components/children/TeachersTab';
 import { InterestsTab } from '@/components/children/InterestsTab';
+import { MonthlyReport } from '@/components/children/MonthlyReport';
 
 interface Child {
   id: string;
@@ -50,7 +52,9 @@ export default function ChildProfilePage() {
   const [child, setChild] = useState<Child | null>(null);
   const [emails, setEmails] = useState<any[]>([]);
   const [unassociatedEmails, setUnassociatedEmails] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -58,6 +62,7 @@ export default function ChildProfilePage() {
     loadChild();
     loadEmails();
     loadUnassociatedEmails();
+    loadSuggestions();
   }, [childId]);
 
   async function loadChild() {
@@ -113,6 +118,19 @@ export default function ChildProfilePage() {
     }
   }
 
+  async function loadSuggestions() {
+    try {
+      const response = await fetch(`/api/children/${childId}/suggestions`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuggestions(data.suggestions || []);
+      }
+    } catch (error) {
+      console.error('Error loading suggestions:', error);
+    }
+  }
+
   async function handleBulkAssociate() {
     if (selectedEmails.size === 0) {
       toast.error('Please select at least one email');
@@ -159,6 +177,24 @@ export default function ChildProfilePage() {
       newSelection.add(emailId);
     }
     setSelectedEmails(newSelection);
+  }
+
+  function selectAllSuggestions() {
+    const suggestionIds = suggestions.map(s => s.email.id);
+    setSelectedEmails(new Set(suggestionIds));
+    toast.success(`Selected ${suggestionIds.length} suggested emails`);
+  }
+
+  function selectByCategory(category: string) {
+    const filtered = unassociatedEmails
+      .filter(e => e.ai_category === category)
+      .map(e => e.id);
+    setSelectedEmails(new Set(filtered));
+    toast.success(`Selected ${filtered.length} ${category} emails`);
+  }
+
+  function clearSelection() {
+    setSelectedEmails(new Set());
   }
 
   const getAvatarColor = (color?: string) => {
@@ -240,7 +276,7 @@ export default function ChildProfilePage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">
               <User className="h-4 w-4 mr-2" />
               Overview
@@ -260,6 +296,10 @@ export default function ChildProfilePage() {
             <TabsTrigger value="bulk">
               <CheckSquare className="h-4 w-4 mr-2" />
               Bulk Actions
+            </TabsTrigger>
+            <TabsTrigger value="reports">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Reports
             </TabsTrigger>
             <TabsTrigger value="learning">
               <Brain className="h-4 w-4 mr-2" />
@@ -357,12 +397,137 @@ export default function ChildProfilePage() {
 
           {/* Bulk Actions Tab */}
           <TabsContent value="bulk" className="space-y-4">
+            {/* AI Suggestions Section */}
+            {suggestions.length > 0 && (
+              <Card className="p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-purple-600" />
+                      AI Smart Suggestions
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {suggestions.length} emails likely relevant to {child.name}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={selectAllSuggestions}
+                    className="bg-white"
+                  >
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Select All Suggestions
+                  </Button>
+                </div>
+
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  {suggestions.map(({ email, confidence, reasons }) => (
+                    <Card
+                      key={email.id}
+                      className={`p-3 cursor-pointer transition-colors ${
+                        selectedEmails.has(email.id)
+                          ? 'bg-blue-50 border-blue-300'
+                          : 'bg-white hover:bg-gray-50'
+                      }`}
+                      onClick={() => toggleEmailSelection(email.id)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedEmails.has(email.id)}
+                          onChange={() => toggleEmailSelection(email.id)}
+                          className="h-4 w-4"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-gray-900">{email.subject}</p>
+                            <Badge
+                              className={`${
+                                confidence >= 70
+                                  ? 'bg-green-100 text-green-700'
+                                  : confidence >= 40
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-gray-100 text-gray-700'
+                              }`}
+                            >
+                              {confidence}% match
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            {email.from_name || email.from_address}
+                          </p>
+                          <div className="flex gap-2 flex-wrap">
+                            {reasons.map((reason, i) => (
+                              <Badge
+                                key={i}
+                                variant="outline"
+                                className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+                              >
+                                {reason}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        {email.ai_category && (
+                          <Badge variant="outline">{email.ai_category}</Badge>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Quick Actions */}
+            <Card className="p-6">
+              <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectByCategory('homework')}
+                >
+                  Select All Homework
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectByCategory('event')}
+                >
+                  Select All Events
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectByCategory('grade')}
+                >
+                  Select All Grades
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectByCategory('permission')}
+                >
+                  Select All Permissions
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearSelection}
+                  className="ml-auto"
+                >
+                  Clear Selection
+                </Button>
+              </div>
+            </Card>
+
+            {/* Bulk Associate Actions */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900">Bulk Associate Emails</h3>
+                  <h3 className="font-semibold text-gray-900">Manual Selection</h3>
                   <p className="text-sm text-gray-600">
-                    Select emails to associate with {child.name}
+                    Browse all unassociated emails ({unassociatedEmails.length})
                   </p>
                 </div>
                 <Button
@@ -405,6 +570,11 @@ export default function ChildProfilePage() {
                 ))}
               </div>
             </Card>
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="space-y-4">
+            <MonthlyReport childId={childId} childName={child.name} days={30} />
           </TabsContent>
 
           {/* AI Learning Tab */}
