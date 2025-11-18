@@ -18,13 +18,14 @@ import {
 } from '@/components/ui/select';
 import { EmailList } from '@/components/email/EmailList';
 import type { SchoolEmail, EmailCategory, EmailPriority } from '@/types/email';
-import { Mail, Search, Filter, RefreshCw, Settings, Inbox, Star, Archive } from 'lucide-react';
+import { Mail, Search, Filter, RefreshCw, Settings, Inbox, Star, Archive, Brain } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
 export default function EmailsPage() {
   const [emails, setEmails] = useState<SchoolEmail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>('all');
   const [priority, setPriority] = useState<string>('all');
@@ -94,6 +95,33 @@ export default function EmailsPage() {
     loadEmails();
   }
 
+  async function handleProcessWithAI() {
+    try {
+      setProcessing(true);
+      toast.info('Processing emails with AI...');
+
+      const response = await fetch('/api/email/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ processAll: true, limit: 10 }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(`Processed ${data.processed} emails! ${data.failed > 0 ? `Failed: ${data.failed}` : ''}`);
+        loadEmails(); // Refresh to show updated analysis
+      } else {
+        toast.error(data.error || 'Failed to process emails');
+      }
+    } catch (error) {
+      console.error('Error processing emails:', error);
+      toast.error('Failed to process emails');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
   const stats = {
     total: emails.length,
     unread: emails.filter(e => !e.is_read).length,
@@ -111,6 +139,10 @@ export default function EmailsPage() {
               School Emails
             </h1>
             <div className="flex gap-2">
+              <Button onClick={handleProcessWithAI} variant="default" size="sm" disabled={processing}>
+                <Brain className="h-4 w-4 mr-2" />
+                {processing ? 'Processing...' : 'Process with AI'}
+              </Button>
               <Button onClick={handleSync} variant="outline" size="sm">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Sync
