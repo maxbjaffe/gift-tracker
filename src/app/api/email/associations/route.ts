@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email_id, child_id, relevance_type } = body;
 
-    if (!email_id || !child_id || !relevance_type) {
+    if (!email_id || !relevance_type) {
       return NextResponse.json(
-        { error: 'Missing required fields: email_id, child_id, relevance_type' },
+        { error: 'Missing required fields: email_id, relevance_type' },
         { status: 400 }
       );
     }

@@ -74,7 +74,7 @@ export class GmailService {
       since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     }
 
-    const limit = options.limit || 25;
+    const limit = options.limit || 100;
 
     try {
       // Build query with school email filters
@@ -278,7 +278,7 @@ export class GmailService {
       const service = new GmailService(account);
       const emails = await service.fetchEmails({
         since: account.fetch_since_date ? new Date(account.fetch_since_date) : undefined,
-        limit: 25, // Limit per sync to avoid timeouts
+        limit: 100, // Increased limit for bulk syncs
       });
 
       let savedCount = 0;

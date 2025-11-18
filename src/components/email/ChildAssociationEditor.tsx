@@ -80,7 +80,7 @@ export function ChildAssociationEditor({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email_id: emailId,
-          child_id: selectedChild,
+          child_id: selectedChild === 'all' ? null : selectedChild,
           relevance_type: relevanceType,
         }),
       });
@@ -157,6 +157,9 @@ export function ChildAssociationEditor({
     }
   };
 
+  // Check if "All Children" is already associated
+  const hasAllChildrenAssociation = associations.some(assoc => !assoc.child_id);
+
   // Filter out already associated children
   const availableChildren = children.filter(
     child => !associations.some(assoc => assoc.child_id === child.id)
@@ -169,7 +172,7 @@ export function ChildAssociationEditor({
           <User className="h-4 w-4" />
           Related Children
         </h3>
-        {availableChildren.length > 0 && (
+        {(availableChildren.length > 0 || !hasAllChildrenAssociation) && (
           <Button
             variant="outline"
             size="sm"
@@ -191,6 +194,9 @@ export function ChildAssociationEditor({
                   <SelectValue placeholder="Select child" />
                 </SelectTrigger>
                 <SelectContent>
+                  {!hasAllChildrenAssociation && (
+                    <SelectItem value="all">All Children</SelectItem>
+                  )}
                   {availableChildren.map(child => (
                     <SelectItem key={child.id} value={child.id}>
                       {child.name}
@@ -243,7 +249,7 @@ export function ChildAssociationEditor({
               <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium">{assoc.child?.name || 'Unknown'}</span>
+                    <span className="font-medium">{assoc.child?.name || (!assoc.child_id ? 'All Children' : 'Unknown')}</span>
                     <Badge variant="outline" className={getRelevanceColor(assoc.relevance_type)}>
                       {assoc.relevance_type}
                     </Badge>
