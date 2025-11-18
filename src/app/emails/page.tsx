@@ -178,6 +178,12 @@ export default function EmailsPage() {
                 </Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
+                <Link href="/emails/filters">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/emails/settings">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
