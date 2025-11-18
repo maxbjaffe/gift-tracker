@@ -17,7 +17,7 @@ import {
   updateCommitmentStatus,
 } from '@/lib/services/accountability';
 import { toast } from 'sonner';
-import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor, Users } from 'lucide-react';
+import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor, Users, Edit3, List } from 'lucide-react';
 import Link from 'next/link';
 import { filterActiveConsequences, filterActiveCommitments } from '@/lib/utils/date-filters';
 
@@ -224,6 +224,18 @@ export default function AccountabilityPage() {
               />
 
               <div className="flex gap-2 flex-wrap">
+                <Button variant="outline" asChild>
+                  <Link href="/accountability/consequences">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Manage Consequences
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/accountability/commitments">
+                    <Target className="h-4 w-4 mr-2" />
+                    Manage Commitments
+                  </Link>
+                </Button>
                 <Button variant="outline" asChild>
                   <Link href="/accountability/children">
                     <Users className="h-4 w-4 mr-2" />

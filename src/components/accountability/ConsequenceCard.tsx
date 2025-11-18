@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from './StatusBadge';
 import type { Consequence } from '@/types/accountability';
-import { format, formatDistance } from 'date-fns';
-import { Ban, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { format, formatDistance, differenceInDays, differenceInHours } from 'date-fns';
+import { Ban, Clock, CheckCircle, XCircle, AlertCircle, TrendingDown } from 'lucide-react';
 
 interface ConsequenceCardProps {
   consequence: Consequence;
@@ -71,6 +71,34 @@ export function ConsequenceCard({
     }
   };
 
+  const getProgressData = () => {
+    if (!consequence.expires_at || !isActive) return null;
+
+    const now = new Date();
+    const startDate = new Date(consequence.created_at);
+    const endDate = new Date(consequence.expires_at);
+
+    const totalDuration = differenceInHours(endDate, startDate);
+    const elapsed = differenceInHours(now, startDate);
+    const remaining = differenceInHours(endDate, now);
+
+    if (totalDuration <= 0) return null;
+
+    const percentage = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+    const daysRemaining = differenceInDays(endDate, now);
+    const hoursRemaining = remaining % 24;
+
+    return {
+      percentage,
+      daysRemaining,
+      hoursRemaining,
+      totalDays: differenceInDays(endDate, startDate),
+      isAlmostOver: percentage >= 75,
+    };
+  };
+
+  const progressData = getProgressData();
+
   return (
     <Card className={`p-4 ${isActive ? 'border-red-300 bg-red-50/30' : ''}`}>
       <div className="space-y-3">
@@ -102,8 +130,57 @@ export function ConsequenceCard({
           </p>
         </div>
 
-        {/* Expiration Info */}
-        {consequence.expires_at && (
+        {/* Progress Bar - Only for active consequences with expiration */}
+        {progressData && (
+          <div className="pl-11 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <TrendingDown className={`h-4 w-4 ${progressData.isAlmostOver ? 'text-green-600' : 'text-orange-600'}`} />
+                <span className={`font-medium ${progressData.isAlmostOver ? 'text-green-600' : 'text-gray-700'}`}>
+                  {progressData.daysRemaining > 0 ? (
+                    <>
+                      {progressData.daysRemaining} day{progressData.daysRemaining !== 1 ? 's' : ''} {progressData.hoursRemaining > 0 && `${progressData.hoursRemaining}h`} remaining
+                    </>
+                  ) : progressData.hoursRemaining > 0 ? (
+                    `${progressData.hoursRemaining} hours remaining`
+                  ) : (
+                    'Almost done!'
+                  )}
+                </span>
+              </div>
+              <span className="text-xs text-gray-500">
+                {Math.round(progressData.percentage)}% complete
+              </span>
+            </div>
+
+            {/* Visual Progress Bar */}
+            <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`absolute left-0 top-0 h-full transition-all duration-500 ${
+                  progressData.isAlmostOver
+                    ? 'bg-gradient-to-r from-green-400 to-green-600'
+                    : progressData.percentage >= 50
+                    ? 'bg-gradient-to-r from-yellow-400 to-orange-500'
+                    : 'bg-gradient-to-r from-red-400 to-red-600'
+                }`}
+                style={{ width: `${progressData.percentage}%` }}
+              >
+                {/* Animated shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+              </div>
+            </div>
+
+            {progressData.isAlmostOver && (
+              <div className="text-xs text-green-600 font-medium flex items-center gap-1">
+                <span>🎉</span>
+                <span>Almost there! Keep it up!</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Expiration Info - Show for non-active or no duration */}
+        {consequence.expires_at && !progressData && (
           <div className="pl-11 flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-gray-400" />
             <span className={`${isActive ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
