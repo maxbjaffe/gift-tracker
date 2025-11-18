@@ -59,7 +59,7 @@ export class GmailService {
   }
 
   /**
-   * Fetch emails from Gmail
+   * Fetch emails from Gmail with pagination support
    */
   async fetchEmails(options: FetchOptions = {}): Promise<any[]> {
     const gmail = await this.initializeGmail();
@@ -74,7 +74,8 @@ export class GmailService {
       since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     }
 
-    const limit = options.limit || 100;
+    const limit = options.limit || 500; // Increased default limit
+    const pageSize = 100; // Gmail API max per page
 
     try {
       // Build query with school email filters
@@ -93,24 +94,46 @@ export class GmailService {
       const query = `after:${afterDate} (${fromFilters})`;
 
       console.log('Gmail query:', query);
+      console.log('Fetching up to', limit, 'emails...');
 
-      // List messages
-      const listResponse = await gmail.users.messages.list({
-        userId: 'me',
-        q: query,
-        maxResults: limit,
-      });
+      // Fetch messages with pagination
+      let allMessages: any[] = [];
+      let nextPageToken: string | undefined = undefined;
+      let pageCount = 0;
 
-      const messages = listResponse.data.messages || [];
-      console.log(`Found ${messages.length} messages`);
+      do {
+        pageCount++;
+        console.log(`Fetching page ${pageCount}...`);
 
-      if (messages.length === 0) {
+        const listResponse = await gmail.users.messages.list({
+          userId: 'me',
+          q: query,
+          maxResults: Math.min(pageSize, limit - allMessages.length),
+          pageToken: nextPageToken,
+        });
+
+        const messages = listResponse.data.messages || [];
+        allMessages = allMessages.concat(messages);
+        nextPageToken = listResponse.data.nextPageToken;
+
+        console.log(`Page ${pageCount}: Found ${messages.length} messages (total: ${allMessages.length})`);
+
+        // Stop if we've hit the limit or no more pages
+        if (allMessages.length >= limit || !nextPageToken) {
+          break;
+        }
+      } while (nextPageToken);
+
+      console.log(`Total messages found: ${allMessages.length}`);
+
+      if (allMessages.length === 0) {
         return [];
       }
 
       // Fetch full message details
       const fetchedMessages = [];
-      for (const message of messages) {
+      for (let i = 0; i < allMessages.length; i++) {
+        const message = allMessages[i];
         try {
           const fullMessage = await gmail.users.messages.get({
             userId: 'me',
@@ -135,7 +158,9 @@ export class GmailService {
             attachments: parsed.attachments,
           });
 
-          console.log(`Fetched email: ${parsed.subject}`);
+          if ((i + 1) % 10 === 0) {
+            console.log(`Fetched ${i + 1}/${allMessages.length} emails...`);
+          }
         } catch (err) {
           console.error(`Error fetching message ${message.id}:`, err);
         }
@@ -278,7 +303,7 @@ export class GmailService {
       const service = new GmailService(account);
       const emails = await service.fetchEmails({
         since: account.fetch_since_date ? new Date(account.fetch_since_date) : undefined,
-        limit: 100, // Increased limit for bulk syncs
+        limit: 500, // Fetch up to 500 emails per sync (will paginate automatically)
       });
 
       let savedCount = 0;
