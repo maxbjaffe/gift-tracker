@@ -25,7 +25,10 @@ export interface Child {
   name: string;
   age: number | null;
   user_id: string;
-  avatar_color: string;
+  avatar_color: string; // Legacy field, kept for backward compatibility
+  avatar_type?: string | null; // New: 'preset' or 'emoji'
+  avatar_data?: string | null; // New: preset ID or emoji character
+  avatar_background?: string | null; // New: background gradient for emojis
   created_at: string;
   updated_at: string;
 }
@@ -181,7 +184,10 @@ export interface SMSContext {
 export interface CreateChildData {
   name: string;
   age?: number;
-  avatar_color?: string;
+  avatar_color?: string; // Legacy
+  avatar_type?: string | null; // New: 'preset' or 'emoji'
+  avatar_data?: string | null; // New: preset ID or emoji character
+  avatar_background?: string | null; // New: background gradient for emojis
 }
 
 export interface CreateConsequenceData {

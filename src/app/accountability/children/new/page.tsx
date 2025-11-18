@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,17 +10,25 @@ import { createChild } from '@/lib/services/accountability';
 import { toast } from 'sonner';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import Link from 'next/link';
-
-const AVATAR_OPTIONS = ['👦', '👧', '🧒', '👶', '🧑', '👨', '👩', '🙂', '😊', '🌟'];
+import AvatarSelector from '@/components/AvatarSelector';
+import type { AvatarData } from '@/lib/avatar-utils';
+import { generateDefaultAvatar } from '@/lib/avatar-utils';
 
 export default function NewChildPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [avatar, setAvatar] = useState<AvatarData | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     age: '',
-    avatar: '👦',
   });
+
+  // Auto-generate default avatar when name changes
+  useEffect(() => {
+    if (formData.name && !avatar) {
+      setAvatar(generateDefaultAvatar());
+    }
+  }, [formData.name, avatar]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,7 +38,9 @@ export default function NewChildPage() {
       await createChild({
         name: formData.name,
         age: formData.age ? parseInt(formData.age) : undefined,
-        avatar: formData.avatar,
+        avatar_type: avatar?.type || null,
+        avatar_data: avatar?.data || null,
+        avatar_background: avatar?.background || null,
       });
 
       toast.success(`${formData.name} added successfully!`);
@@ -95,27 +105,18 @@ export default function NewChildPage() {
             </div>
 
             {/* Avatar Selection */}
-            <div>
-              <Label>Avatar</Label>
-              <div className="grid grid-cols-5 gap-2 mt-2">
-                {AVATAR_OPTIONS.map((avatar) => (
-                  <button
-                    key={avatar}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, avatar })}
-                    className={`
-                      text-4xl p-3 rounded-lg border-2 transition-all
-                      ${formData.avatar === avatar
-                        ? 'border-purple-500 bg-purple-50 scale-110'
-                        : 'border-gray-200 hover:border-gray-300'
-                      }
-                    `}
-                  >
-                    {avatar}
-                  </button>
-                ))}
+            {formData.name && (
+              <div>
+                <Label>Choose Avatar</Label>
+                <div className="mt-2">
+                  <AvatarSelector
+                    name={formData.name}
+                    value={avatar}
+                    onChange={setAvatar}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">

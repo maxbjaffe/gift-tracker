@@ -8,7 +8,7 @@ export interface AvatarData {
   background?: string; // For emoji: gradient ID
 }
 
-export type AvatarCategory = 'animals' | 'fantasy' | 'robots' | 'fun' | 'abstract';
+export type AvatarCategory = 'people' | 'animals' | 'fantasy' | 'robots' | 'fun' | 'abstract';
 
 export interface PresetAvatar {
   id: string;
@@ -19,8 +19,49 @@ export interface PresetAvatar {
   url: string; // Pre-generated URL for instant display
 }
 
-// Curated fun avatar presets (30-40 avatars organized by personality)
+// Curated fun avatar presets (60+ avatars organized by category)
 export const AVATAR_PRESETS: PresetAvatar[] = [
+  // PEOPLE (diverse human avatars with different looks & expressions) - 30 avatars
+  // Young Adults - Happy & Friendly
+  { id: 'person-happy-1', name: 'Happy Person 1', category: 'people', style: 'avataaars', seed: 'Felix', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' },
+  { id: 'person-happy-2', name: 'Happy Person 2', category: 'people', style: 'avataaars', seed: 'Mia', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mia' },
+  { id: 'person-smile-1', name: 'Smiling Person 1', category: 'people', style: 'big-smile', seed: 'Alex', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Alex' },
+  { id: 'person-smile-2', name: 'Smiling Person 2', category: 'people', style: 'big-smile', seed: 'Emma', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Emma' },
+  { id: 'person-smile-3', name: 'Smiling Person 3', category: 'people', style: 'big-smile', seed: 'Oliver', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Oliver' },
+
+  // Professional & Casual
+  { id: 'person-prof-1', name: 'Professional 1', category: 'people', style: 'lorelei', seed: 'James', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=James' },
+  { id: 'person-prof-2', name: 'Professional 2', category: 'people', style: 'lorelei', seed: 'Sophia', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Sophia' },
+  { id: 'person-casual-1', name: 'Casual 1', category: 'people', style: 'avataaars', seed: 'Lucas', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas' },
+  { id: 'person-casual-2', name: 'Casual 2', category: 'people', style: 'avataaars', seed: 'Isabella', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Isabella' },
+  { id: 'person-casual-3', name: 'Casual 3', category: 'people', style: 'adventurer', seed: 'Noah', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Noah' },
+
+  // Diverse Looks & Styles
+  { id: 'person-curly-1', name: 'Curly Hair 1', category: 'people', style: 'avataaars', seed: 'Liam', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Liam' },
+  { id: 'person-curly-2', name: 'Curly Hair 2', category: 'people', style: 'lorelei', seed: 'Ava', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Ava' },
+  { id: 'person-glasses-1', name: 'With Glasses 1', category: 'people', style: 'avataaars', seed: 'Ethan', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ethan' },
+  { id: 'person-glasses-2', name: 'With Glasses 2', category: 'people', style: 'lorelei', seed: 'Charlotte', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Charlotte' },
+  { id: 'person-bearded-1', name: 'Bearded 1', category: 'people', style: 'avataaars', seed: 'Benjamin', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Benjamin' },
+
+  // Different Ages & Expressions
+  { id: 'person-young-1', name: 'Young Person 1', category: 'people', style: 'big-smile', seed: 'Mason', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Mason' },
+  { id: 'person-young-2', name: 'Young Person 2', category: 'people', style: 'adventurer', seed: 'Amelia', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Amelia' },
+  { id: 'person-adult-1', name: 'Adult 1', category: 'people', style: 'lorelei', seed: 'William', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=William' },
+  { id: 'person-adult-2', name: 'Adult 2', category: 'people', style: 'avataaars', seed: 'Harper', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Harper' },
+  { id: 'person-mature-1', name: 'Mature Adult 1', category: 'people', style: 'lorelei', seed: 'Michael', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Michael' },
+
+  // More Variety
+  { id: 'person-short-1', name: 'Short Hair 1', category: 'people', style: 'adventurer', seed: 'Daniel', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Daniel' },
+  { id: 'person-short-2', name: 'Short Hair 2', category: 'people', style: 'big-smile', seed: 'Evelyn', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Evelyn' },
+  { id: 'person-long-1', name: 'Long Hair 1', category: 'people', style: 'lorelei', seed: 'Alexander', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Alexander' },
+  { id: 'person-long-2', name: 'Long Hair 2', category: 'people', style: 'avataaars', seed: 'Abigail', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Abigail' },
+  { id: 'person-stylish-1', name: 'Stylish 1', category: 'people', style: 'adventurer', seed: 'Henry', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Henry' },
+  { id: 'person-stylish-2', name: 'Stylish 2', category: 'people', style: 'lorelei', seed: 'Emily', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Emily' },
+  { id: 'person-fun-1', name: 'Playful 1', category: 'people', style: 'big-smile', seed: 'Jackson', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Jackson' },
+  { id: 'person-fun-2', name: 'Playful 2', category: 'people', style: 'avataaars', seed: 'Elizabeth', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elizabeth' },
+  { id: 'person-cool-1', name: 'Cool 1', category: 'people', style: 'adventurer', seed: 'Sebastian', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sebastian' },
+  { id: 'person-cool-2', name: 'Cool 2', category: 'people', style: 'lorelei', seed: 'Victoria', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Victoria' },
+
   // ANIMALS (cute and friendly) - 12 avatars
   { id: 'cat-whiskers', name: 'Whiskers the Cat', category: 'animals', style: 'bottts', seed: 'cat-001', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=cat-001' },
   { id: 'dog-buddy', name: 'Buddy the Dog', category: 'animals', style: 'bottts', seed: 'dog-001', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=dog-001' },

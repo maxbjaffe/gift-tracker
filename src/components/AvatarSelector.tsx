@@ -24,7 +24,7 @@ export interface AvatarSelectorProps {
 
 export default function AvatarSelector({ value, onChange, name = '' }: AvatarSelectorProps) {
   const [activeTab, setActiveTab] = useState<'presets' | 'emoji'>('presets');
-  const [selectedCategory, setSelectedCategory] = useState<AvatarCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<AvatarCategory | 'all'>('people');
   const [selectedGradient, setSelectedGradient] = useState(value?.background || 'purple');
 
   // Filter presets by category
@@ -54,6 +54,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
   };
 
   const categories: Array<{ id: AvatarCategory | 'all'; label: string; emoji: string }> = [
+    { id: 'people', label: 'People', emoji: '👤' },
     { id: 'all', label: 'All', emoji: '🎨' },
     { id: 'animals', label: 'Animals', emoji: '🐾' },
     { id: 'fantasy', label: 'Fantasy', emoji: '🦄' },
