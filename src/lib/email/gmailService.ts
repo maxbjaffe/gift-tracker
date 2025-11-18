@@ -63,7 +63,17 @@ export class GmailService {
    */
   async fetchEmails(options: FetchOptions = {}): Promise<any[]> {
     const gmail = await this.initializeGmail();
-    const since = options.since || this.account.fetch_since_date || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // Ensure since is a Date object
+    let since: Date;
+    if (options.since) {
+      since = options.since;
+    } else if (this.account.fetch_since_date) {
+      since = new Date(this.account.fetch_since_date);
+    } else {
+      since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    }
+
     const limit = options.limit || 25;
 
     try {
