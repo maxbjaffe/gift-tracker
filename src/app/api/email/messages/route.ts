@@ -41,6 +41,8 @@ export async function GET(request: NextRequest) {
           id,
           child_id,
           relevance_type,
+          is_verified,
+          is_rejected,
           child:children(id, name, avatar_color)
         ),
         event_associations:email_event_associations(
