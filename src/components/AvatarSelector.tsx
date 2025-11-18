@@ -55,12 +55,6 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
 
   const categories: Array<{ id: AvatarCategory | 'all'; label: string; emoji: string }> = [
     { id: 'people', label: 'People', emoji: '👤' },
-    { id: 'all', label: 'All', emoji: '🎨' },
-    { id: 'animals', label: 'Animals', emoji: '🐾' },
-    { id: 'fantasy', label: 'Fantasy', emoji: '🦄' },
-    { id: 'robots', label: 'Robots', emoji: '🤖' },
-    { id: 'fun', label: 'Fun', emoji: '🎉' },
-    { id: 'abstract', label: 'Abstract', emoji: '🎭' },
   ];
 
   return (
@@ -86,6 +80,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
               : 'No avatar selected'}
           </p>
           <button
+            type="button"
             onClick={handleSurpriseMe}
             className="mt-2 w-full sm:w-auto min-h-11 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 active:scale-95"
           >
@@ -97,6 +92,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
       {/* Tabs */}
       <div className="flex gap-1 md:gap-2 border-b border-gray-200 dark:border-gray-700 -mx-1">
         <button
+          type="button"
           onClick={() => setActiveTab('presets')}
           className={`flex-1 sm:flex-none px-3 md:px-4 py-2.5 md:py-3 font-medium text-xs sm:text-sm transition-colors touch-manipulation ${
             activeTab === 'presets'
@@ -107,6 +103,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
           🎨 Fun Avatars
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('emoji')}
           className={`flex-1 sm:flex-none px-3 md:px-4 py-2.5 md:py-3 font-medium text-xs sm:text-sm transition-colors touch-manipulation ${
             activeTab === 'emoji'
@@ -125,6 +122,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
           <div className="flex gap-2 flex-wrap">
             {categories.map((cat) => (
               <button
+                type="button"
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`min-h-9 px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-manipulation ${
@@ -142,6 +140,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8 gap-2 md:gap-3 max-h-80 md:max-h-96 overflow-y-auto p-1 md:p-2 -mx-1">
             {filteredPresets.map((preset) => (
               <button
+                type="button"
                 key={preset.id}
                 onClick={() => onChange({ type: 'preset', data: preset.id })}
                 className={`group relative aspect-square rounded-lg md:rounded-xl overflow-hidden transition-all transform active:scale-95 md:hover:scale-110 md:hover:z-10 touch-manipulation ${
@@ -183,6 +182,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
               {AVATAR_GRADIENTS.map((gradient) => (
                 <button
+                  type="button"
                   key={gradient.id}
                   onClick={() => setSelectedGradient(gradient.id)}
                   className={`aspect-square rounded-md md:rounded-lg transition-all transform active:scale-95 md:hover:scale-110 touch-manipulation ${
@@ -204,6 +204,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs sm:text-sm font-medium">Choose an Emoji</label>
               <button
+                type="button"
                 onClick={handleRandomEmoji}
                 className="text-xs px-3 py-1.5 min-h-8 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full hover:bg-purple-200 dark:hover:bg-purple-900/50 active:scale-95 transition-all touch-manipulation"
               >
@@ -213,6 +214,7 @@ export default function AvatarSelector({ value, onChange, name = '' }: AvatarSel
             <div className="grid grid-cols-6 xs:grid-cols-8 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-14 gap-1.5 md:gap-2 max-h-56 md:max-h-64 overflow-y-auto p-2 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
               {AVATAR_EMOJIS.map((emoji, index) => (
                 <button
+                  type="button"
                   key={index}
                   onClick={() => onChange({ type: 'emoji', data: emoji, background: selectedGradient })}
                   className={`aspect-square rounded-md md:rounded-lg text-xl md:text-2xl flex items-center justify-center transition-all transform active:scale-95 md:hover:scale-125 md:hover:z-10 touch-manipulation ${
