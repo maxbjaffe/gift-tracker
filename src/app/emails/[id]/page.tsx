@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { ChildAssociationEditor } from '@/components/email/ChildAssociationEditor';
 
 export default function EmailDetailPage() {
   const router = useRouter();
@@ -37,10 +38,24 @@ export default function EmailDetailPage() {
   const [email, setEmail] = useState<SchoolEmail | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [userId, setUserId] = useState<string>('');
 
   useEffect(() => {
     loadEmail();
+    loadUser();
   }, [emailId]);
+
+  async function loadUser() {
+    try {
+      const response = await fetch('/api/user');
+      const data = await response.json();
+      if (response.ok) {
+        setUserId(data.user.id);
+      }
+    } catch (error) {
+      console.error('Error loading user:', error);
+    }
+  }
 
   async function loadEmail() {
     try {
@@ -209,19 +224,14 @@ export default function EmailDetailPage() {
           )}
 
           {/* Child Associations */}
-          {email.child_relevance && (email.child_relevance as any).length > 0 && (
-            <div className="space-y-2 mb-4 pb-4 border-b">
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Related Children
-              </h3>
-              <div className="flex gap-2 flex-wrap">
-                {(email.child_relevance as any).map((rel: any) => (
-                  <Badge key={rel.id} variant="outline" className="bg-purple-100 text-purple-700">
-                    {rel.child?.name} ({rel.relevance_type})
-                  </Badge>
-                ))}
-              </div>
+          {userId && (
+            <div className="mb-4 pb-4 border-b">
+              <ChildAssociationEditor
+                emailId={emailId}
+                userId={userId}
+                associations={(email.child_relevance as any) || []}
+                onUpdate={loadEmail}
+              />
             </div>
           )}
 

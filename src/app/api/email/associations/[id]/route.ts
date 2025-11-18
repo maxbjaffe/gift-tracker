@@ -1,0 +1,86 @@
+/**
+ * Email Child Association API Routes
+ * PATCH /api/email/associations/[id] - Update association (verify/reject)
+ * DELETE /api/email/associations/[id] - Delete association
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { is_verified, is_rejected } = body;
+
+    // Update the association
+    const { error } = await supabase
+      .from('email_child_relevance')
+      .update({
+        is_verified,
+        is_rejected,
+      })
+      .eq('id', params.id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error updating association:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error in PATCH /api/email/associations/[id]:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = await createClient();
+
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Delete the association
+    const { error } = await supabase
+      .from('email_child_relevance')
+      .delete()
+      .eq('id', params.id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error deleting association:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error in DELETE /api/email/associations/[id]:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

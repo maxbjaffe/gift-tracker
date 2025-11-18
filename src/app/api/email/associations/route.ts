@@ -1,12 +1,10 @@
 /**
- * Email Associations API Routes
- * POST /api/email/associations/verify - Verify an association
- * POST /api/email/associations/feedback - Submit classification feedback
+ * Email Child Associations API Routes
+ * POST /api/email/associations - Create a new child-email association
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { AIAssociationService } from '@/lib/email/associationService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,51 +18,35 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { action } = body;
+    const { email_id, child_id, relevance_type } = body;
 
-    if (action === 'verify') {
-      // Verify or reject an association
-      const { association_id, association_type, is_verified, feedback } = body;
-
-      if (!association_id || !association_type) {
-        return NextResponse.json(
-          { error: 'Missing required fields: association_id, association_type' },
-          { status: 400 }
-        );
-      }
-
-      await AIAssociationService.verifyAssociation(
-        association_id,
-        association_type,
-        is_verified,
-        feedback
+    if (!email_id || !child_id || !relevance_type) {
+      return NextResponse.json(
+        { error: 'Missing required fields: email_id, child_id, relevance_type' },
+        { status: 400 }
       );
-
-      return NextResponse.json({ success: true });
-    } else if (action === 'feedback') {
-      // Submit classification feedback
-      const { email_id, field_name, ai_value, user_value, feedback_text } = body;
-
-      if (!email_id || !field_name || !user_value) {
-        return NextResponse.json(
-          { error: 'Missing required fields: email_id, field_name, user_value' },
-          { status: 400 }
-        );
-      }
-
-      await AIAssociationService.submitFeedback(
-        email_id,
-        user.id,
-        field_name,
-        ai_value,
-        user_value,
-        feedback_text
-      );
-
-      return NextResponse.json({ success: true });
-    } else {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
+
+    // Create the association
+    const { data: association, error } = await supabase
+      .from('email_child_relevance')
+      .insert({
+        email_id,
+        child_id,
+        user_id: user.id,
+        relevance_type,
+        is_verified: true, // Manually added associations are auto-verified
+        is_rejected: false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating association:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, association });
   } catch (error: any) {
     console.error('Error in POST /api/email/associations:', error);
     return NextResponse.json(
