@@ -79,7 +79,7 @@ export class EmailService {
 
     const password = EmailEncryption.decrypt(this.account.imap_password_encrypted);
 
-    const config: EmailConfig = {
+    const config: any = {
       user: this.account.imap_username,
       password,
       host: this.account.imap_host,
@@ -87,7 +87,11 @@ export class EmailService {
       tls: this.account.use_ssl,
       tlsOptions: {
         rejectUnauthorized: false, // Accept self-signed certificates
+        servername: this.account.imap_host, // Required for some servers
       },
+      connTimeout: 30000, // 30 second connection timeout
+      authTimeout: 15000, // 15 second auth timeout
+      debug: console.log, // Enable debug logging
     };
 
     return new Promise((resolve, reject) => {
