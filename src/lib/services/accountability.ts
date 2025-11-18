@@ -238,6 +238,34 @@ export async function confirmConsequence(id: string, confirmedBy: string): Promi
   });
 }
 
+export async function updateConsequence(
+  id: string,
+  updates: Partial<CreateConsequenceData>
+): Promise<Consequence> {
+  const { data, error } = await supabase
+    .from('consequences')
+    .update(updates)
+    .eq('id', id)
+    .select('*, child:children(*)')
+    .single();
+
+  if (error) {
+    console.error('Error updating consequence:', error);
+    throw new Error('Failed to update consequence');
+  }
+
+  return data;
+}
+
+export async function deleteConsequence(id: string): Promise<void> {
+  const { error } = await supabase.from('consequences').delete().eq('id', id);
+
+  if (error) {
+    console.error('Error deleting consequence:', error);
+    throw new Error('Failed to delete consequence');
+  }
+}
+
 // ==================== COMMITMENTS ====================
 
 export async function fetchCommitments(
@@ -371,6 +399,34 @@ export async function markCommitmentMissed(id: string): Promise<Commitment> {
   return updateCommitmentStatus(id, {
     status: 'missed',
   });
+}
+
+export async function updateCommitment(
+  id: string,
+  updates: Partial<CreateCommitmentData>
+): Promise<Commitment> {
+  const { data, error } = await supabase
+    .from('commitments')
+    .update(updates)
+    .eq('id', id)
+    .select('*, child:children(*)')
+    .single();
+
+  if (error) {
+    console.error('Error updating commitment:', error);
+    throw new Error('Failed to update commitment');
+  }
+
+  return data;
+}
+
+export async function deleteCommitment(id: string): Promise<void> {
+  const { error } = await supabase.from('commitments').delete().eq('id', id);
+
+  if (error) {
+    console.error('Error deleting commitment:', error);
+    throw new Error('Failed to delete commitment');
+  }
 }
 
 // ==================== COMMITMENT STATS ====================
