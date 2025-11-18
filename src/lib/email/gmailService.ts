@@ -77,9 +77,20 @@ export class GmailService {
     const limit = options.limit || 25;
 
     try {
-      // Build query
+      // Build query with school email filters
       const afterDate = since.toISOString().split('T')[0].replace(/-/g, '/');
-      const query = `after:${afterDate}`;
+
+      // Filter for school-related emails (matching your Python scanner)
+      const schoolDomains = [
+        'cottle',
+        'tuckahoe',
+        'finalsiteconnect.com',
+        'tuckahoeschools.org',
+        'tuckahoeclassparents',
+      ];
+
+      const fromFilters = schoolDomains.map(domain => `from:${domain}`).join(' OR ');
+      const query = `after:${afterDate} (${fromFilters})`;
 
       console.log('Gmail query:', query);
 
