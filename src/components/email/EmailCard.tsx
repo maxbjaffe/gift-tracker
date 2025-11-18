@@ -151,10 +151,20 @@ export function EmailCard({ email, onClick }: EmailCardProps) {
             )}
 
             {hasChildren && (
-              <Badge variant="outline" className="bg-blue-100 text-blue-700">
-                <User className="h-3 w-3 mr-1" />
-                {(email.child_relevance as any)?.[0]?.child?.name}
-              </Badge>
+              <>
+                {(email.child_relevance as any)?.map((rel: any, index: number) => (
+                  rel.child?.name && (
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="bg-blue-100 text-blue-700 border-blue-300"
+                    >
+                      <User className="h-3 w-3 mr-1" />
+                      {rel.child.name}
+                    </Badge>
+                  )
+                ))}
+              </>
             )}
           </div>
         </div>
