@@ -32,6 +32,15 @@ export class GmailService {
       return this.gmail;
     }
 
+    console.log('Initializing Gmail API...');
+    console.log('CLIENT_ID present:', !!process.env.GMAIL_CLIENT_ID);
+    console.log('CLIENT_SECRET present:', !!process.env.GMAIL_CLIENT_SECRET);
+    console.log('REFRESH_TOKEN present:', !!process.env.GMAIL_REFRESH_TOKEN);
+
+    if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_CLIENT_SECRET || !process.env.GMAIL_REFRESH_TOKEN) {
+      throw new Error('Missing Gmail API credentials in environment variables');
+    }
+
     const oauth2Client = new google.auth.OAuth2(
       process.env.GMAIL_CLIENT_ID,
       process.env.GMAIL_CLIENT_SECRET,
@@ -45,6 +54,7 @@ export class GmailService {
     });
 
     this.gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    console.log('Gmail API initialized successfully');
     return this.gmail;
   }
 
