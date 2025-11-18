@@ -224,9 +224,9 @@ export default function AccountabilityPage() {
               />
 
               {/* Quick Actions Section - More Defined */}
-              <Card className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+              <Card className="p-4 bg-gradient-to-br from-purple-100 to-pink-100 border-purple-300 shadow-md">
                 <div className="mb-3">
-                  <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
                     <span className="text-lg">⚡</span>
                     Quick Actions
                   </h3>
