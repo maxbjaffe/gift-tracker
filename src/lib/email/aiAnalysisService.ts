@@ -5,7 +5,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
-import type { SchoolEmail, EmailCategory, EmailPriority } from '@/Types/email';
+import type { SchoolEmail, EmailCategory, EmailPriority } from '@/types/email';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,

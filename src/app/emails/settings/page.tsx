@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import type { EmailAccount, EmailProvider } from '@/Types/email';
+import type { EmailAccount, EmailProvider } from '@/types/email';
 import { Mail, Plus, Trash2, RefreshCw, ArrowLeft, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';

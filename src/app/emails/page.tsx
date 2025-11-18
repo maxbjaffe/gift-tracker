@@ -93,20 +93,17 @@ export default function EmailsPage() {
   async function handleSync() {
     try {
       toast.info('Syncing emails...');
-      const response = await fetch('/api/cron/email-sync', {
-        method: 'GET',
-        headers: {
-          'authorization': `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET}`,
-        },
+      const response = await fetch('/api/email/sync', {
+        method: 'POST',
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Emails synced successfully!');
+        toast.success(`Synced ${data.emailsSaved} new emails!`);
         loadEmails();
       } else {
-        toast.error('Failed to sync emails');
+        toast.error(data.error || 'Failed to sync emails');
       }
     } catch (error) {
       console.error('Error syncing emails:', error);

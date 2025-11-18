@@ -6,7 +6,7 @@
 import { google } from 'googleapis';
 import { simpleParser } from 'mailparser';
 import { createClient } from '@/lib/supabase/server';
-import type { EmailAccount, SchoolEmail } from '@/Types/email';
+import type { EmailAccount, SchoolEmail } from '@/types/email';
 
 interface FetchOptions {
   since?: Date;

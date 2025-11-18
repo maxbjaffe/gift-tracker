@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { EmailService } from '@/lib/email/emailService';
+import { GmailService } from '@/lib/email/gmailService';
 import { AIAssociationService } from '@/lib/email/associationService';
 
 export async function GET(request: NextRequest) {
@@ -39,7 +40,10 @@ export async function GET(request: NextRequest) {
     // Sync each account
     for (const account of accounts) {
       try {
-        const syncResult = await EmailService.syncAccount(account.id, account.user_id);
+        // Use the appropriate service based on provider
+        const syncResult = account.provider === 'gmail'
+          ? await GmailService.syncAccount(account.id, account.user_id)
+          : await EmailService.syncAccount(account.id, account.user_id);
         results.push({
           accountId: account.id,
           email: account.email_address,
