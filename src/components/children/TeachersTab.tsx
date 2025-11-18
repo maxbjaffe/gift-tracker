@@ -289,8 +289,11 @@ export function TeachersTab({ childId, childName }: TeachersTabProps) {
       {availableTeachers.length === 0 && !showAddForm && (
         <Card className="p-4 bg-yellow-50 border-yellow-200">
           <p className="text-sm text-gray-700">
-            <strong>Tip:</strong> Create teachers first in the main Teachers section, then
-            associate them with your children here.
+            <strong>Tip:</strong> Create teachers first in the{' '}
+            <a href="/teachers" className="text-blue-600 hover:underline font-medium">
+              main Teachers page
+            </a>
+            , then associate them with your children here.
           </p>
         </Card>
       )}

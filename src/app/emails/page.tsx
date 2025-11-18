@@ -175,6 +175,12 @@ export default function EmailsPage() {
                 </Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
+                <Link href="/teachers">
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  Teachers
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/emails/summaries">
                   <FileText className="h-4 w-4 mr-2" />
                   Summaries
