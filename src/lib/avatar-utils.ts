@@ -19,48 +19,57 @@ export interface PresetAvatar {
   url: string; // Pre-generated URL for instant display
 }
 
-// Curated fun avatar presets (60+ avatars organized by category)
+// Curated avataaars presets organized by age/gender (36 avatars)
 export const AVATAR_PRESETS: PresetAvatar[] = [
-  // PEOPLE (diverse human avatars with different looks & expressions) - 30 avatars
-  // Young Adults - Happy & Friendly
-  { id: 'person-happy-1', name: 'Happy Person 1', category: 'people', style: 'avataaars', seed: 'Felix', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' },
-  { id: 'person-happy-2', name: 'Happy Person 2', category: 'people', style: 'avataaars', seed: 'Mia', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mia' },
-  { id: 'person-smile-1', name: 'Smiling Person 1', category: 'people', style: 'big-smile', seed: 'Alex', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Alex' },
-  { id: 'person-smile-2', name: 'Smiling Person 2', category: 'people', style: 'big-smile', seed: 'Emma', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Emma' },
-  { id: 'person-smile-3', name: 'Smiling Person 3', category: 'people', style: 'big-smile', seed: 'Oliver', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Oliver' },
+  // PEOPLE - All using avataaars style for consistency
 
-  // Professional & Casual
-  { id: 'person-prof-1', name: 'Professional 1', category: 'people', style: 'lorelei', seed: 'James', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=James' },
-  { id: 'person-prof-2', name: 'Professional 2', category: 'people', style: 'lorelei', seed: 'Sophia', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Sophia' },
-  { id: 'person-casual-1', name: 'Casual 1', category: 'people', style: 'avataaars', seed: 'Lucas', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas' },
-  { id: 'person-casual-2', name: 'Casual 2', category: 'people', style: 'avataaars', seed: 'Isabella', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Isabella' },
-  { id: 'person-casual-3', name: 'Casual 3', category: 'people', style: 'adventurer', seed: 'Noah', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Noah' },
+  // Boys (ages 5-12) - 6 avatars
+  { id: 'boy-1', name: 'Boy 1', category: 'people', style: 'avataaars', seed: 'boy-short-hair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=boy-short-hair' },
+  { id: 'boy-2', name: 'Boy 2', category: 'people', style: 'avataaars', seed: 'boy-spiky-hair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=boy-spiky-hair' },
+  { id: 'boy-3', name: 'Boy 3', category: 'people', style: 'avataaars', seed: 'boy-curly', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=boy-curly' },
+  { id: 'boy-4', name: 'Boy 4', category: 'people', style: 'avataaars', seed: 'boy-glasses', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=boy-glasses' },
+  { id: 'boy-5', name: 'Boy 5', category: 'people', style: 'avataaars', seed: 'boy-smile', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=boy-smile' },
+  { id: 'boy-6', name: 'Boy 6', category: 'people', style: 'avataaars', seed: 'boy-happy', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=boy-happy' },
 
-  // Diverse Looks & Styles
-  { id: 'person-curly-1', name: 'Curly Hair 1', category: 'people', style: 'avataaars', seed: 'Liam', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Liam' },
-  { id: 'person-curly-2', name: 'Curly Hair 2', category: 'people', style: 'lorelei', seed: 'Ava', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Ava' },
-  { id: 'person-glasses-1', name: 'With Glasses 1', category: 'people', style: 'avataaars', seed: 'Ethan', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ethan' },
-  { id: 'person-glasses-2', name: 'With Glasses 2', category: 'people', style: 'lorelei', seed: 'Charlotte', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Charlotte' },
-  { id: 'person-bearded-1', name: 'Bearded 1', category: 'people', style: 'avataaars', seed: 'Benjamin', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Benjamin' },
+  // Girls (ages 5-12) - 6 avatars
+  { id: 'girl-1', name: 'Girl 1', category: 'people', style: 'avataaars', seed: 'girl-long-hair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=girl-long-hair' },
+  { id: 'girl-2', name: 'Girl 2', category: 'people', style: 'avataaars', seed: 'girl-ponytail', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=girl-ponytail' },
+  { id: 'girl-3', name: 'Girl 3', category: 'people', style: 'avataaars', seed: 'girl-curly', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=girl-curly' },
+  { id: 'girl-4', name: 'Girl 4', category: 'people', style: 'avataaars', seed: 'girl-short', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=girl-short' },
+  { id: 'girl-5', name: 'Girl 5', category: 'people', style: 'avataaars', seed: 'girl-glasses', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=girl-glasses' },
+  { id: 'girl-6', name: 'Girl 6', category: 'people', style: 'avataaars', seed: 'girl-smile', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=girl-smile' },
 
-  // Different Ages & Expressions
-  { id: 'person-young-1', name: 'Young Person 1', category: 'people', style: 'big-smile', seed: 'Mason', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Mason' },
-  { id: 'person-young-2', name: 'Young Person 2', category: 'people', style: 'adventurer', seed: 'Amelia', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Amelia' },
-  { id: 'person-adult-1', name: 'Adult 1', category: 'people', style: 'lorelei', seed: 'William', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=William' },
-  { id: 'person-adult-2', name: 'Adult 2', category: 'people', style: 'avataaars', seed: 'Harper', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Harper' },
-  { id: 'person-mature-1', name: 'Mature Adult 1', category: 'people', style: 'lorelei', seed: 'Michael', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Michael' },
+  // Teen Boys (ages 13-17) - 6 avatars
+  { id: 'teen-boy-1', name: 'Teen Boy 1', category: 'people', style: 'avataaars', seed: 'teen-boy-cool', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-boy-cool' },
+  { id: 'teen-boy-2', name: 'Teen Boy 2', category: 'people', style: 'avataaars', seed: 'teen-boy-sporty', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-boy-sporty' },
+  { id: 'teen-boy-3', name: 'Teen Boy 3', category: 'people', style: 'avataaars', seed: 'teen-boy-casual', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-boy-casual' },
+  { id: 'teen-boy-4', name: 'Teen Boy 4', category: 'people', style: 'avataaars', seed: 'teen-boy-nerd', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-boy-nerd' },
+  { id: 'teen-boy-5', name: 'Teen Boy 5', category: 'people', style: 'avataaars', seed: 'teen-boy-stylish', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-boy-stylish' },
+  { id: 'teen-boy-6', name: 'Teen Boy 6', category: 'people', style: 'avataaars', seed: 'teen-boy-messy', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-boy-messy' },
 
-  // More Variety
-  { id: 'person-short-1', name: 'Short Hair 1', category: 'people', style: 'adventurer', seed: 'Daniel', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Daniel' },
-  { id: 'person-short-2', name: 'Short Hair 2', category: 'people', style: 'big-smile', seed: 'Evelyn', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Evelyn' },
-  { id: 'person-long-1', name: 'Long Hair 1', category: 'people', style: 'lorelei', seed: 'Alexander', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Alexander' },
-  { id: 'person-long-2', name: 'Long Hair 2', category: 'people', style: 'avataaars', seed: 'Abigail', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Abigail' },
-  { id: 'person-stylish-1', name: 'Stylish 1', category: 'people', style: 'adventurer', seed: 'Henry', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Henry' },
-  { id: 'person-stylish-2', name: 'Stylish 2', category: 'people', style: 'lorelei', seed: 'Emily', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Emily' },
-  { id: 'person-fun-1', name: 'Playful 1', category: 'people', style: 'big-smile', seed: 'Jackson', url: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Jackson' },
-  { id: 'person-fun-2', name: 'Playful 2', category: 'people', style: 'avataaars', seed: 'Elizabeth', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elizabeth' },
-  { id: 'person-cool-1', name: 'Cool 1', category: 'people', style: 'adventurer', seed: 'Sebastian', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sebastian' },
-  { id: 'person-cool-2', name: 'Cool 2', category: 'people', style: 'lorelei', seed: 'Victoria', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Victoria' },
+  // Teen Girls (ages 13-17) - 6 avatars
+  { id: 'teen-girl-1', name: 'Teen Girl 1', category: 'people', style: 'avataaars', seed: 'teen-girl-long', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-girl-long' },
+  { id: 'teen-girl-2', name: 'Teen Girl 2', category: 'people', style: 'avataaars', seed: 'teen-girl-wavy', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-girl-wavy' },
+  { id: 'teen-girl-3', name: 'Teen Girl 3', category: 'people', style: 'avataaars', seed: 'teen-girl-sporty', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-girl-sporty' },
+  { id: 'teen-girl-4', name: 'Teen Girl 4', category: 'people', style: 'avataaars', seed: 'teen-girl-stylish', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-girl-stylish' },
+  { id: 'teen-girl-5', name: 'Teen Girl 5', category: 'people', style: 'avataaars', seed: 'teen-girl-cool', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-girl-cool' },
+  { id: 'teen-girl-6', name: 'Teen Girl 6', category: 'people', style: 'avataaars', seed: 'teen-girl-bun', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=teen-girl-bun' },
+
+  // Men (adults) - 6 avatars
+  { id: 'man-1', name: 'Man 1', category: 'people', style: 'avataaars', seed: 'man-professional', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=man-professional' },
+  { id: 'man-2', name: 'Man 2', category: 'people', style: 'avataaars', seed: 'man-beard', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=man-beard' },
+  { id: 'man-3', name: 'Man 3', category: 'people', style: 'avataaars', seed: 'man-glasses', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=man-glasses' },
+  { id: 'man-4', name: 'Man 4', category: 'people', style: 'avataaars', seed: 'man-casual', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=man-casual' },
+  { id: 'man-5', name: 'Man 5', category: 'people', style: 'avataaars', seed: 'man-mustache', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=man-mustache' },
+  { id: 'man-6', name: 'Man 6', category: 'people', style: 'avataaars', seed: 'man-short-hair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=man-short-hair' },
+
+  // Women (adults) - 6 avatars
+  { id: 'woman-1', name: 'Woman 1', category: 'people', style: 'avataaars', seed: 'woman-professional', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woman-professional' },
+  { id: 'woman-2', name: 'Woman 2', category: 'people', style: 'avataaars', seed: 'woman-long-hair', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woman-long-hair' },
+  { id: 'woman-3', name: 'Woman 3', category: 'people', style: 'avataaars', seed: 'woman-curly', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woman-curly' },
+  { id: 'woman-4', name: 'Woman 4', category: 'people', style: 'avataaars', seed: 'woman-glasses', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woman-glasses' },
+  { id: 'woman-5', name: 'Woman 5', category: 'people', style: 'avataaars', seed: 'woman-bob', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woman-bob' },
+  { id: 'woman-6', name: 'Woman 6', category: 'people', style: 'avataaars', seed: 'woman-ponytail', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=woman-ponytail' },
 
   // ANIMALS (cute and friendly) - 12 avatars
   { id: 'cat-whiskers', name: 'Whiskers the Cat', category: 'animals', style: 'bottts', seed: 'cat-001', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=cat-001' },
