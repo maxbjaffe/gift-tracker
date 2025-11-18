@@ -27,6 +27,8 @@ import {
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { EmailList } from '@/components/email/EmailList';
+import { TeachersTab } from '@/components/children/TeachersTab';
+import { InterestsTab } from '@/components/children/InterestsTab';
 
 interface Child {
   id: string;
@@ -36,6 +38,8 @@ interface Child {
   school?: string;
   avatar_color?: string;
   notes?: string;
+  interests?: string[];
+  activities?: any[];
 }
 
 export default function ChildProfilePage() {
@@ -236,7 +240,7 @@ export default function ChildProfilePage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">
               <User className="h-4 w-4 mr-2" />
               Overview
@@ -244,6 +248,14 @@ export default function ChildProfilePage() {
             <TabsTrigger value="emails">
               <Mail className="h-4 w-4 mr-2" />
               Emails ({emails.length})
+            </TabsTrigger>
+            <TabsTrigger value="teachers">
+              <Users className="h-4 w-4 mr-2" />
+              Teachers
+            </TabsTrigger>
+            <TabsTrigger value="interests">
+              <Heart className="h-4 w-4 mr-2" />
+              Interests
             </TabsTrigger>
             <TabsTrigger value="bulk">
               <CheckSquare className="h-4 w-4 mr-2" />
@@ -325,6 +337,21 @@ export default function ChildProfilePage() {
               emails={emails}
               loading={false}
               emptyMessage="No emails associated with this child yet"
+            />
+          </TabsContent>
+
+          {/* Teachers Tab */}
+          <TabsContent value="teachers" className="space-y-4">
+            <TeachersTab childId={childId} childName={child.name} />
+          </TabsContent>
+
+          {/* Interests Tab */}
+          <TabsContent value="interests" className="space-y-4">
+            <InterestsTab
+              childId={childId}
+              childName={child.name}
+              initialInterests={child.interests || []}
+              initialActivities={child.activities || []}
             />
           </TabsContent>
 
