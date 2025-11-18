@@ -56,54 +56,54 @@ export async function GET(
     }
 
     // Filter out emails already associated with this child
-    const unassociated = allEmails.filter(
-      email => !email.child_relevance?.some((rel: any) => rel.child_id === params.id)
+    const unassociated = (allEmails as any[]).filter(
+      (email: any) => !email.child_relevance?.some((rel: any) => rel.child_id === params.id)
     );
 
     // AI-powered suggestions based on child's info
     const suggestions = unassociated
-      .map(email => {
+      .map((email: any) => {
         let confidence = 0;
         const reasons: string[] = [];
 
         // Check for child name mention in subject or body
-        const childNameLower = child.name.toLowerCase();
+        const childNameLower = (child as any).name.toLowerCase();
         if (email.subject?.toLowerCase().includes(childNameLower)) {
           confidence += 40;
-          reasons.push(`${child.name} mentioned in subject`);
+          reasons.push(`${(child as any).name} mentioned in subject`);
         }
         if (email.body_text?.toLowerCase().includes(childNameLower)) {
           confidence += 30;
-          reasons.push(`${child.name} mentioned in email`);
+          reasons.push(`${(child as any).name} mentioned in email`);
         }
 
         // Check for grade mention
-        if (child.grade) {
-          const gradeLower = child.grade.toLowerCase();
+        if ((child as any).grade) {
+          const gradeLower = (child as any).grade.toLowerCase();
           if (
             email.subject?.toLowerCase().includes(gradeLower) ||
             email.body_text?.toLowerCase().includes(gradeLower)
           ) {
             confidence += 25;
-            reasons.push(`Grade ${child.grade} mentioned`);
+            reasons.push(`Grade ${(child as any).grade} mentioned`);
           }
         }
 
         // Check for teacher mention
-        if (child.teacher) {
-          const teacherName = child.teacher.toLowerCase();
+        if ((child as any).teacher) {
+          const teacherName = (child as any).teacher.toLowerCase();
           if (
             email.from_name?.toLowerCase().includes(teacherName) ||
             email.from_address?.toLowerCase().includes(teacherName)
           ) {
             confidence += 35;
-            reasons.push(`From ${child.name}'s teacher`);
+            reasons.push(`From ${(child as any).name}'s teacher`);
           }
         }
 
         // Check interests match (if available)
-        if (child.interests && Array.isArray(child.interests)) {
-          for (const interest of child.interests) {
+        if ((child as any).interests && Array.isArray((child as any).interests)) {
+          for (const interest of (child as any).interests) {
             const interestLower = interest.toLowerCase();
             if (
               email.subject?.toLowerCase().includes(interestLower) ||

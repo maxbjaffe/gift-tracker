@@ -33,7 +33,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const updates: any = {};
+    const updates: Record<string, any> = {};
 
     if (body.interests !== undefined) {
       updates.interests = body.interests;

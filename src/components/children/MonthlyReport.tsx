@@ -205,7 +205,8 @@ Events: ${report.activityCounts.events}
           </h3>
           <div className="space-y-3">
             {Object.entries(report.categoryBreakdown).map(([category, count]) => {
-              const percentage = Math.round((Number(count) / report.summary.totalEmails) * 100);
+              const countNum = Number(count);
+              const percentage = Math.round((countNum / report.summary.totalEmails) * 100);
               return (
                 <div key={category}>
                   <div className="flex items-center justify-between mb-1">
@@ -216,7 +217,7 @@ Events: ${report.activityCounts.events}
                       {category}
                     </Badge>
                     <span className="text-sm font-medium text-gray-900">
-                      {count} ({percentage}%)
+                      {countNum} ({percentage}%)
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">

@@ -58,19 +58,24 @@ export async function GET(
           is_read
         )
       `)
-      .eq('child_id', params.id)
-      .gte('email.received_at', startDate.toISOString());
+      .eq('child_id', params.id);
 
-    const emails = emailAssociations?.map(a => a.email).filter(Boolean) || [];
+    // Filter by date range in JavaScript (can't filter on nested relations in Supabase)
+    const filteredAssociations = (emailAssociations as any[])?.filter((a: any) => {
+      if (!a.email?.received_at) return false;
+      return new Date(a.email.received_at) >= startDate;
+    }) || [];
+
+    const emails = filteredAssociations.map((a: any) => a.email).filter(Boolean);
 
     // Calculate statistics
     const totalEmails = emails.length;
-    const unreadEmails = emails.filter(e => !e.is_read).length;
-    const verifiedAssociations = emailAssociations?.filter(a => a.is_verified).length || 0;
+    const unreadEmails = emails.filter((e: any) => !e.is_read).length;
+    const verifiedAssociations = filteredAssociations.filter((a: any) => a.is_verified).length;
 
     // Category breakdown
     const categoryBreakdown: Record<string, number> = {};
-    emails.forEach(email => {
+    emails.forEach((email: any) => {
       const category = email.ai_category || 'uncategorized';
       categoryBreakdown[category] = (categoryBreakdown[category] || 0) + 1;
     });
@@ -81,14 +86,14 @@ export async function GET(
       medium: 0,
       low: 0,
     };
-    emails.forEach(email => {
+    emails.forEach((email: any) => {
       const priority = email.ai_priority || 'low';
       priorityBreakdown[priority] = (priorityBreakdown[priority] || 0) + 1;
     });
 
     // Top senders
     const senderCounts: Record<string, { name: string; email: string; count: number }> = {};
-    emails.forEach(email => {
+    emails.forEach((email: any) => {
       const senderEmail = email.from_address || 'unknown';
       if (!senderCounts[senderEmail]) {
         senderCounts[senderEmail] = {
@@ -108,7 +113,7 @@ export async function GET(
     for (let i = 0; i < 4; i++) {
       const weekStart = new Date(Date.now() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
       const weekEnd = new Date(Date.now() - i * 7 * 24 * 60 * 60 * 1000);
-      const count = emails.filter(e => {
+      const count = emails.filter((e: any) => {
         const date = new Date(e.received_at);
         return date >= weekStart && date < weekEnd;
       }).length;
@@ -120,10 +125,10 @@ export async function GET(
 
     // Recent highlights (high priority unread emails)
     const highlights = emails
-      .filter(e => !e.is_read && e.ai_priority === 'high')
-      .sort((a, b) => new Date(b.received_at).getTime() - new Date(a.received_at).getTime())
+      .filter((e: any) => !e.is_read && e.ai_priority === 'high')
+      .sort((a: any, b: any) => new Date(b.received_at).getTime() - new Date(a.received_at).getTime())
       .slice(0, 5)
-      .map(e => ({
+      .map((e: any) => ({
         id: e.id,
         subject: e.subject,
         from_name: e.from_name,
@@ -133,30 +138,33 @@ export async function GET(
       }));
 
     // Activity trends
-    const homeworkCount = emails.filter(e => e.ai_category === 'homework').length;
-    const gradeCount = emails.filter(e => e.ai_category === 'grade').length;
-    const eventCount = emails.filter(e => e.ai_category === 'event').length;
+    const homeworkCount = emails.filter((e: any) => e.ai_category === 'homework').length;
+    const gradeCount = emails.filter((e: any) => e.ai_category === 'grade').length;
+    const eventCount = emails.filter((e: any) => e.ai_category === 'event').length;
 
     // Compare to previous period
     const previousPeriodStart = new Date(startDate.getTime() - days * 24 * 60 * 60 * 1000);
     const { data: previousEmails } = await supabase
       .from('email_child_relevance')
-      .select(`email:school_emails(id)`)
-      .eq('child_id', params.id)
-      .gte('email.received_at', previousPeriodStart.toISOString())
-      .lt('email.received_at', startDate.toISOString());
+      .select(`email:school_emails(id, received_at)`)
+      .eq('child_id', params.id);
 
-    const previousCount = previousEmails?.filter(e => e.email).length || 0;
+    // Filter by date range in JavaScript
+    const previousCount = (previousEmails as any[])?.filter((e: any) => {
+      if (!e.email?.received_at) return false;
+      const date = new Date(e.email.received_at);
+      return date >= previousPeriodStart && date < startDate;
+    }).length || 0;
     const trend = previousCount === 0
       ? 0
       : Math.round(((totalEmails - previousCount) / previousCount) * 100);
 
     return NextResponse.json({
       child: {
-        id: child.id,
-        name: child.name,
-        grade: child.grade,
-        teacher: child.teacher,
+        id: (child as any).id,
+        name: (child as any).name,
+        grade: (child as any).grade,
+        teacher: (child as any).teacher,
       },
       period: {
         days,
