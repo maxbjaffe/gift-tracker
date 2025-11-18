@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Get children for user
     const { data: children, error } = await supabase
       .from('children')
-      .select('id, name, grade, teacher, notes')
+      .select('*')
       .eq('user_id', user.id)
       .order('name');
 
