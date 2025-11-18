@@ -22,18 +22,41 @@ import { Mail, Search, Filter, RefreshCw, Settings, Inbox, Star, Archive, Brain 
 import Link from 'next/link';
 import { toast } from 'sonner';
 
+interface Child {
+  id: string;
+  name: string;
+}
+
 export default function EmailsPage() {
   const [emails, setEmails] = useState<SchoolEmail[]>([]);
+  const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>('all');
   const [priority, setPriority] = useState<string>('all');
+  const [childId, setChildId] = useState<string>('all');
   const [filter, setFilter] = useState<string>('unread');
 
   useEffect(() => {
+    loadChildren();
+  }, []);
+
+  useEffect(() => {
     loadEmails();
-  }, [category, priority, filter]);
+  }, [category, priority, childId, filter]);
+
+  async function loadChildren() {
+    try {
+      const response = await fetch('/api/accountability/children');
+      const data = await response.json();
+      if (response.ok) {
+        setChildren(data.children || []);
+      }
+    } catch (error) {
+      console.error('Error loading children:', error);
+    }
+  }
 
   async function loadEmails() {
     try {
@@ -42,6 +65,7 @@ export default function EmailsPage() {
 
       if (category !== 'all') params.append('category', category);
       if (priority !== 'all') params.append('priority', priority);
+      if (childId !== 'all') params.append('child_id', childId);
 
       // Filter presets
       if (filter === 'unread') params.append('is_read', 'false');
@@ -256,8 +280,8 @@ export default function EmailsPage() {
               </Button>
             </div>
 
-            {/* Category & Priority Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Category, Priority & Child Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Category</label>
                 <Select value={category} onValueChange={setCategory}>
@@ -290,6 +314,23 @@ export default function EmailsPage() {
                     <SelectItem value="high">🔴 High</SelectItem>
                     <SelectItem value="medium">🟡 Medium</SelectItem>
                     <SelectItem value="low">🟢 Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Child</label>
+                <Select value={childId} onValueChange={setChildId}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Children</SelectItem>
+                    {children.map(child => (
+                      <SelectItem key={child.id} value={child.id}>
+                        {child.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
