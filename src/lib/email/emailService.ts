@@ -328,7 +328,7 @@ export class EmailService {
       const service = new EmailService(account);
       const emails = await service.fetchEmails({
         since: account.fetch_since_date || undefined,
-        limit: 50, // Limit per sync to avoid overwhelming
+        limit: 25, // Limit per sync to avoid timeouts
       });
 
       let savedCount = 0;

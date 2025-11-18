@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { EmailService } from '@/lib/email/emailService';
 
+// Increase timeout to max (60 seconds for Pro, 10 for Hobby)
+export const maxDuration = 60;
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
