@@ -31,6 +31,7 @@ import { EmailList } from '@/components/email/EmailList';
 import { TeachersTab } from '@/components/children/TeachersTab';
 import { InterestsTab } from '@/components/children/InterestsTab';
 import { MonthlyReport } from '@/components/children/MonthlyReport';
+import { AILearningTab } from '@/components/children/AILearningTab';
 
 interface Child {
   id: string;
@@ -579,27 +580,7 @@ export default function ChildProfilePage() {
 
           {/* AI Learning Tab */}
           <TabsContent value="learning" className="space-y-4">
-            <Card className="p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">AI Learning & Patterns</h3>
-              <p className="text-gray-600 mb-6">
-                Coming soon: AI will learn from your email associations to automatically
-                categorize future emails for {child.name}.
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded">
-                  <p className="text-sm text-gray-600 mb-1">Verified Associations</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {emails.filter(e => e.child_relevance?.some((r: any) => r.is_verified)).length}
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded">
-                  <p className="text-sm text-gray-600 mb-1">AI Confidence</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {emails.length > 0 ? '87%' : '0%'}
-                  </p>
-                </div>
-              </div>
-            </Card>
+            <AILearningTab childId={childId} childName={child.name} emails={emails} />
           </TabsContent>
         </Tabs>
       </div>
