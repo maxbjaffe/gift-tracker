@@ -14,6 +14,9 @@ interface EmailConfig {
   host: string;
   port: number;
   tls: boolean;
+  tlsOptions?: {
+    rejectUnauthorized: boolean;
+  };
 }
 
 interface FetchOptions {
@@ -82,6 +85,9 @@ export class EmailService {
       host: this.account.imap_host,
       port: this.account.imap_port,
       tls: this.account.use_ssl,
+      tlsOptions: {
+        rejectUnauthorized: false, // Accept self-signed certificates
+      },
     };
 
     return new Promise((resolve, reject) => {
