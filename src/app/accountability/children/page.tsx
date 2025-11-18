@@ -9,6 +9,7 @@ import type { Child } from '@/types/accountability';
 import { toast } from 'sonner';
 import { UserPlus, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Avatar from '@/components/Avatar';
 
 export default function ChildrenPage() {
   const router = useRouter();
@@ -107,7 +108,14 @@ export default function ChildrenPage() {
               <Card key={child.id} className="p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className="text-4xl">{child.avatar || '👤'}</div>
+                  <Avatar
+                    type={child.avatar_type as 'preset' | 'emoji' | null}
+                    data={child.avatar_data}
+                    background={child.avatar_background}
+                    name={child.name}
+                    size="lg"
+                    showBorder
+                  />
 
                   {/* Info */}
                   <div className="flex-1">
