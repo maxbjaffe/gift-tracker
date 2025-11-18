@@ -38,24 +38,10 @@ export default function EmailDetailPage() {
   const [email, setEmail] = useState<SchoolEmail | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [userId, setUserId] = useState<string>('');
 
   useEffect(() => {
     loadEmail();
-    loadUser();
   }, [emailId]);
-
-  async function loadUser() {
-    try {
-      const response = await fetch('/api/user');
-      const data = await response.json();
-      if (response.ok) {
-        setUserId(data.user.id);
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
-    }
-  }
 
   async function loadEmail() {
     try {
@@ -224,16 +210,14 @@ export default function EmailDetailPage() {
           )}
 
           {/* Child Associations */}
-          {userId && (
-            <div className="mb-4 pb-4 border-b">
-              <ChildAssociationEditor
-                emailId={emailId}
-                userId={userId}
-                associations={(email.child_relevance as any) || []}
-                onUpdate={loadEmail}
-              />
-            </div>
-          )}
+          <div className="mb-4 pb-4 border-b">
+            <ChildAssociationEditor
+              emailId={emailId}
+              userId={email.user_id}
+              associations={(email.child_relevance as any) || []}
+              onUpdate={loadEmail}
+            />
+          </div>
 
           {/* Event Associations */}
           {email.event_associations && (email.event_associations as any).length > 0 && (
