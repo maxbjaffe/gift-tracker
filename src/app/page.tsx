@@ -13,12 +13,12 @@ export default function HomePage() {
             Your all-in-one platform for family management
           </p>
           <p className="text-lg text-gray-500">
-            Track gifts and manage family accountability in one place
+            Track gifts, manage accountability, and monitor school emails in one place
           </p>
         </div>
 
-        {/* Two Main Systems - Side by Side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        {/* Three Main Systems */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {/* Gift Tracker System */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 border-4 border-purple-200 hover:border-purple-400 transition-all">
             <div className="text-center mb-6">
@@ -106,12 +106,56 @@ export default function HomePage() {
               Open Accountability →
             </a>
           </div>
+
+          {/* School Email System */}
+          <div className="bg-white rounded-3xl shadow-2xl p-8 border-4 border-green-200 hover:border-green-400 transition-all">
+            <div className="text-center mb-6">
+              <div className="text-7xl mb-4">📧</div>
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3">
+                School Emails
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Never miss important school updates
+              </p>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🤖</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">AI Analysis</h3>
+                  <p className="text-gray-600 text-sm">Auto-categorize and prioritize emails</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">📊</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Smart Summaries</h3>
+                  <p className="text-gray-600 text-sm">Monthly AI-generated insights</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🔗</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Auto-Link Events</h3>
+                  <p className="text-gray-600 text-sm">Connect to calendar and children</p>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href="/emails"
+              className="block w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-xl hover:from-blue-700 hover:to-green-700 transition-all shadow-lg font-semibold text-center text-lg"
+            >
+              Open School Emails →
+            </a>
+          </div>
         </div>
 
         {/* Quick Links */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Quick Access</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <a
               href="/recipients"
               className="p-4 text-center rounded-xl hover:bg-purple-50 transition-all border border-gray-200 hover:border-purple-300"
@@ -132,6 +176,13 @@ export default function HomePage() {
             >
               <div className="text-3xl mb-2">📋</div>
               <div className="text-sm font-medium text-gray-700">Dashboard</div>
+            </a>
+            <a
+              href="/emails"
+              className="p-4 text-center rounded-xl hover:bg-green-50 transition-all border border-gray-200 hover:border-green-300"
+            >
+              <div className="text-3xl mb-2">📧</div>
+              <div className="text-sm font-medium text-gray-700">School Emails</div>
             </a>
             <a
               href="/accountability/analytics"

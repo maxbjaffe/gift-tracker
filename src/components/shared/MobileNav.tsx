@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { X, Menu, Home, Gift, Users, BarChart3, MessageCircle, Sparkles, Target } from 'lucide-react'
+import { X, Menu, Home, Gift, Users, BarChart3, MessageCircle, Sparkles, Target, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
@@ -45,6 +45,7 @@ export function MobileNav({ user }: MobileNavProps) {
   const accountabilityItems = [
     { href: '/accountability', label: 'Accountability', icon: Target },
     { href: '/accountability/analytics', label: 'Stats', icon: BarChart3 },
+    { href: '/emails', label: 'School Emails', icon: Mail },
   ]
 
   const isActive = (href: string) => {

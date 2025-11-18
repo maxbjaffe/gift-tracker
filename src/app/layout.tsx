@@ -90,6 +90,12 @@ export default async function RootLayout({
                 >
                   Stats
                 </Link>
+                <Link
+                  href="/emails"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                >
+                  📧 School Emails
+                </Link>
               </div>
 
               <UserMenu user={user} />
