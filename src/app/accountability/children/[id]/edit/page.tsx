@@ -11,8 +11,8 @@ import type { Child } from '@/types/accountability';
 import { toast } from 'sonner';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
-
-const AVATAR_OPTIONS = ['👦', '👧', '🧒', '👶', '🧑', '👨', '👩', '🙂', '😊', '🌟'];
+import AvatarSelector from '@/components/AvatarSelector';
+import type { AvatarData } from '@/lib/avatar-utils';
 
 export default function EditChildPage() {
   const router = useRouter();
@@ -22,10 +22,10 @@ export default function EditChildPage() {
   const [child, setChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [avatar, setAvatar] = useState<AvatarData | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     age: '',
-    avatar: '👦',
   });
 
   useEffect(() => {
@@ -40,8 +40,15 @@ export default function EditChildPage() {
         setFormData({
           name: data.name,
           age: data.age?.toString() || '',
-          avatar: data.avatar || '👦',
         });
+        // Load existing avatar data if available
+        if (data.avatar_type && data.avatar_data) {
+          setAvatar({
+            type: data.avatar_type as 'preset' | 'emoji',
+            data: data.avatar_data,
+            background: data.avatar_background || undefined,
+          });
+        }
       } else {
         toast.error('Child not found');
         router.push('/accountability/children');
@@ -62,7 +69,9 @@ export default function EditChildPage() {
       await updateChild(childId, {
         name: formData.name,
         age: formData.age ? parseInt(formData.age) : undefined,
-        avatar: formData.avatar,
+        avatar_type: avatar?.type || null,
+        avatar_data: avatar?.data || null,
+        avatar_background: avatar?.background || null,
       });
 
       toast.success(`${formData.name} updated successfully!`);
@@ -139,27 +148,18 @@ export default function EditChildPage() {
             </div>
 
             {/* Avatar Selection */}
-            <div>
-              <Label>Avatar</Label>
-              <div className="grid grid-cols-5 gap-2 mt-2">
-                {AVATAR_OPTIONS.map((avatar) => (
-                  <button
-                    key={avatar}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, avatar })}
-                    className={`
-                      text-4xl p-3 rounded-lg border-2 transition-all
-                      ${formData.avatar === avatar
-                        ? 'border-purple-500 bg-purple-50 scale-110'
-                        : 'border-gray-200 hover:border-gray-300'
-                      }
-                    `}
-                  >
-                    {avatar}
-                  </button>
-                ))}
+            {formData.name && (
+              <div>
+                <Label>Choose Avatar</Label>
+                <div className="mt-2">
+                  <AvatarSelector
+                    name={formData.name}
+                    value={avatar}
+                    onChange={setAvatar}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
