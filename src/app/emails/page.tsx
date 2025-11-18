@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { EmailList } from '@/components/email/EmailList';
 import type { SchoolEmail, EmailCategory, EmailPriority } from '@/types/email';
-import { Mail, Search, Filter, RefreshCw, Settings, Inbox, Star, Archive, Brain, FileText, Users } from 'lucide-react';
+import { Mail, Search, Filter, RefreshCw, Settings, Inbox, Star, Archive, Brain, FileText, Users, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
