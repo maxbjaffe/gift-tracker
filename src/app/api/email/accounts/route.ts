@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
       imap_password,
       use_ssl = true,
       sync_frequency_minutes = 15,
+      fetch_since_date,
     } = body;
 
     // Validate required fields
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
         imap_password_encrypted: encrypted_password,
         use_ssl,
         sync_frequency_minutes,
-        fetch_since_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
+        fetch_since_date: fetch_since_date || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       })
       .select()
       .single();
