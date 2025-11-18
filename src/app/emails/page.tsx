@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { EmailList } from '@/components/email/EmailList';
 import type { SchoolEmail, EmailCategory, EmailPriority } from '@/types/email';
-import { Mail, Search, Filter, RefreshCw, Settings, Inbox, Star, Archive, Brain, FileText } from 'lucide-react';
+import { Mail, Search, Filter, RefreshCw, Settings, Inbox, Star, Archive, Brain, FileText, Users } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -159,7 +159,7 @@ export default function EmailsPage() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               School Emails
             </h1>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button onClick={handleProcessWithAI} variant="default" size="sm" disabled={processing}>
                 <Brain className="h-4 w-4 mr-2" />
                 {processing ? 'Processing...' : 'Process with AI'}
@@ -167,6 +167,12 @@ export default function EmailsPage() {
               <Button onClick={handleSync} variant="outline" size="sm">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Sync
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/children">
+                  <Users className="h-4 w-4 mr-2" />
+                  Kids
+                </Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/emails/summaries">
