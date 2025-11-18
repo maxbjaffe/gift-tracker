@@ -1,0 +1,294 @@
+/**
+ * Gmail API Service
+ * Handles email fetching using Gmail API (more reliable than IMAP)
+ */
+
+import { google } from 'googleapis';
+import { simpleParser } from 'mailparser';
+import { createClient } from '@/lib/supabase/server';
+import type { EmailAccount, SchoolEmail } from '@/Types/email';
+
+interface FetchOptions {
+  since?: Date;
+  limit?: number;
+}
+
+/**
+ * Gmail API Email Service
+ */
+export class GmailService {
+  private account: EmailAccount;
+  private gmail: any;
+
+  constructor(account: EmailAccount) {
+    this.account = account;
+  }
+
+  /**
+   * Initialize Gmail API client with OAuth2
+   */
+  private async initializeGmail() {
+    if (this.gmail) {
+      return this.gmail;
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GMAIL_CLIENT_ID,
+      process.env.GMAIL_CLIENT_SECRET,
+      process.env.GMAIL_REDIRECT_URI || 'http://localhost'
+    );
+
+    // Set credentials - in production, you'd fetch this per user from database
+    // For now, using environment variables for single-user setup
+    oauth2Client.setCredentials({
+      refresh_token: process.env.GMAIL_REFRESH_TOKEN,
+    });
+
+    this.gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    return this.gmail;
+  }
+
+  /**
+   * Fetch emails from Gmail
+   */
+  async fetchEmails(options: FetchOptions = {}): Promise<any[]> {
+    const gmail = await this.initializeGmail();
+    const since = options.since || this.account.fetch_since_date || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const limit = options.limit || 25;
+
+    try {
+      // Build query
+      const afterDate = since.toISOString().split('T')[0].replace(/-/g, '/');
+      const query = `after:${afterDate}`;
+
+      console.log('Gmail query:', query);
+
+      // List messages
+      const listResponse = await gmail.users.messages.list({
+        userId: 'me',
+        q: query,
+        maxResults: limit,
+      });
+
+      const messages = listResponse.data.messages || [];
+      console.log(`Found ${messages.length} messages`);
+
+      if (messages.length === 0) {
+        return [];
+      }
+
+      // Fetch full message details
+      const fetchedMessages = [];
+      for (const message of messages) {
+        try {
+          const fullMessage = await gmail.users.messages.get({
+            userId: 'me',
+            id: message.id,
+            format: 'raw', // Get raw MIME content
+          });
+
+          // Decode the raw message
+          const rawMessage = Buffer.from(fullMessage.data.raw, 'base64').toString('utf-8');
+
+          // Parse the email
+          const parsed = await simpleParser(rawMessage);
+
+          fetchedMessages.push({
+            messageId: parsed.messageId || message.id,
+            from: parsed.from,
+            to: parsed.to,
+            subject: parsed.subject,
+            date: parsed.date,
+            text: parsed.text,
+            html: parsed.html,
+            attachments: parsed.attachments,
+          });
+
+          console.log(`Fetched email: ${parsed.subject}`);
+        } catch (err) {
+          console.error(`Error fetching message ${message.id}:`, err);
+        }
+      }
+
+      console.log(`Successfully fetched ${fetchedMessages.length} emails`);
+      return fetchedMessages;
+    } catch (error) {
+      console.error('Error fetching Gmail messages:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save email to database
+   */
+  async saveEmail(parsedEmail: any, userId: string): Promise<SchoolEmail | null> {
+    const supabase = await createClient();
+
+    try {
+      // Extract email addresses
+      const fromAddress = parsedEmail.from?.value?.[0]?.address || parsedEmail.from?.text || '';
+      const fromName = parsedEmail.from?.value?.[0]?.name || '';
+      const toAddresses = parsedEmail.to?.value?.map((addr: any) => addr.address) || [];
+      const ccAddresses = parsedEmail.cc?.value?.map((addr: any) => addr.address) || [];
+      const bccAddresses = parsedEmail.bcc?.value?.map((addr: any) => addr.address) || [];
+
+      // Create snippet from text content
+      const snippet = parsedEmail.text?.substring(0, 200) || '';
+
+      // Check if email already exists
+      const { data: existing } = await supabase
+        .from('school_emails')
+        .select('id')
+        .eq('email_account_id', this.account.id)
+        .eq('message_id', parsedEmail.messageId)
+        .single();
+
+      if (existing) {
+        console.log('Email already exists:', parsedEmail.messageId);
+        return null;
+      }
+
+      // Insert email
+      const { data: email, error } = await supabase
+        .from('school_emails')
+        .insert({
+          user_id: userId,
+          email_account_id: this.account.id,
+          message_id: parsedEmail.messageId,
+          thread_id: parsedEmail.inReplyTo || parsedEmail.messageId,
+          in_reply_to: parsedEmail.inReplyTo,
+          from_address: fromAddress,
+          from_name: fromName,
+          to_addresses: toAddresses,
+          cc_addresses: ccAddresses,
+          bcc_addresses: bccAddresses,
+          subject: parsedEmail.subject || '(No Subject)',
+          body_text: parsedEmail.text,
+          body_html: parsedEmail.html,
+          snippet,
+          received_at: parsedEmail.date || new Date(),
+          fetched_at: new Date(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving email:', error);
+        throw error;
+      }
+
+      // Save attachments if any
+      if (parsedEmail.attachments && parsedEmail.attachments.length > 0) {
+        await this.saveAttachments(email.id, parsedEmail.attachments);
+      }
+
+      return email;
+    } catch (error) {
+      console.error('Error in saveEmail:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save email attachments
+   */
+  private async saveAttachments(emailId: string, attachments: any[]): Promise<void> {
+    const supabase = await createClient();
+
+    const attachmentData = attachments.map(att => ({
+      email_id: emailId,
+      filename: att.filename || 'unnamed',
+      content_type: att.contentType || 'application/octet-stream',
+      size_bytes: att.size || 0,
+      inline_data: att.size < 100000 ? att.content?.toString('base64') : null,
+      is_inline: att.contentDisposition === 'inline',
+      content_id: att.cid,
+    }));
+
+    const { error } = await supabase
+      .from('email_attachments')
+      .insert(attachmentData);
+
+    if (error) {
+      console.error('Error saving attachments:', error);
+    }
+  }
+
+  /**
+   * Sync emails for an account using Gmail API
+   */
+  static async syncAccount(accountId: string, userId: string): Promise<{
+    success: boolean;
+    emailsFetched: number;
+    emailsSaved: number;
+    error?: string;
+  }> {
+    const supabase = await createClient();
+
+    try {
+      // Update sync status to in_progress
+      await supabase
+        .from('email_accounts')
+        .update({ last_sync_status: 'in_progress' })
+        .eq('id', accountId);
+
+      // Get account details
+      const { data: account, error: accountError } = await supabase
+        .from('email_accounts')
+        .select('*')
+        .eq('id', accountId)
+        .single();
+
+      if (accountError || !account) {
+        throw new Error('Account not found');
+      }
+
+      // Create service and fetch emails
+      const service = new GmailService(account);
+      const emails = await service.fetchEmails({
+        since: account.fetch_since_date || undefined,
+        limit: 25, // Limit per sync to avoid timeouts
+      });
+
+      let savedCount = 0;
+      for (const email of emails) {
+        const saved = await service.saveEmail(email, userId);
+        if (saved) savedCount++;
+      }
+
+      // Update sync status to success
+      await supabase
+        .from('email_accounts')
+        .update({
+          last_sync_status: 'success',
+          last_sync_at: new Date().toISOString(),
+          last_sync_error: null,
+        })
+        .eq('id', accountId);
+
+      return {
+        success: true,
+        emailsFetched: emails.length,
+        emailsSaved: savedCount,
+      };
+    } catch (error: any) {
+      console.error('Error syncing Gmail account:', error);
+
+      // Update sync status to error
+      await supabase
+        .from('email_accounts')
+        .update({
+          last_sync_status: 'error',
+          last_sync_error: error.message,
+        })
+        .eq('id', accountId);
+
+      return {
+        success: false,
+        emailsFetched: 0,
+        emailsSaved: 0,
+        error: error.message,
+      };
+    }
+  }
+}

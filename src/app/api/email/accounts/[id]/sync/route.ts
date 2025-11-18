@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { EmailService } from '@/lib/email/emailService';
+import { GmailService } from '@/lib/email/gmailService';
 
 // Increase timeout to max (60 seconds for Pro, 10 for Hobby)
 export const maxDuration = 60;
@@ -36,8 +37,10 @@ export async function POST(
       return NextResponse.json({ error: 'Account not found' }, { status: 404 });
     }
 
-    // Trigger sync
-    const result = await EmailService.syncAccount(params.id, user.id);
+    // Trigger sync - use Gmail API for Gmail accounts, IMAP for others
+    const result = account.provider === 'gmail'
+      ? await GmailService.syncAccount(params.id, user.id)
+      : await EmailService.syncAccount(params.id, user.id);
 
     if (!result.success) {
       return NextResponse.json(
