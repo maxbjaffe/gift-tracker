@@ -3,7 +3,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import type { Database } from '@/Types/database.types';
+import type { Database } from '@/types/database.types';
 
 type Recipient = Database['public']['Tables']['recipients']['Row'];
 

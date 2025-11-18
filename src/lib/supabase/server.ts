@@ -2,7 +2,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import type { Database } from '@/Types/database.types'
+import type { Database } from '@/types/database.types'
 
 // For development: Use service role key to bypass RLS
 export function createServiceSupabaseClient() {

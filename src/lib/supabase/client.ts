@@ -1,6 +1,6 @@
 // Browser-side Supabase client
 import { createBrowserClient } from '@supabase/ssr'
-import type { Database } from '@/Types/database.types'
+import type { Database } from '@/types/database.types'
 
 export function createClient() {
   return createBrowserClient<Database>(

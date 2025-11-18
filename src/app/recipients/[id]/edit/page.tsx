@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import type { Recipient } from '@/Types/database.types';
+import type { Recipient } from '@/types/database.types';
 import AvatarSelector from '@/components/AvatarSelector';
 import type { AvatarData } from '@/lib/avatar-utils';
 import { generateDefaultAvatar } from '@/lib/avatar-utils';

@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import Link from 'next/link'
 import { Plus, ExternalLink, Lightbulb, ShoppingCart } from 'lucide-react'
-import { GIFT_STATUSES, GIFT_CATEGORIES } from '@/Types/database.types'
+import { GIFT_STATUSES, GIFT_CATEGORIES } from '@/types/database.types'
 import Avatar from '@/components/Avatar'
 
 export default function GiftsPage() {

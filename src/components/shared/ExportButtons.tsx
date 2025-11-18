@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Download, FileText, FileSpreadsheet } from 'lucide-react'
-import { Gift, Recipient } from '@/Types/database.types'
+import { Gift, Recipient } from '@/types/database.types'
 import { exportToCSV, exportToPDF, exportRecipientsToCSV } from '@/lib/utils/export'
 import { toast } from 'sonner'
 

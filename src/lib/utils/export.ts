@@ -1,4 +1,4 @@
-import { Gift, Recipient } from '@/Types/database.types'
+import { Gift, Recipient } from '@/types/database.types'
 
 export function exportToCSV(data: Gift[], filename: string = 'gifts.csv') {
   // Define CSV headers

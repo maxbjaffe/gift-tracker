@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { Sparkles, Loader2 } from 'lucide-react'
-import { OCCASION_TYPES } from '@/Types/database.types'
+import { OCCASION_TYPES } from '@/types/database.types'
 import { toast } from 'sonner'
 
 interface AISuggestionsDialogProps {

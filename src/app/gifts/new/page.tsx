@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { GIFT_CATEGORIES } from '@/Types/database.types';
+import { GIFT_CATEGORIES } from '@/types/database.types';
 
 export default function NewGiftPage() {
   const router = useRouter();
