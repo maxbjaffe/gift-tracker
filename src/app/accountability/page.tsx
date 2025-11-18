@@ -17,7 +17,7 @@ import {
   updateCommitmentStatus,
 } from '@/lib/services/accountability';
 import { toast } from 'sonner';
-import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor } from 'lucide-react';
+import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor, Users } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AccountabilityPage() {
@@ -219,7 +219,13 @@ export default function AccountabilityPage() {
                 includeAll
               />
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="outline" asChild>
+                  <Link href="/accountability/children">
+                    <Users className="h-4 w-4 mr-2" />
+                    Children
+                  </Link>
+                </Button>
                 <Button variant="outline" asChild>
                   <Link href="/accountability/dakboard">
                     <Monitor className="h-4 w-4 mr-2" />
@@ -236,12 +242,6 @@ export default function AccountabilityPage() {
                   <Link href="/accountability/analytics">
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Analytics
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/accountability/children/new">
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add Child
                   </Link>
                 </Button>
               </div>
