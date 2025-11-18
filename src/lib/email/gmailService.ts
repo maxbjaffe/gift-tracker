@@ -266,7 +266,7 @@ export class GmailService {
       // Create service and fetch emails
       const service = new GmailService(account);
       const emails = await service.fetchEmails({
-        since: account.fetch_since_date || undefined,
+        since: account.fetch_since_date ? new Date(account.fetch_since_date) : undefined,
         limit: 25, // Limit per sync to avoid timeouts
       });
 
