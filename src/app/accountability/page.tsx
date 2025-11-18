@@ -214,7 +214,7 @@ export default function AccountabilityPage() {
             </div>
 
             {/* Child Filter */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-4">
               <ChildSelector
                 children={dashboard.children}
                 value={selectedChildId}
@@ -223,47 +223,53 @@ export default function AccountabilityPage() {
                 includeAll
               />
 
-              <div className="flex gap-2 flex-wrap">
-                {/* Primary Management Buttons - More Prominent */}
-                <Button asChild className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg">
-                  <Link href="/accountability/consequences">
-                    <Shield className="h-4 w-4 mr-2" />
-                    Manage Consequences
-                  </Link>
-                </Button>
-                <Button asChild className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg">
-                  <Link href="/accountability/commitments">
-                    <Target className="h-4 w-4 mr-2" />
-                    Manage Commitments
-                  </Link>
-                </Button>
-
-                {/* Secondary Navigation - Subtle */}
-                <Button variant="outline" asChild>
-                  <Link href="/accountability/children">
-                    <Users className="h-4 w-4 mr-2" />
-                    Children
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/accountability/analytics">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Analytics
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/accountability/dakboard">
-                    <Monitor className="h-4 w-4 mr-2" />
-                    DAKboard
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/accountability/sms-guide">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    SMS Commands
-                  </Link>
-                </Button>
-              </div>
+              {/* Quick Actions Section - More Defined */}
+              <Card className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <span className="text-lg">⚡</span>
+                    Quick Actions
+                  </h3>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
+                    <Link href="/accountability/consequences">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Manage Consequences
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
+                    <Link href="/accountability/commitments">
+                      <Target className="h-4 w-4 mr-2" />
+                      Manage Commitments
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
+                    <Link href="/accountability/children">
+                      <Users className="h-4 w-4 mr-2" />
+                      Children
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
+                    <Link href="/accountability/analytics">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Analytics
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
+                    <Link href="/accountability/dakboard">
+                      <Monitor className="h-4 w-4 mr-2" />
+                      DAKboard
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
+                    <Link href="/accountability/sms-guide">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      SMS Commands
+                    </Link>
+                  </Button>
+                </div>
+              </Card>
             </div>
 
             {/* Reliability Score for Selected Child */}
