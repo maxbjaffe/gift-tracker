@@ -19,6 +19,7 @@ import {
 import { toast } from 'sonner';
 import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor, Users } from 'lucide-react';
 import Link from 'next/link';
+import { filterActiveConsequences, filterActiveCommitments } from '@/lib/utils/date-filters';
 
 export default function AccountabilityPage() {
   const router = useRouter();
@@ -85,15 +86,18 @@ export default function AccountabilityPage() {
     }
   }
 
-  const filteredConsequences =
+  // Filter by child and remove expired consequences in real-time
+  const filteredConsequences = filterActiveConsequences(
     selectedChildId === 'all'
       ? dashboard?.activeConsequences || []
-      : dashboard?.activeConsequences.filter((c) => c.child_id === selectedChildId) || [];
+      : dashboard?.activeConsequences.filter((c) => c.child_id === selectedChildId) || []
+  );
 
-  const filteredCommitments =
+  const filteredCommitments = filterActiveCommitments(
     selectedChildId === 'all'
       ? dashboard?.activeCommitments || []
-      : dashboard?.activeCommitments.filter((c) => c.child_id === selectedChildId) || [];
+      : dashboard?.activeCommitments.filter((c) => c.child_id === selectedChildId) || []
+  );
 
   const selectedChild =
     selectedChildId !== 'all'

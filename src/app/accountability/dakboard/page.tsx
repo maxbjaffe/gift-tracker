@@ -6,6 +6,7 @@ import { fetchAccountabilityDashboard } from '@/lib/services/accountability';
 import type { AccountabilityDashboard } from '@/types/accountability';
 import { formatDistanceToNow, isPast, isToday, isTomorrow, format } from 'date-fns';
 import { Shield, Target, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { filterActiveConsequences, filterActiveCommitments } from '@/lib/utils/date-filters';
 
 export default function DAKBoardView() {
   const [dashboard, setDashboard] = useState<AccountabilityDashboard | null>(null);
@@ -57,8 +58,11 @@ export default function DAKBoardView() {
   };
 
   const getChildStatus = (childId: string) => {
-    const consequences = dashboard?.activeConsequences.filter(c => c.child_id === childId) || [];
-    const commitments = dashboard?.activeCommitments.filter(c => c.child_id === childId) || [];
+    // Filter out expired consequences in real-time
+    const allConsequences = dashboard?.activeConsequences.filter(c => c.child_id === childId) || [];
+    const consequences = filterActiveConsequences(allConsequences);
+    const allCommitments = dashboard?.activeCommitments.filter(c => c.child_id === childId) || [];
+    const commitments = filterActiveCommitments(allCommitments);
     const stats = dashboard?.recentStats.find(s => s.child_id === childId);
 
     if (consequences.length === 0 && commitments.length === 0) {
@@ -118,8 +122,13 @@ export default function DAKBoardView() {
         {/* Children Status - Side by Side Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {dashboard.children.map((child) => {
-          const childConsequences = dashboard.activeConsequences.filter(c => c.child_id === child.id);
-          const childCommitments = dashboard.activeCommitments.filter(c => c.child_id === child.id);
+          // Filter out expired consequences and commitments in real-time
+          const childConsequences = filterActiveConsequences(
+            dashboard.activeConsequences.filter(c => c.child_id === child.id)
+          );
+          const childCommitments = filterActiveCommitments(
+            dashboard.activeCommitments.filter(c => c.child_id === child.id)
+          );
 
           // Skip if this child has nothing active
           if (childConsequences.length === 0 && childCommitments.length === 0) {
