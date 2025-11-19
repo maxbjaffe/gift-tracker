@@ -17,7 +17,7 @@ import {
   updateCommitmentStatus,
 } from '@/lib/services/accountability';
 import { toast } from 'sonner';
-import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor, Users, Edit3, List, Mail } from 'lucide-react';
+import { Shield, Target, TrendingUp, UserPlus, AlertCircle, MessageSquare, Monitor, Users, Edit3, List, Mail, CheckSquare } from 'lucide-react';
 import Link from 'next/link';
 import { filterActiveConsequences, filterActiveCommitments } from '@/lib/utils/date-filters';
 
@@ -248,6 +248,12 @@ export default function AccountabilityPage() {
                     <Link href="/accountability/children">
                       <Users className="h-4 w-4 mr-2" />
                       Children
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
+                    <Link href="/accountability/checklist">
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      Daily Checklist
                     </Link>
                   </Button>
                   <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
