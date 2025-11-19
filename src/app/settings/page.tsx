@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [kioskUrl, setKioskUrl] = useState('');
+  const [accountabilityKioskUrl, setAccountabilityKioskUrl] = useState('');
   const [loadingKiosk, setLoadingKiosk] = useState(false);
 
   useEffect(() => {
@@ -74,6 +75,9 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setKioskUrl(data.url);
+        // Generate accountability kiosk URL by replacing /kiosk with /kiosk/accountability
+        const accountabilityUrl = data.url.replace('/kiosk?', '/kiosk/accountability?');
+        setAccountabilityKioskUrl(accountabilityUrl);
       } else {
         console.error('Error loading kiosk URL:', data);
         toast.error(`Failed to load kiosk URL: ${data.error || 'Unknown error'}`);
@@ -91,7 +95,10 @@ export default function SettingsPage() {
       if (response.ok) {
         const data = await response.json();
         setKioskUrl(data.url);
-        toast.success('Kiosk URL regenerated!');
+        // Generate accountability kiosk URL
+        const accountabilityUrl = data.url.replace('/kiosk?', '/kiosk/accountability?');
+        setAccountabilityKioskUrl(accountabilityUrl);
+        toast.success('Kiosk URLs regenerated!');
       } else {
         toast.error('Failed to regenerate kiosk URL');
       }
@@ -105,7 +112,12 @@ export default function SettingsPage() {
 
   const copyKioskUrl = () => {
     navigator.clipboard.writeText(kioskUrl);
-    toast.success('Kiosk URL copied to clipboard!');
+    toast.success('Checklist kiosk URL copied to clipboard!');
+  };
+
+  const copyAccountabilityKioskUrl = () => {
+    navigator.clipboard.writeText(accountabilityKioskUrl);
+    toast.success('Accountability kiosk URL copied to clipboard!');
   };
 
   const handleSave = async () => {
@@ -267,13 +279,15 @@ export default function SettingsPage() {
                 Dakboard / Kiosk Mode
               </CardTitle>
               <CardDescription>
-                Access your checklist dashboard without logging in - perfect for wall-mounted tablets
+                Access your dashboards without logging in - perfect for wall-mounted tablets
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              {/* Checklist Kiosk URL */}
               <div>
-                <Label>Kiosk URL</Label>
-                <div className="flex gap-2 mt-2">
+                <Label className="text-base font-semibold">Morning Checklist Kiosk</Label>
+                <p className="text-xs text-gray-600 mb-2">Shows daily checklist items for kids</p>
+                <div className="flex gap-2">
                   <Input
                     value={kioskUrl}
                     readOnly
@@ -299,8 +313,43 @@ export default function SettingsPage() {
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  This URL allows access to your checklist without logging in. Keep it private!
+              </div>
+
+              {/* Accountability Kiosk URL */}
+              <div>
+                <Label className="text-base font-semibold">Accountability Kiosk</Label>
+                <p className="text-xs text-gray-600 mb-2">Shows consequences and commitments</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={accountabilityKioskUrl}
+                    readOnly
+                    className="bg-gray-50 font-mono text-sm"
+                    placeholder="Loading..."
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyAccountabilityKioskUrl}
+                    disabled={!accountabilityKioskUrl}
+                    title="Copy URL"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => window.open(accountabilityKioskUrl, '_blank')}
+                    disabled={!accountabilityKioskUrl}
+                    title="Open in new tab"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <p className="text-xs text-gray-600">
+                  ⚠️ These URLs allow access without logging in. Keep them private and secure!
                 </p>
               </div>
 
@@ -309,10 +358,12 @@ export default function SettingsPage() {
                   How to use Kiosk Mode:
                 </h4>
                 <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                  <li>Open the kiosk URL on your wall-mounted tablet or device</li>
-                  <li>Bookmark it for easy access</li>
-                  <li>Kids can check off items without needing to log in</li>
-                  <li>Perfect for Dakboard or dedicated family dashboard displays</li>
+                  <li>Open either kiosk URL on your wall-mounted tablet or device</li>
+                  <li>Bookmark for easy access</li>
+                  <li>No login required - perfect for kids to use independently</li>
+                  <li>Checklist: Daily morning routines with completion tracking</li>
+                  <li>Accountability: Live view of consequences and commitments</li>
+                  <li>Ideal for Dakboard or dedicated family dashboard displays</li>
                 </ul>
               </div>
 
