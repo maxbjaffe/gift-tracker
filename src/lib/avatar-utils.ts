@@ -154,13 +154,13 @@ export function generateDefaultAvatar(): AvatarData {
 // Create avatar URL based on type and data
 export function getAvatarUrl(avatarData: AvatarData | null): string {
   if (!avatarData || !avatarData.type) {
-    // Default: random preset avatar
-    return getRandomPreset().url;
+    // Default: first preset avatar (consistent, not random)
+    return AVATAR_PRESETS[0].url;
   }
 
   if (avatarData.type === 'preset') {
     const preset = getPresetById(avatarData.data);
-    return preset?.url || getRandomPreset().url;
+    return preset?.url || AVATAR_PRESETS[0].url; // Use first preset as fallback, not random
   }
 
   // Emoji avatars don't have URLs, they're rendered as components
