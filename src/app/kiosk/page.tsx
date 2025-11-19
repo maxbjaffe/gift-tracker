@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, Sparkles, RefreshCw } from 'lucide-react';
 import { ChildAvatar } from '@/components/ChildAvatar';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
 interface Child {
   id: string;
@@ -146,6 +147,12 @@ function KioskChecklistContent() {
         return;
       }
 
+      // Check if this will complete the child's checklist
+      const childData = childrenData.get(childId);
+      const willComplete = !isCurrentlyCompleted &&
+                          childData &&
+                          childData.stats.remaining === 1;
+
       if (isCurrentlyCompleted) {
         await fetch(
           `/api/kiosk/checklist/completions?token=${encodeURIComponent(token)}&child_id=${childId}&item_id=${itemId}`,
@@ -163,6 +170,16 @@ function KioskChecklistContent() {
       if (userId) {
         await loadData(userId);
       }
+
+      // Celebrate when a child completes their checklist!
+      if (willComplete) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#10b981', '#3b82f6', '#fbbf24'],
+        });
+      }
     } catch (error) {
       console.error('Error toggling item:', error);
       toast.error(`Failed to update checklist: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -172,6 +189,37 @@ function KioskChecklistContent() {
   const allComplete =
     children.length > 0 &&
     children.every((child) => childrenData.get(child.id)?.stats.isComplete);
+
+  // Trigger celebration confetti when everyone completes their checklist
+  useEffect(() => {
+    if (allComplete && children.length > 0) {
+      // Big celebration for everyone being done!
+      const duration = 3000;
+      const end = Date.now() + duration;
+
+      const frame = () => {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899'],
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899'],
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+    }
+  }, [allComplete, children.length]);
 
   if (error) {
     return (
