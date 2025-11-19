@@ -78,6 +78,7 @@ function KioskChecklistContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -210,12 +211,15 @@ function KioskChecklistContent() {
           colors: ['#10b981', '#3b82f6', '#fbbf24'],
         });
 
-        // Show a fun completion message
+        // Show a BIG fun completion message
         const message = COMPLETION_MESSAGES[Math.floor(Math.random() * COMPLETION_MESSAGES.length)];
         const child = children.find(c => c.id === childId);
-        toast.success(`${child?.name}: ${message}`, {
-          duration: 4000,
-        });
+        setCelebrationMessage(`${child?.name}: ${message}`);
+
+        // Hide message after 4 seconds
+        setTimeout(() => {
+          setCelebrationMessage(null);
+        }, 4000);
       }
     } catch (error) {
       console.error('Error toggling item:', error);
@@ -282,16 +286,28 @@ function KioskChecklistContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
-      {/* Background Tiger Watermark */}
-      <div className="fixed bottom-0 right-0 opacity-10 pointer-events-none z-0">
+      {/* Background Tiger Watermark - BIGGER and MORE PRESENT */}
+      <div className="fixed bottom-0 right-0 opacity-20 pointer-events-none z-0">
         <Image
           src="/images/cottletiger.JPG"
           alt="Cottle Tiger Background"
-          width={500}
-          height={500}
+          width={1000}
+          height={1000}
           className="object-contain"
         />
       </div>
+
+      {/* BIG Celebration Message Overlay */}
+      {celebrationMessage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-16 py-12 rounded-3xl shadow-2xl transform animate-bounce">
+            <p className="text-6xl font-black text-center drop-shadow-lg">
+              {celebrationMessage}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">
         {/* Header */}
         <div className="mb-6">

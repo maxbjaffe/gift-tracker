@@ -9,7 +9,7 @@ import {
   getPresetById,
   getGradientClass,
   getAvatarSizeClasses,
-  getRandomPreset
+  AVATAR_PRESETS
 } from '@/lib/avatar-utils';
 
 export interface AvatarProps {
@@ -40,9 +40,9 @@ export default function Avatar({
   const avatarContent = useMemo(() => {
     // Preset avatar (new default)
     if (!type || type === 'preset') {
-      const presetId = data || getRandomPreset().id;
+      const presetId = data || AVATAR_PRESETS[0].id;
       const preset = getPresetById(presetId);
-      const avatarUrl = preset?.url || getRandomPreset().url;
+      const avatarUrl = preset?.url || AVATAR_PRESETS[0].url;
 
       return (
         <div className="w-full h-full relative bg-gradient-to-br from-gray-100 to-gray-200">
