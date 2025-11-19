@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -82,23 +83,32 @@ export default function ChecklistDashboard() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <div>
-              <Button variant="ghost" size="sm" asChild className="mb-2">
-                <Link href="/accountability">
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  Back to Dashboard
-                </Link>
-              </Button>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                Morning Checklist
-              </h1>
-              <p className="text-gray-600 mt-1">
-                {new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
+            <div className="flex items-center gap-4">
+              <Image
+                src="/images/cottletiger.JPG"
+                alt="Cottle Tiger"
+                width={100}
+                height={100}
+                className="rounded-lg shadow-md"
+              />
+              <div>
+                <Button variant="ghost" size="sm" asChild className="mb-2">
+                  <Link href="/accountability">
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Back to Dashboard
+                  </Link>
+                </Button>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  Morning Checklist
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  {new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
             </div>
             <Button variant="outline" asChild>
               <Link href="/accountability/checklist/manage">

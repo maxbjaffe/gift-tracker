@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,13 +137,22 @@ export default function AccountabilityPage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start justify-between gap-4 mb-2">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Family Accountability
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Track consequences and commitments to build responsibility
-              </p>
+            <div className="flex items-center gap-4">
+              <Image
+                src="/images/aimaxhead.png"
+                alt="AI Max"
+                width={120}
+                height={120}
+                className="rounded-full shadow-lg"
+              />
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Family Accountability
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Track consequences and commitments to build responsibility
+                </p>
+              </div>
             </div>
             <Button asChild className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
               <Link href="/accountability/checklist">

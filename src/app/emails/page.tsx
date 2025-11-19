@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -168,9 +169,27 @@ export default function EmailsPage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              School Emails
-            </h1>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-2">
+                <Image
+                  src="/images/cottlecrest.JPG"
+                  alt="Cottle Crest"
+                  width={80}
+                  height={80}
+                  className="rounded-lg shadow-md"
+                />
+                <Image
+                  src="/images/cottlepeace.JPG"
+                  alt="Cottle Peace"
+                  width={80}
+                  height={80}
+                  className="rounded-lg shadow-md"
+                />
+              </div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                School Emails
+              </h1>
+            </div>
             <div className="flex gap-2 flex-wrap">
               <Button onClick={handleProcessWithAI} variant="default" size="sm" disabled={processing}>
                 <Brain className="h-4 w-4 mr-2" />
