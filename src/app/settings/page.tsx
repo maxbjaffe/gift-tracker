@@ -70,12 +70,17 @@ export default function SettingsPage() {
   const loadKioskUrl = async () => {
     try {
       const response = await fetch('/api/kiosk/token');
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
         setKioskUrl(data.url);
+      } else {
+        console.error('Error loading kiosk URL:', data);
+        toast.error(`Failed to load kiosk URL: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error loading kiosk URL:', error);
+      toast.error('Failed to load kiosk URL');
     }
   };
 

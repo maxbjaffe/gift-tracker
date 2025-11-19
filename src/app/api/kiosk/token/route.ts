@@ -13,14 +13,17 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export async function GET() {
   try {
     // Get user from session
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    const cookieString = allCookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: false,
       },
       global: {
         headers: {
-          cookie: cookieStore.toString(),
+          cookie: cookieString,
         },
       },
     });
@@ -84,14 +87,17 @@ export async function GET() {
 export async function DELETE() {
   try {
     // Get user from session
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    const cookieString = allCookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: false,
       },
       global: {
         headers: {
-          cookie: cookieStore.toString(),
+          cookie: cookieString,
         },
       },
     });
