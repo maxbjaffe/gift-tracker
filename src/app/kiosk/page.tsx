@@ -11,6 +11,36 @@ import { ChildAvatar } from '@/components/ChildAvatar';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 
+// Fun completion messages
+const COMPLETION_MESSAGES = [
+  "🌟 You're a superstar!",
+  "🎉 Amazing job!",
+  "💪 You crushed it!",
+  "⭐ Awesome work!",
+  "🚀 Ready for liftoff!",
+  "🏆 Champion of the day!",
+  "✨ You're on fire!",
+  "🎯 Nailed it!",
+  "🌈 Fantastic work!",
+  "💎 You're brilliant!",
+  "🦸 Superhero status unlocked!",
+  "🎨 Masterfully done!",
+  "🎪 What a performance!",
+  "🌟 Shining bright today!",
+  "🎵 You're in perfect harmony!",
+];
+
+const ALL_COMPLETE_MESSAGES = [
+  "Everyone's Ready! 🎉",
+  "Team Complete! 🌟",
+  "Perfect Team Work! 💪",
+  "All Stars Ready! ⭐",
+  "Champions Assemble! 🏆",
+  "Ready to Conquer the Day! 🚀",
+  "100% Success Rate! ✨",
+  "Dream Team Ready! 🦸",
+];
+
 interface Child {
   id: string;
   name: string;
@@ -179,6 +209,13 @@ function KioskChecklistContent() {
           origin: { y: 0.6 },
           colors: ['#10b981', '#3b82f6', '#fbbf24'],
         });
+
+        // Show a fun completion message
+        const message = COMPLETION_MESSAGES[Math.floor(Math.random() * COMPLETION_MESSAGES.length)];
+        const child = children.find(c => c.id === childId);
+        toast.success(`${child?.name}: ${message}`, {
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('Error toggling item:', error);
@@ -288,7 +325,7 @@ function KioskChecklistContent() {
                 <Sparkles className="h-8 w-8 text-green-600" />
                 <div>
                   <h3 className="text-lg font-bold text-green-900">
-                    Everyone's Ready! 🎉
+                    {ALL_COMPLETE_MESSAGES[Math.floor(Math.random() * ALL_COMPLETE_MESSAGES.length)]}
                   </h3>
                   <p className="text-green-700">
                     All checklists are complete. Have a great day at school!
