@@ -55,43 +55,17 @@ export async function GET(request: NextRequest) {
       console.error('[Kiosk API] Error fetching consequences:', consequencesError);
     }
 
-    // Fetch today's commitments (due today or overdue)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const { data: commitments, error: commitmentsError } = await supabase
+    // Fetch all active commitments (sorted by due date)
+    const { data: allCommitments, error: commitmentsError } = await supabase
       .from('commitments')
       .select('*, child:children(id, name)')
       .in('status', ['active', 'completed'])
       .in('child_id', children?.map(c => c.id) || [])
-      .gte('due_date', today.toISOString())
-      .lt('due_date', tomorrow.toISOString())
       .order('due_date', { ascending: true });
 
     if (commitmentsError) {
       console.error('[Kiosk API] Error fetching commitments:', commitmentsError);
     }
-
-    // Also fetch overdue commitments
-    const { data: overdueCommitments, error: overdueError } = await supabase
-      .from('commitments')
-      .select('*, child:children(id, name)')
-      .eq('status', 'active')
-      .in('child_id', children?.map(c => c.id) || [])
-      .lt('due_date', today.toISOString())
-      .order('due_date', { ascending: true });
-
-    if (overdueError) {
-      console.error('[Kiosk API] Error fetching overdue commitments:', overdueError);
-    }
-
-    // Combine commitments (overdue first, then today's)
-    const allCommitments = [
-      ...(overdueCommitments || []),
-      ...(commitments || []),
-    ];
 
     return NextResponse.json({
       children: children || [],

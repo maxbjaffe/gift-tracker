@@ -311,17 +311,17 @@ function AccountabilityKioskContent() {
           </Card>
         )}
 
-        {/* Today's Commitments */}
+        {/* Active Commitments */}
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Target className="h-8 w-8 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Today's Commitments</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Active Commitments</h2>
           </div>
 
           {commitmentsByChild.every(({ commitments }) => commitments.length === 0) ? (
             <div className="text-center py-12 text-gray-500">
-              <p className="text-xl">No commitments for today</p>
-              <p className="text-sm mt-2">Enjoy your free time!</p>
+              <p className="text-xl">No active commitments</p>
+              <p className="text-sm mt-2">All clear!</p>
             </div>
           ) : (
             <div className="space-y-6">
