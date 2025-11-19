@@ -306,11 +306,13 @@ export class GmailService {
       console.log(`\nSaving ${emails.length} emails to database...`);
       let savedCount = 0;
       let skippedCount = 0;
+      const savedEmailIds: string[] = [];
 
       for (const email of emails) {
         const saved = await service.saveEmail(email, userId);
         if (saved) {
           savedCount++;
+          savedEmailIds.push(saved.id);
         } else {
           skippedCount++;
         }
@@ -318,6 +320,18 @@ export class GmailService {
 
       console.log(`✓ Saved ${savedCount} new emails`);
       console.log(`  Skipped ${skippedCount} duplicates\n`);
+
+      // Automatically process new emails with AI (async, don't wait)
+      if (savedEmailIds.length > 0) {
+        console.log(`🤖 Auto-processing ${savedEmailIds.length} new emails with AI...`);
+        // Import AIAnalysisService
+        const { AIAnalysisService } = await import('@/lib/email/aiAnalysisService');
+
+        // Process in background (don't await - let it happen asynchronously)
+        AIAnalysisService.processBatch(savedEmailIds, userId).catch((error) => {
+          console.error('Error in auto AI processing:', error);
+        });
+      }
 
       // Update sync status to success
       await supabase

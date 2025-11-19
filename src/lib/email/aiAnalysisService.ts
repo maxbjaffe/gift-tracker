@@ -45,14 +45,70 @@ interface EmailAnalysisResult {
  */
 export class AIAnalysisService {
   /**
+   * Get past email-child associations to help AI learn patterns
+   */
+  static async getPastAssociations(userId: string): Promise<string> {
+    const supabase = await createClient();
+
+    // Get recent emails with manual child associations (limit to 50 most recent)
+    const { data: associations } = await supabase
+      .from('email_child_relevance')
+      .select(`
+        email:school_emails(from_address, from_name, subject),
+        child:children(name),
+        relevance_type,
+        manually_set
+      `)
+      .eq('user_id', userId)
+      .eq('manually_set', true)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (!associations || associations.length === 0) {
+      return '';
+    }
+
+    // Build learning examples string
+    let learningStr = '\n\nPAST ASSOCIATIONS (learn from these patterns):\n';
+    for (const assoc of associations) {
+      if (assoc.email && assoc.child) {
+        learningStr += `- "${(assoc.email as any).subject}" from ${(assoc.email as any).from_name || (assoc.email as any).from_address} → ${(assoc.child as any).name} (${assoc.relevance_type})\n`;
+      }
+    }
+
+    return learningStr;
+  }
+
+  /**
    * Analyze a single email with Claude AI
    */
-  static async analyzeEmail(email: SchoolEmail): Promise<EmailAnalysisResult> {
-    const prompt = `You are analyzing a school email for a family with 3 children:
-- Riley (5th grade, Teacher: Cynthia Goracy)
-- Parker (3rd grade, Teacher: Mary Burke, has peanut allergy)
-- Devin (1st grade, Teacher: Diana Castro)
-School: William E. Cottle School, Tuckahoe UFSD
+  static async analyzeEmail(email: SchoolEmail, userId: string): Promise<EmailAnalysisResult> {
+    const supabase = await createClient();
+
+    // Load children for this user dynamically
+    const { data: children } = await supabase
+      .from('children')
+      .select('name, age, grade, notes')
+      .eq('user_id', userId);
+
+    if (!children || children.length === 0) {
+      throw new Error('No children found for user. Please add children first.');
+    }
+
+    // Build children description
+    let childrenDesc = '';
+    for (const child of children) {
+      childrenDesc += `- ${child.name}`;
+      if (child.grade) childrenDesc += ` (${child.grade})`;
+      if (child.notes) childrenDesc += `, ${child.notes}`;
+      childrenDesc += '\n';
+    }
+
+    // Get past associations for learning
+    const pastAssociations = await this.getPastAssociations(userId);
+
+    const prompt = `You are analyzing a school email for a family with ${children.length} ${children.length === 1 ? 'child' : 'children'}:
+${childrenDesc}${pastAssociations}
 
 Analyze this email and extract structured information:
 
@@ -91,13 +147,15 @@ Please analyze and return a JSON object with:
   ],
   "child_mentions": [
     {
-      "child_name": "Riley", "Parker", or "Devin",
+      "child_name": one of: ${children.map(c => `"${c.name}"`).join(', ')},
       "relevance_type": "primary" (email is about this child), "mentioned" (child mentioned), "shared" (applies to multiple kids), or "class_wide" (whole class/grade),
       "confidence": 0.0-1.0,
       "reasoning": "why you think this email relates to this child"
     }
   ]
 }
+
+Use the past associations to learn patterns - if you see similar senders, subjects, or content, apply the same child associations. But always use your judgment - the past associations are hints, not rules.
 
 Return ONLY the JSON object, no other text.`;
 
@@ -278,7 +336,7 @@ Return ONLY the JSON object, no other text.`;
     }
 
     // Analyze with AI
-    const analysis = await this.analyzeEmail(email);
+    const analysis = await this.analyzeEmail(email, userId);
 
     // Save results
     await this.saveAnalysis(emailId, userId, analysis);
