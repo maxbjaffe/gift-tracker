@@ -377,6 +377,7 @@ Return ONLY the JSON object, no other text.`;
     processed: number;
     failed: number;
     errors: string[];
+    remaining: number;
   }> {
     const supabase = await createClient();
 
@@ -393,6 +394,18 @@ Return ONLY the JSON object, no other text.`;
     }
 
     const emailIds = emails.map(e => e.id);
-    return await this.processBatch(emailIds, userId);
+    const result = await this.processBatch(emailIds, userId);
+
+    // Count remaining unprocessed emails
+    const { count } = await supabase
+      .from('school_emails')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .is('ai_processed_at', null);
+
+    return {
+      ...result,
+      remaining: count || 0,
+    };
   }
 }

@@ -132,18 +132,21 @@ export default function EmailsPage() {
   async function handleProcessWithAI() {
     try {
       setProcessing(true);
-      toast.info('Processing emails with AI...');
+      toast.info('Processing unprocessed emails with AI in batches...');
 
+      // Process in larger batches (50 at a time) for backlog
       const response = await fetch('/api/email/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ processAll: true, limit: 10 }),
+        body: JSON.stringify({ processAll: true, limit: 50 }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(`Processed ${data.processed} emails! ${data.failed > 0 ? `Failed: ${data.failed}` : ''}`);
+        toast.success(
+          `✅ Processed ${data.processed} emails! ${data.failed > 0 ? `Failed: ${data.failed}` : ''}${data.remaining > 0 ? `\n\n${data.remaining} unprocessed emails remaining. Click again to process more.` : '\n\nAll emails processed!'}`
+        );
         loadEmails(); // Refresh to show updated analysis
       } else {
         toast.error(data.error || 'Failed to process emails');
