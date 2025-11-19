@@ -31,8 +31,23 @@ interface ChildProgress {
   stats: ChecklistStats;
 }
 
+interface ChecklistItemData {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  display_order: number;
+  isCompleted: boolean;
+}
+
+interface ChildChecklistData {
+  checklist: ChecklistItemData[];
+  stats: ChecklistStats;
+}
+
 export default function ChecklistDashboard() {
   const [children, setChildren] = useState<Child[]>([]);
+  const [childrenData, setChildrenData] = useState<Map<string, ChildChecklistData>>(new Map());
   const [progress, setProgress] = useState<Map<string, ChecklistStats>>(new Map());
   const [loading, setLoading] = useState(true);
 
@@ -46,24 +61,30 @@ export default function ChecklistDashboard() {
 
       // Load children
       const childrenResponse = await fetch('/api/accountability/children');
-      const childrenData = await childrenResponse.json();
+      const childrenDataResponse = await childrenResponse.json();
 
-      if (childrenResponse.ok && childrenData.children) {
-        setChildren(childrenData.children);
+      if (childrenResponse.ok && childrenDataResponse.children) {
+        setChildren(childrenDataResponse.children);
 
-        // Load checklist stats for each child
+        // Load checklist data for each child
         const statsMap = new Map<string, ChecklistStats>();
+        const dataMap = new Map<string, ChildChecklistData>();
 
-        for (const child of childrenData.children) {
+        for (const child of childrenDataResponse.children) {
           const checklistResponse = await fetch(`/api/accountability/checklist/${child.id}`);
           const checklistData = await checklistResponse.json();
 
           if (checklistResponse.ok) {
             statsMap.set(child.id, checklistData.stats);
+            dataMap.set(child.id, {
+              checklist: checklistData.checklist || [],
+              stats: checklistData.stats
+            });
           }
         }
 
         setProgress(statsMap);
+        setChildrenData(dataMap);
       }
     } catch (error) {
       console.error('Error loading checklist data:', error);
@@ -137,7 +158,7 @@ export default function ChecklistDashboard() {
           )}
         </div>
 
-        {/* Children Grid */}
+        {/* Dakboard-style Children Grid */}
         {loading ? (
           <div className="text-center py-12 text-gray-600">Loading...</div>
         ) : children.length === 0 ? (
@@ -148,8 +169,9 @@ export default function ChecklistDashboard() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {children.map(child => {
+              const childData = childrenData.get(child.id);
               const stats = progress.get(child.id) || {
                 total: 0,
                 completed: 0,
@@ -161,65 +183,110 @@ export default function ChecklistDashboard() {
                 : 0;
 
               return (
-                <Link key={child.id} href={`/accountability/checklist/${child.id}`}>
-                  <Card className={`p-6 hover:shadow-lg transition-all cursor-pointer ${
-                    stats.isComplete
-                      ? 'bg-gradient-to-br from-green-50 to-blue-50 border-green-300'
-                      : 'bg-white'
-                  }`}>
-                    {/* Avatar & Name */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <ChildAvatar
-                        name={child.name}
-                        avatarType={child.avatar_type}
-                        avatarData={child.avatar_data}
-                        avatarBackground={child.avatar_background}
-                        size="lg"
-                      />
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900">
-                          {child.name}
-                        </h3>
-                        {child.age && (
-                          <p className="text-sm text-gray-600">Age {child.age}</p>
-                        )}
-                      </div>
-                      {stats.isComplete && (
-                        <CheckCircle2 className="h-8 w-8 text-green-600" />
+                <Card key={child.id} className={`p-6 ${
+                  stats.isComplete
+                    ? 'bg-gradient-to-br from-green-50 to-blue-50 border-green-300'
+                    : 'bg-white'
+                }`}>
+                  {/* Child Header */}
+                  <div className="flex items-center gap-3 mb-4 pb-4 border-b">
+                    <ChildAvatar
+                      name={child.name}
+                      avatarType={child.avatar_type}
+                      avatarData={child.avatar_data}
+                      avatarBackground={child.avatar_background}
+                      size="lg"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {child.name}
+                      </h3>
+                      {child.age && (
+                        <p className="text-sm text-gray-600">Age {child.age}</p>
                       )}
                     </div>
-
-                    {/* Progress */}
-                    {stats.total > 0 ? (
-                      <>
-                        <div className="mb-2">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-600">Progress</span>
-                            <span className="font-semibold text-gray-900">
-                              {stats.completed}/{stats.total}
-                            </span>
-                          </div>
-                          <Progress value={percentage} className="h-3" />
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {stats.isComplete ? (
-                            <span className="text-green-600 font-semibold">
-                              ✓ All done!
-                            </span>
-                          ) : (
-                            <span>
-                              {stats.remaining} item{stats.remaining !== 1 ? 's' : ''} remaining
-                            </span>
-                          )}
-                        </p>
-                      </>
-                    ) : (
-                      <div className="text-center py-4 text-gray-500 text-sm">
-                        No checklist items yet
-                      </div>
+                    {stats.isComplete && stats.total > 0 && (
+                      <CheckCircle2 className="h-8 w-8 text-green-600" />
                     )}
-                  </Card>
-                </Link>
+                  </div>
+
+                  {/* Progress Bar */}
+                  {stats.total > 0 && (
+                    <div className="mb-4">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-600 font-medium">Progress</span>
+                        <span className="font-bold text-gray-900">
+                          {stats.completed}/{stats.total}
+                        </span>
+                      </div>
+                      <Progress value={percentage} className="h-3" />
+                      {stats.isComplete && (
+                        <p className="text-green-600 font-semibold text-sm mt-2">
+                          ✓ All done! 🎉
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Checklist Items */}
+                  {!childData || childData.checklist.length === 0 ? (
+                    <div className="text-center py-6 text-gray-500 text-sm">
+                      <p>No checklist items yet</p>
+                      <Button variant="link" asChild className="mt-2">
+                        <Link href="/accountability/checklist/manage">Add Items</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {childData.checklist.map(item => (
+                        <div
+                          key={item.id}
+                          className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                            item.isCompleted
+                              ? 'bg-green-100 border border-green-300'
+                              : 'bg-gray-50 border border-gray-200'
+                          }`}
+                        >
+                          {/* Checkbox Icon */}
+                          <div className="flex-shrink-0">
+                            {item.isCompleted ? (
+                              <CheckCircle2 className="h-6 w-6 text-green-600" />
+                            ) : (
+                              <Circle className="h-6 w-6 text-gray-400" />
+                            )}
+                          </div>
+
+                          {/* Item Icon */}
+                          {item.icon && (
+                            <div className="text-2xl flex-shrink-0">
+                              {item.icon}
+                            </div>
+                          )}
+
+                          {/* Item Title */}
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium text-sm ${
+                              item.isCompleted
+                                ? 'text-green-900 line-through'
+                                : 'text-gray-900'
+                            }`}>
+                              {item.title}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* View Details Link */}
+                  {childData && childData.checklist.length > 0 && (
+                    <Button variant="link" asChild className="w-full mt-4">
+                      <Link href={`/accountability/checklist/${child.id}`}>
+                        Open Full Checklist →
+                      </Link>
+                    </Button>
+                  )}
+                </Card>
               );
             })}
           </div>
