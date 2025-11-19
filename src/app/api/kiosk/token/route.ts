@@ -49,7 +49,10 @@ export async function GET() {
       }
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // Get the base URL from the request headers
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+    const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_APP_URL || 'localhost:3000';
+    const baseUrl = `${protocol}://${host}`;
     const kioskUrl = `${baseUrl}/kiosk?token=${kioskToken}`;
 
     return NextResponse.json({
@@ -91,7 +94,10 @@ export async function DELETE() {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // Get the base URL from the request headers
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+    const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_APP_URL || 'localhost:3000';
+    const baseUrl = `${protocol}://${host}`;
     const kioskUrl = `${baseUrl}/kiosk?token=${newToken}`;
 
     return NextResponse.json({
