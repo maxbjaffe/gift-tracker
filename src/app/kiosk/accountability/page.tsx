@@ -238,166 +238,157 @@ function AccountabilityKioskContent() {
           </div>
         </div>
 
-        {/* Active Consequences */}
-        {data.consequences.length > 0 && (
-          <Card className="p-6 mb-6 border-red-300 bg-red-50/50">
-            <div className="flex items-center gap-3 mb-4">
-              <Ban className="h-8 w-8 text-red-600" />
-              <h2 className="text-2xl font-bold text-red-900">Active Consequences</h2>
-            </div>
+        {/* Children Grid - Each child shows consequences and commitments side by side */}
+        <div className="space-y-6">
+          {data.children.map(child => {
+            const childConsequences = data.consequences.filter(c => c.child_id === child.id);
+            const childCommitments = data.commitments.filter(c => c.child_id === child.id);
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.consequences.map(consequence => {
-                const progressData = getProgressData(consequence);
-                const child = data.children.find(c => c.id === consequence.child_id);
-
-                return (
-                  <Card key={consequence.id} className="p-4 bg-white border-red-200">
-                    <div className="flex items-start gap-3 mb-3">
-                      {child && (
-                        <ChildAvatar
-                          name={child.name}
-                          avatarType={child.avatar_type}
-                          avatarData={child.avatar_data}
-                          avatarBackground={child.avatar_background}
-                          size="md"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg text-gray-900">
-                          {consequence.child.name}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-2xl">{getRestrictionIcon(consequence.restriction_type)}</span>
-                          <span className="font-semibold text-red-700">
-                            {consequence.restriction_item}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {consequence.reason}
-                    </p>
-
-                    {progressData && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className={`font-medium ${progressData.isAlmostOver ? 'text-green-600' : 'text-orange-600'}`}>
-                            {progressData.remaining > 24 ? (
-                              `${Math.ceil(progressData.remaining / 24)} days left`
-                            ) : progressData.remaining > 0 ? (
-                              `${progressData.remaining} hours left`
-                            ) : (
-                              'Almost done!'
-                            )}
-                          </span>
-                          <span className="text-gray-500">
-                            {Math.round(progressData.percentage)}%
-                          </span>
-                        </div>
-                        <Progress value={progressData.percentage} className="h-3" />
-                        {progressData.isAlmostOver && (
-                          <p className="text-xs text-green-600 font-medium">
-                            🎉 Almost there!
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </Card>
-                );
-              })}
-            </div>
-          </Card>
-        )}
-
-        {/* Active Commitments */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Target className="h-8 w-8 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Active Commitments</h2>
-          </div>
-
-          {commitmentsByChild.every(({ commitments }) => commitments.length === 0) ? (
-            <div className="text-center py-12 text-gray-500">
-              <p className="text-xl">No active commitments</p>
-              <p className="text-sm mt-2">All clear!</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {commitmentsByChild.map(({ child, commitments }) => {
-                if (commitments.length === 0) return null;
-
-                return (
-                  <div key={child.id} className="space-y-3">
-                    <div className="flex items-center gap-3 pb-2 border-b-2 border-gray-200">
-                      <ChildAvatar
-                        name={child.name}
-                        avatarType={child.avatar_type}
-                        avatarData={child.avatar_data}
-                        avatarBackground={child.avatar_background}
-                        size="md"
-                      />
-                      <h3 className="text-xl font-bold text-gray-900">{child.name}</h3>
-                      <span className="text-sm text-gray-500">
-                        {commitments.filter(c => c.status === 'completed').length}/{commitments.length} completed
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 pl-12">
-                      {commitments.map(commitment => {
-                        const timeInfo = getTimeRemaining(commitment.due_date);
-                        const isCompleted = commitment.status === 'completed';
-
-                        return (
-                          <div
-                            key={commitment.id}
-                            className={`flex items-center gap-3 p-3 rounded-lg border-2 ${
-                              isCompleted
-                                ? 'bg-green-50 border-green-300'
-                                : timeInfo.isOverdue
-                                ? 'bg-red-50 border-red-300'
-                                : 'bg-blue-50 border-blue-200'
-                            }`}
-                          >
-                            <span className="text-2xl flex-shrink-0">
-                              {getCategoryIcon(commitment.category)}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <p className={`font-medium text-base ${isCompleted ? 'line-through text-gray-600' : 'text-gray-900'}`}>
-                                {commitment.commitment_text}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1 text-sm">
-                                {isCompleted ? (
-                                  <>
-                                    <CheckCircle className="h-4 w-4 text-green-600" />
-                                    <span className="text-green-600 font-medium">
-                                      Completed {commitment.completed_on_time ? 'on time' : 'late'}
-                                    </span>
-                                  </>
-                                ) : timeInfo.isOverdue ? (
-                                  <>
-                                    <AlertCircle className="h-4 w-4 text-red-600" />
-                                    <span className="text-red-600 font-medium">{timeInfo.text}</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Clock className="h-4 w-4 text-blue-600" />
-                                    <span className="text-blue-600 font-medium">Due {timeInfo.text}</span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+            return (
+              <Card key={child.id} className="p-6">
+                {/* Child Header */}
+                <div className="flex items-center gap-3 pb-4 mb-4 border-b-2 border-gray-200">
+                  <ChildAvatar
+                    name={child.name}
+                    avatarType={child.avatar_type}
+                    avatarData={child.avatar_data}
+                    avatarBackground={child.avatar_background}
+                    size="lg"
+                  />
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900">{child.name}</h2>
+                    <div className="flex gap-4 mt-1 text-sm text-gray-600">
+                      <span>{childConsequences.length} consequences</span>
+                      <span>•</span>
+                      <span>{childCommitments.length} commitments</span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </Card>
+                </div>
+
+                {/* Two Column Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Consequences Column */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Ban className="h-5 w-5 text-red-600" />
+                      <h3 className="text-lg font-bold text-red-900">Consequences</h3>
+                    </div>
+
+                    {childConsequences.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-lg">
+                        <p className="text-sm">No active consequences</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {childConsequences.map(consequence => {
+                          const progressData = getProgressData(consequence);
+
+                          return (
+                            <Card key={consequence.id} className="p-3 bg-red-50 border-red-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xl">{getRestrictionIcon(consequence.restriction_type)}</span>
+                                <span className="font-semibold text-red-700 text-sm">
+                                  {consequence.restriction_item}
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                {consequence.reason}
+                              </p>
+
+                              {progressData && (
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs">
+                                    <span className={`font-medium ${progressData.isAlmostOver ? 'text-green-600' : 'text-orange-600'}`}>
+                                      {progressData.remaining > 24 ? (
+                                        `${Math.ceil(progressData.remaining / 24)} days left`
+                                      ) : progressData.remaining > 0 ? (
+                                        `${progressData.remaining} hours left`
+                                      ) : (
+                                        'Almost done!'
+                                      )}
+                                    </span>
+                                    <span className="text-gray-500">
+                                      {Math.round(progressData.percentage)}%
+                                    </span>
+                                  </div>
+                                  <Progress value={progressData.percentage} className="h-2" />
+                                </div>
+                              )}
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Commitments Column */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Target className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-lg font-bold text-blue-900">Commitments</h3>
+                    </div>
+
+                    {childCommitments.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-lg">
+                        <p className="text-sm">No active commitments</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {childCommitments.map(commitment => {
+                          const timeInfo = getTimeRemaining(commitment.due_date);
+                          const isCompleted = commitment.status === 'completed';
+
+                          return (
+                            <div
+                              key={commitment.id}
+                              className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                isCompleted
+                                  ? 'bg-green-50 border-green-300'
+                                  : timeInfo.isOverdue
+                                  ? 'bg-red-50 border-red-300'
+                                  : 'bg-blue-50 border-blue-200'
+                              }`}
+                            >
+                              <span className="text-xl flex-shrink-0">
+                                {getCategoryIcon(commitment.category)}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-medium text-sm ${isCompleted ? 'line-through text-gray-600' : 'text-gray-900'}`}>
+                                  {commitment.commitment_text}
+                                </p>
+                                <div className="flex items-center gap-1 mt-1 text-xs">
+                                  {isCompleted ? (
+                                    <>
+                                      <CheckCircle className="h-3 w-3 text-green-600" />
+                                      <span className="text-green-600 font-medium">
+                                        Done {commitment.completed_on_time ? 'on time' : 'late'}
+                                      </span>
+                                    </>
+                                  ) : timeInfo.isOverdue ? (
+                                    <>
+                                      <AlertCircle className="h-3 w-3 text-red-600" />
+                                      <span className="text-red-600 font-medium">{timeInfo.text}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Clock className="h-3 w-3 text-blue-600" />
+                                      <span className="text-blue-600 font-medium">Due {timeInfo.text}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
