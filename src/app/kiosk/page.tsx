@@ -287,7 +287,7 @@ function KioskChecklistContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
       {/* Cottle Tigers on Left and Right Margins - BIG and BOLD */}
-      <div className="fixed left-0 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-20">
+      <div className="fixed -left-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
         <Image
           src="/images/cottletiger.JPG"
           alt="Cottle Tiger Left"
@@ -296,7 +296,7 @@ function KioskChecklistContent() {
           className="object-contain"
         />
       </div>
-      <div className="fixed right-0 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-20">
+      <div className="fixed -right-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
         <Image
           src="/images/cottletiger.JPG"
           alt="Cottle Tiger Right"
