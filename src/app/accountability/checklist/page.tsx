@@ -94,6 +94,31 @@ export default function ChecklistDashboard() {
     }
   }
 
+  async function toggleItem(childId: string, itemId: string, isCurrentlyCompleted: boolean) {
+    try {
+      if (isCurrentlyCompleted) {
+        // Uncheck
+        await fetch(
+          `/api/accountability/checklist/completions?child_id=${childId}&item_id=${itemId}`,
+          { method: 'DELETE' }
+        );
+      } else {
+        // Check
+        await fetch('/api/accountability/checklist/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ child_id: childId, item_id: itemId }),
+        });
+      }
+
+      // Reload data to update all displays
+      await loadData();
+    } catch (error) {
+      console.error('Error toggling item:', error);
+      toast.error('Failed to update checklist');
+    }
+  }
+
   const allComplete = children.length > 0 && children.every(child =>
     progress.get(child.id)?.isComplete
   );
@@ -241,10 +266,11 @@ export default function ChecklistDashboard() {
                       {childData.checklist.map(item => (
                         <div
                           key={item.id}
-                          className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                          onClick={() => toggleItem(child.id, item.id, item.isCompleted)}
+                          className={`flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer hover:shadow-md ${
                             item.isCompleted
                               ? 'bg-green-100 border border-green-300'
-                              : 'bg-gray-50 border border-gray-200'
+                              : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
                           }`}
                         >
                           {/* Checkbox Icon */}
