@@ -161,12 +161,14 @@ Please analyze and return a JSON object with:
   ],
   "child_mentions": [
     {
-      "child_name": one of: ${children.map(c => `"${c.name}"`).join(', ')},
-      "relevance_type": "primary" (email is about this child), "mentioned" (child mentioned), "shared" (applies to multiple kids), or "class_wide" (whole class/grade),
+      "child_name": "${children.map(c => c.name).join('" or "')}",
+      "relevance_type": "primary" | "mentioned" | "shared" | "class_wide",
       "confidence": 0.0-1.0,
       "reasoning": "why you think this email relates to this child"
     }
   ]
+
+Important: child_name must be one of: ${children.map(c => c.name).join(', ')}
 }
 
 Use the past associations to learn patterns - if you see similar senders, subjects, or content, apply the same child associations. But always use your judgment - the past associations are hints, not rules.
