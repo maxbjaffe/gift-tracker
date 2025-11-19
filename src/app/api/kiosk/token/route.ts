@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9,7 +9,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  * GET /api/kiosk/token
  * Generate or retrieve kiosk token for current user
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Get authenticated user using server helper
     const supabase = await createServerClient();
@@ -49,9 +49,9 @@ export async function GET() {
       }
     }
 
-    // Get the base URL from the request headers
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_APP_URL || 'localhost:3000';
+    // Get the base URL from the request
+    const host = request.headers.get('host') || 'localhost:3000';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
     const baseUrl = `${protocol}://${host}`;
     const kioskUrl = `${baseUrl}/kiosk?token=${kioskToken}`;
 
@@ -72,7 +72,7 @@ export async function GET() {
  * DELETE /api/kiosk/token
  * Regenerate kiosk token (invalidates old one)
  */
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   try {
     // Get authenticated user using server helper
     const supabase = await createServerClient();
@@ -94,9 +94,9 @@ export async function DELETE() {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    // Get the base URL from the request headers
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_APP_URL || 'localhost:3000';
+    // Get the base URL from the request
+    const host = request.headers.get('host') || 'localhost:3000';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
     const baseUrl = `${protocol}://${host}`;
     const kioskUrl = `${baseUrl}/kiosk?token=${newToken}`;
 
