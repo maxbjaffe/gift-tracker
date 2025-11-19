@@ -37,14 +37,21 @@ export default function EmailsPage() {
   const [priority, setPriority] = useState<string>('all');
   const [childId, setChildId] = useState<string>('all');
   const [filter, setFilter] = useState<string>('all');
+  const [page, setPage] = useState(1);
+  const [totalEmails, setTotalEmails] = useState(0);
+  const pageSize = 50;
 
   useEffect(() => {
     loadChildren();
   }, []);
 
   useEffect(() => {
+    setPage(1); // Reset to first page when filters change
+  }, [category, priority, childId, filter, search]);
+
+  useEffect(() => {
     loadEmails();
-  }, [category, priority, childId, filter]);
+  }, [category, priority, childId, filter, page]);
 
   async function loadChildren() {
     try {
@@ -74,11 +81,16 @@ export default function EmailsPage() {
 
       if (search) params.append('search', search);
 
+      // Pagination
+      params.append('limit', pageSize.toString());
+      params.append('offset', ((page - 1) * pageSize).toString());
+
       const response = await fetch(`/api/email/messages?${params.toString()}`);
       const data = await response.json();
 
       if (response.ok) {
         setEmails(data.emails || []);
+        setTotalEmails(data.total || 0);
       } else {
         toast.error('Failed to load emails');
       }
@@ -144,7 +156,7 @@ export default function EmailsPage() {
   }
 
   const stats = {
-    total: emails.length,
+    total: totalEmails, // Total from database, not just current page
     unread: emails.filter(e => !e.is_read).length,
     starred: emails.filter(e => e.is_starred).length,
     actionRequired: emails.filter(e => e.ai_action_required).length,
@@ -363,8 +375,53 @@ export default function EmailsPage() {
         <EmailList
           emails={emails}
           loading={loading}
-          emptyMessage={filter === 'unread' ? 'No unread emails' : 'No emails found'}
+          emptyMessage={filter === 'all' ? 'No emails found' : `No ${filter} emails`}
         />
+
+        {/* Pagination */}
+        {totalEmails > pageSize && (
+          <Card className="p-4 mt-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, totalEmails)} of {totalEmails} emails
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, Math.ceil(totalEmails / pageSize)) }, (_, i) => {
+                    const pageNum = page <= 3 ? i + 1 : page - 2 + i;
+                    if (pageNum > Math.ceil(totalEmails / pageSize)) return null;
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={page === pageNum ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.min(Math.ceil(totalEmails / pageSize), p + 1))}
+                  disabled={page >= Math.ceil(totalEmails / pageSize)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );
