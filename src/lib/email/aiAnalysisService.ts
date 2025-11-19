@@ -56,9 +56,8 @@ export class AIAnalysisService {
       // Get recent emails with manual child associations (simplified query)
       const { data: associations, error } = await supabase
         .from('email_child_relevance')
-        .select('email_id, child_id, relevance_type, manually_set')
+        .select('email_id, child_id, relevance_type')
         .eq('user_id', userId)
-        .eq('manually_set', true)
         .order('created_at', { ascending: false })
         .limit(20); // Reduced to 20 for performance
 
@@ -193,8 +192,18 @@ Return ONLY the JSON object, no other text.`;
 
       console.log(`[AI Analysis] Got response from Claude, parsing JSON...`);
 
+      // Strip markdown code blocks if present
+      let cleanedText = responseText.trim();
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.replace(/^```json\n/, '').replace(/\n```$/, '');
+        console.log('[AI Analysis] Stripped ```json markdown wrapper');
+      } else if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/^```\n/, '').replace(/\n```$/, '');
+        console.log('[AI Analysis] Stripped ``` markdown wrapper');
+      }
+
       // Parse JSON response
-      const analysis: EmailAnalysisResult = JSON.parse(responseText);
+      const analysis: EmailAnalysisResult = JSON.parse(cleanedText);
 
       console.log('[AI Analysis] Analysis complete:', {
         subject: email.subject,
