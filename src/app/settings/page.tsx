@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Phone, Save, User } from 'lucide-react';
+import { Loader2, Phone, Save, User, Monitor, Copy, RefreshCw, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
@@ -15,9 +15,12 @@ export default function SettingsPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [kioskUrl, setKioskUrl] = useState('');
+  const [loadingKiosk, setLoadingKiosk] = useState(false);
 
   useEffect(() => {
     loadProfile();
+    loadKioskUrl();
   }, []);
 
   const loadProfile = async () => {
@@ -62,6 +65,42 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadKioskUrl = async () => {
+    try {
+      const response = await fetch('/api/kiosk/token');
+      if (response.ok) {
+        const data = await response.json();
+        setKioskUrl(data.url);
+      }
+    } catch (error) {
+      console.error('Error loading kiosk URL:', error);
+    }
+  };
+
+  const regenerateKioskUrl = async () => {
+    setLoadingKiosk(true);
+    try {
+      const response = await fetch('/api/kiosk/token', { method: 'DELETE' });
+      if (response.ok) {
+        const data = await response.json();
+        setKioskUrl(data.url);
+        toast.success('Kiosk URL regenerated!');
+      } else {
+        toast.error('Failed to regenerate kiosk URL');
+      }
+    } catch (error) {
+      console.error('Error regenerating kiosk URL:', error);
+      toast.error('Failed to regenerate kiosk URL');
+    } finally {
+      setLoadingKiosk(false);
+    }
+  };
+
+  const copyKioskUrl = () => {
+    navigator.clipboard.writeText(kioskUrl);
+    toast.success('Kiosk URL copied to clipboard!');
   };
 
   const handleSave = async () => {
@@ -212,6 +251,84 @@ export default function SettingsPage() {
                   </p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Kiosk/Dakboard Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Monitor className="h-5 w-5" />
+                Dakboard / Kiosk Mode
+              </CardTitle>
+              <CardDescription>
+                Access your checklist dashboard without logging in - perfect for wall-mounted tablets
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Kiosk URL</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={kioskUrl}
+                    readOnly
+                    className="bg-gray-50 font-mono text-sm"
+                    placeholder="Loading..."
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyKioskUrl}
+                    disabled={!kioskUrl}
+                    title="Copy URL"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => window.open(kioskUrl, '_blank')}
+                    disabled={!kioskUrl}
+                    title="Open in new tab"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  This URL allows access to your checklist without logging in. Keep it private!
+                </p>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2">
+                  How to use Kiosk Mode:
+                </h4>
+                <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                  <li>Open the kiosk URL on your wall-mounted tablet or device</li>
+                  <li>Bookmark it for easy access</li>
+                  <li>Kids can check off items without needing to log in</li>
+                  <li>Perfect for Dakboard or dedicated family dashboard displays</li>
+                </ul>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={regenerateKioskUrl}
+                  disabled={loadingKiosk}
+                >
+                  {loadingKiosk ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Regenerate URL
+                </Button>
+                <p className="text-xs text-gray-500 self-center">
+                  (This will invalidate the old URL)
+                </p>
+              </div>
             </CardContent>
           </Card>
 
