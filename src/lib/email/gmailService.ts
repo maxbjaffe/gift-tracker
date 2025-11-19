@@ -74,8 +74,8 @@ export class GmailService {
       since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     }
 
-    const limit = options.limit || 500; // Increased default limit
-    const pageSize = 100; // Gmail API max per page
+    const limit = options.limit || 50; // Reduced to prevent timeouts
+    const pageSize = 50; // Reduced batch size for faster processing
 
     try {
       // Build query with school email filters
@@ -303,7 +303,7 @@ export class GmailService {
       const service = new GmailService(account);
       const emails = await service.fetchEmails({
         since: account.fetch_since_date ? new Date(account.fetch_since_date) : undefined,
-        limit: 500, // Fetch up to 500 emails per sync (will paginate automatically)
+        limit: 50, // Reduced to 50 emails per sync to prevent timeouts
       });
 
       let savedCount = 0;

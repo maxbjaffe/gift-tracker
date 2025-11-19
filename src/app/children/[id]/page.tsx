@@ -24,6 +24,7 @@ import {
   Inbox,
   CheckSquare,
   BarChart3,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -198,6 +199,31 @@ export default function ChildProfilePage() {
     setSelectedEmails(new Set());
   }
 
+  async function handleDelete() {
+    if (!child) return;
+
+    if (!confirm(`Are you sure you want to delete ${child.name}? This will remove all associated data and cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/accountability/children?id=${childId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success(`${child.name} has been deleted`);
+        router.push('/children');
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Failed to delete child');
+      }
+    } catch (error) {
+      console.error('Error deleting child:', error);
+      toast.error('Failed to delete child');
+    }
+  }
+
   const getAvatarColor = (color?: string) => {
     const colors: Record<string, string> = {
       blue: 'bg-blue-500',
@@ -265,12 +291,22 @@ export default function ChildProfilePage() {
                   </Badge>
                 </div>
               </div>
-              <Button variant="outline" asChild>
-                <Link href="/accountability">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Link>
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" asChild>
+                  <Link href={`/accountability/children/${childId}/edit`}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleDelete}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
             </div>
           </Card>
         </div>

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, GraduationCap, Plus, ArrowRight } from 'lucide-react';
+import { User, Mail, GraduationCap, Plus, ArrowRight, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -78,6 +78,29 @@ export default function ChildrenPage() {
     }
   }
 
+  async function handleDelete(childId: string, childName: string) {
+    if (!confirm(`Are you sure you want to delete ${childName}? This will remove all associated data and cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/accountability/children?id=${childId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success(`${childName} has been deleted`);
+        loadChildren(); // Refresh the list
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Failed to delete child');
+      }
+    } catch (error) {
+      console.error('Error deleting child:', error);
+      toast.error('Failed to delete child');
+    }
+  }
+
   const getAvatarColor = (color?: string) => {
     const colors: Record<string, string> = {
       blue: 'bg-blue-500',
@@ -141,66 +164,75 @@ export default function ChildrenPage() {
             {children.map((child) => {
               const childStats = stats[child.id];
               return (
-                <Link key={child.id} href={`/children/${child.id}`}>
-                  <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
-                    <div className="space-y-4">
-                      {/* Avatar & Name */}
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`w-16 h-16 rounded-full ${getAvatarColor(
-                            child.avatar_color
-                          )} flex items-center justify-center text-white text-2xl font-bold`}
-                        >
-                          {child.name.charAt(0).toUpperCase()}
+                <Card key={child.id} className="p-6 hover:shadow-lg transition-shadow h-full relative">
+                  <div className="space-y-4">
+                    {/* Avatar & Name */}
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={`w-16 h-16 rounded-full ${getAvatarColor(
+                          child.avatar_color
+                        )} flex items-center justify-center text-white text-2xl font-bold`}
+                      >
+                        {child.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900">{child.name}</h3>
+                        {child.grade && (
+                          <p className="text-sm text-gray-600 flex items-center gap-1">
+                            <GraduationCap className="h-3 w-3" />
+                            {child.grade}
+                          </p>
+                        )}
+                      </div>
+                      {/* Delete Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(child.id, child.name)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* Teacher Info */}
+                    {child.teacher && (
+                      <div className="bg-purple-50 p-3 rounded">
+                        <p className="text-xs text-gray-600 mb-1">Teacher</p>
+                        <p className="font-medium text-gray-900">{child.teacher}</p>
+                      </div>
+                    )}
+
+                    {/* Email Stats */}
+                    {childStats && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-blue-50 p-3 rounded text-center">
+                          <Mail className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                          <p className="text-2xl font-bold text-blue-600">
+                            {childStats.emailCount || 0}
+                          </p>
+                          <p className="text-xs text-gray-600">Emails</p>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-gray-900">{child.name}</h3>
-                          {child.grade && (
-                            <p className="text-sm text-gray-600 flex items-center gap-1">
-                              <GraduationCap className="h-3 w-3" />
-                              {child.grade}
-                            </p>
-                          )}
+                        <div className="bg-orange-50 p-3 rounded text-center">
+                          <Badge className="bg-orange-600 text-white mb-1">
+                            {childStats.unreadCount || 0}
+                          </Badge>
+                          <p className="text-xs text-gray-600 mt-1">Unread</p>
                         </div>
                       </div>
+                    )}
 
-                      {/* Teacher Info */}
-                      {child.teacher && (
-                        <div className="bg-purple-50 p-3 rounded">
-                          <p className="text-xs text-gray-600 mb-1">Teacher</p>
-                          <p className="font-medium text-gray-900">{child.teacher}</p>
-                        </div>
-                      )}
-
-                      {/* Email Stats */}
-                      {childStats && (
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-blue-50 p-3 rounded text-center">
-                            <Mail className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-                            <p className="text-2xl font-bold text-blue-600">
-                              {childStats.emailCount || 0}
-                            </p>
-                            <p className="text-xs text-gray-600">Emails</p>
-                          </div>
-                          <div className="bg-orange-50 p-3 rounded text-center">
-                            <Badge className="bg-orange-600 text-white mb-1">
-                              {childStats.unreadCount || 0}
-                            </Badge>
-                            <p className="text-xs text-gray-600 mt-1">Unread</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* View Profile Button */}
-                      <Button variant="outline" className="w-full" asChild>
+                    {/* View Profile Button */}
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href={`/children/${child.id}`}>
                         <div className="flex items-center justify-center gap-2">
                           View Profile
                           <ArrowRight className="h-4 w-4" />
                         </div>
-                      </Button>
-                    </div>
-                  </Card>
-                </Link>
+                      </Link>
+                    </Button>
+                  </div>
+                </Card>
               );
             })}
           </div>

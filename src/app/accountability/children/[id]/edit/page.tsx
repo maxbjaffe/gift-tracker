@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { fetchChild, updateChild } from '@/lib/services/accountability';
 import type { Child } from '@/types/accountability';
 import { toast } from 'sonner';
@@ -26,6 +27,10 @@ export default function EditChildPage() {
   const [formData, setFormData] = useState({
     name: '',
     age: '',
+    grade: '',
+    teacher: '',
+    school: '',
+    notes: '',
   });
 
   useEffect(() => {
@@ -40,6 +45,10 @@ export default function EditChildPage() {
         setFormData({
           name: data.name,
           age: data.age?.toString() || '',
+          grade: (data as any).grade || '',
+          teacher: (data as any).teacher || '',
+          school: (data as any).school || '',
+          notes: (data as any).notes || '',
         });
         // Load existing avatar data if available
         if (data.avatar_type && data.avatar_data) {
@@ -72,7 +81,11 @@ export default function EditChildPage() {
         avatar_type: avatar?.type || null,
         avatar_data: avatar?.data || null,
         avatar_background: avatar?.background || null,
-      });
+        grade: formData.grade || null,
+        teacher: formData.teacher || null,
+        school: formData.school || null,
+        notes: formData.notes || null,
+      } as any);
 
       toast.success(`${formData.name} updated successfully!`);
       router.push('/accountability/children');
@@ -144,6 +157,58 @@ export default function EditChildPage() {
                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                 placeholder="Enter age"
                 className="mt-1"
+              />
+            </div>
+
+            {/* Grade */}
+            <div>
+              <Label htmlFor="grade">Grade (optional)</Label>
+              <Input
+                id="grade"
+                type="text"
+                value={formData.grade}
+                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                placeholder="e.g., 3rd Grade, Kindergarten"
+                className="mt-1"
+              />
+            </div>
+
+            {/* Teacher */}
+            <div>
+              <Label htmlFor="teacher">Teacher (optional)</Label>
+              <Input
+                id="teacher"
+                type="text"
+                value={formData.teacher}
+                onChange={(e) => setFormData({ ...formData, teacher: e.target.value })}
+                placeholder="e.g., Mrs. Smith"
+                className="mt-1"
+              />
+            </div>
+
+            {/* School */}
+            <div>
+              <Label htmlFor="school">School (optional)</Label>
+              <Input
+                id="school"
+                type="text"
+                value={formData.school}
+                onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                placeholder="e.g., Tuckahoe Elementary"
+                className="mt-1"
+              />
+            </div>
+
+            {/* Notes */}
+            <div>
+              <Label htmlFor="notes">Notes (optional)</Label>
+              <Textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder="Any additional notes about this child"
+                className="mt-1"
+                rows={3}
               />
             </div>
 

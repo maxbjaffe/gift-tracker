@@ -9,8 +9,12 @@ import { GmailService } from '@/lib/email/gmailService';
 import { EmailService } from '@/lib/email/emailService';
 
 export const maxDuration = 60; // Allow up to 60 seconds for sync
+export const dynamic = 'force-dynamic'; // Ensure this route is always dynamic
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  console.log('[Email Sync] Starting sync operation...');
+
   try {
     const supabase = await createClient();
 
@@ -74,15 +78,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const duration = Date.now() - startTime;
+    console.log(`[Email Sync] Completed in ${duration}ms - Fetched: ${totalFetched}, Saved: ${totalSaved}`);
+
     return NextResponse.json({
       success: true,
       message: `Synced ${accounts.length} account(s)`,
       emailsFetched: totalFetched,
       emailsSaved: totalSaved,
       accounts: results,
+      duration,
     });
   } catch (error: any) {
-    console.error('Error in POST /api/email/sync:', error);
+    const duration = Date.now() - startTime;
+    console.error(`[Email Sync] Failed after ${duration}ms:`, error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
