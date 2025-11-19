@@ -135,12 +135,22 @@ export default function AccountabilityPage() {
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Family Accountability
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Track consequences and commitments to build responsibility
-          </p>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Family Accountability
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Track consequences and commitments to build responsibility
+              </p>
+            </div>
+            <Button asChild className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+              <Link href="/accountability/checklist">
+                <CheckSquare className="h-5 w-5 mr-2" />
+                Daily Checklist
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* No Children State */}
