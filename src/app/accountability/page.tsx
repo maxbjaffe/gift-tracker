@@ -10,6 +10,8 @@ import { ConsequenceCard } from '@/components/accountability/ConsequenceCard';
 import { CommitmentCard } from '@/components/accountability/CommitmentCard';
 import { ReliabilityScore } from '@/components/accountability/ReliabilityScore';
 import { ChildSelector } from '@/components/accountability/ChildSelector';
+import { CreateCommitmentDialog } from '@/components/accountability/CreateCommitmentDialog';
+import { CreateConsequenceDialog } from '@/components/accountability/CreateConsequenceDialog';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import type { AccountabilityDashboard } from '@/types/accountability';
 import {
@@ -262,6 +264,16 @@ export default function AccountabilityPage() {
                   </h3>
                 </div>
                 <div className="flex gap-2 flex-wrap">
+                  <CreateCommitmentDialog
+                    children={dashboard.children}
+                    onSuccess={loadDashboard}
+                    defaultChildId={selectedChildId !== 'all' ? selectedChildId : undefined}
+                  />
+                  <CreateConsequenceDialog
+                    children={dashboard.children}
+                    onSuccess={loadDashboard}
+                    defaultChildId={selectedChildId !== 'all' ? selectedChildId : undefined}
+                  />
                   <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
                     <Link href="/accountability/consequences">
                       <Shield className="h-4 w-4 mr-2" />
@@ -299,9 +311,9 @@ export default function AccountabilityPage() {
                     </Link>
                   </Button>
                   <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
-                    <Link href="/accountability/dakboard">
+                    <Link href="/kiosk">
                       <Monitor className="h-4 w-4 mr-2" />
-                      DAKboard
+                      Kiosk Display
                     </Link>
                   </Button>
                   <Button variant="outline" asChild className="bg-white hover:bg-gray-50">
