@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 /**
  * GET /api/kiosk/token
@@ -12,7 +12,19 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  */
 export async function GET() {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    // Get user from session
+    const cookieStore = cookies();
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+      },
+      global: {
+        headers: {
+          cookie: cookieStore.toString(),
+        },
+      },
+    });
+
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -71,7 +83,19 @@ export async function GET() {
  */
 export async function DELETE() {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    // Get user from session
+    const cookieStore = cookies();
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+      },
+      global: {
+        headers: {
+          cookie: cookieStore.toString(),
+        },
+      },
+    });
+
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
