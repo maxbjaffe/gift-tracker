@@ -13,7 +13,9 @@ export const dynamic = 'force-dynamic'; // Ensure this route is always dynamic
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  console.log('[Email Sync] Starting sync operation...');
+  console.error('========================================');
+  console.error('[Email Sync] Starting sync operation...');
+  console.error('========================================');
 
   try {
     const supabase = await createClient();

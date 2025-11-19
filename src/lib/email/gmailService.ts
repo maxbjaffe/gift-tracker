@@ -63,24 +63,12 @@ export class GmailService {
    */
   async fetchEmails(options: FetchOptions = {}): Promise<any[]> {
     const gmail = await this.initializeGmail();
+    const supabase = await createClient();
 
-    // Ensure since is a Date object
-    let since: Date;
-    if (options.since) {
-      since = options.since;
-    } else if (this.account.fetch_since_date) {
-      since = new Date(this.account.fetch_since_date);
-    } else {
-      since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    }
-
-    const limit = options.limit || 50; // Reduced to prevent timeouts
-    const pageSize = 50; // Reduced batch size for faster processing
+    const limit = options.limit || 500; // Fetch up to 500 emails per sync
+    const pageSize = 100; // Gmail API batch size (100 per page)
 
     try {
-      // Build query with school email filters
-      const afterDate = since.toISOString().split('T')[0].replace(/-/g, '/');
-
       // Filter for school-related emails (matching your Python scanner)
       const schoolDomains = [
         'cottle',
@@ -91,10 +79,15 @@ export class GmailService {
       ];
 
       const fromFilters = schoolDomains.map(domain => `from:${domain}`).join(' OR ');
-      const query = `after:${afterDate} (${fromFilters})`;
 
-      console.log('Gmail query:', query);
-      console.log('Fetching up to', limit, 'emails...');
+      // Just fetch all matching emails without date filtering
+      // The database will handle deduplication via message_id
+      let query = `(${fromFilters})`;
+
+      console.error(`📧 Fetching all school emails (database will skip duplicates)`);
+
+      console.error('Gmail query:', query);
+      console.error('Fetching up to', limit, 'emails...');
 
       // Fetch messages with pagination
       let allMessages: any[] = [];
@@ -132,6 +125,8 @@ export class GmailService {
 
       // Fetch full message details
       const fetchedMessages = [];
+      console.log(`\nFetching details for ${allMessages.length} messages...`);
+
       for (let i = 0; i < allMessages.length; i++) {
         const message = allMessages[i];
         try {
@@ -159,14 +154,16 @@ export class GmailService {
           });
 
           if ((i + 1) % 10 === 0) {
-            console.log(`Fetched ${i + 1}/${allMessages.length} emails...`);
+            console.log(`  Fetched ${i + 1}/${allMessages.length} emails...`);
           }
         } catch (err) {
-          console.error(`Error fetching message ${message.id}:`, err);
+          console.error(`  Error fetching message ${message.id}:`, err);
         }
       }
 
-      console.log(`Successfully fetched ${fetchedMessages.length} emails`);
+      console.log(`\n✓ Successfully fetched ${fetchedMessages.length} emails`);
+      console.log(`  Date range: ${fetchedMessages[0]?.date?.toISOString()} to ${fetchedMessages[fetchedMessages.length - 1]?.date?.toISOString()}`);
+
       return fetchedMessages;
     } catch (error) {
       console.error('Error fetching Gmail messages:', error);
@@ -200,7 +197,7 @@ export class GmailService {
         .single();
 
       if (existing) {
-        console.log('Email already exists:', parsedEmail.messageId);
+        // Email already exists - skip it silently (this is normal for pagination)
         return null;
       }
 
@@ -303,14 +300,24 @@ export class GmailService {
       const service = new GmailService(account);
       const emails = await service.fetchEmails({
         since: account.fetch_since_date ? new Date(account.fetch_since_date) : undefined,
-        limit: 50, // Reduced to 50 emails per sync to prevent timeouts
+        limit: 500, // Fetch 500 emails per sync (will auto-skip duplicates)
       });
 
+      console.log(`\nSaving ${emails.length} emails to database...`);
       let savedCount = 0;
+      let skippedCount = 0;
+
       for (const email of emails) {
         const saved = await service.saveEmail(email, userId);
-        if (saved) savedCount++;
+        if (saved) {
+          savedCount++;
+        } else {
+          skippedCount++;
+        }
       }
+
+      console.log(`✓ Saved ${savedCount} new emails`);
+      console.log(`  Skipped ${skippedCount} duplicates\n`);
 
       // Update sync status to success
       await supabase
