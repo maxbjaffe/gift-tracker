@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 /**
  * GET /api/kiosk/token
@@ -12,22 +11,8 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
  */
 export async function GET() {
   try {
-    // Get user from session
-    const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll();
-    const cookieString = allCookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: false,
-      },
-      global: {
-        headers: {
-          cookie: cookieString,
-        },
-      },
-    });
-
+    // Get authenticated user using server helper
+    const supabase = await createServerClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -86,22 +71,8 @@ export async function GET() {
  */
 export async function DELETE() {
   try {
-    // Get user from session
-    const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll();
-    const cookieString = allCookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: false,
-      },
-      global: {
-        headers: {
-          cookie: cookieString,
-        },
-      },
-    });
-
+    // Get authenticated user using server helper
+    const supabase = await createServerClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
