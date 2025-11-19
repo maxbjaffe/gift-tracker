@@ -360,6 +360,9 @@ Return ONLY the JSON object, no other text.`;
       try {
         await this.processEmail(emailId, userId);
         processed++;
+
+        // Small delay to avoid rate limiting (100ms between emails)
+        await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error: any) {
         failed++;
         errors.push(`Email ${emailId}: ${error.message}`);

@@ -134,11 +134,11 @@ export default function EmailsPage() {
       setProcessing(true);
       toast.info('Processing unprocessed emails with AI in batches...');
 
-      // Process in larger batches (50 at a time) for backlog
+      // Process in manageable batches (20 at a time) for backlog
       const response = await fetch('/api/email/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ processAll: true, limit: 50 }),
+        body: JSON.stringify({ processAll: true, limit: 20 }),
       });
 
       const data = await response.json();
