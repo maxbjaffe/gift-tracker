@@ -17,24 +17,19 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Verify the kiosk token and get user_id
-    const { data: kioskData, error: kioskError } = await supabase
-      .from('kiosk_tokens')
-      .select('user_id, expires_at')
-      .eq('token', token)
+    // Verify the kiosk token and get user_id from profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('kiosk_token', token)
       .single();
 
-    if (kioskError || !kioskData) {
-      console.error('[Kiosk API] Invalid token:', kioskError);
+    if (profileError || !profile) {
+      console.error('[Kiosk API] Invalid token:', profileError);
       return NextResponse.json({ error: 'Invalid kiosk token' }, { status: 403 });
     }
 
-    // Check if token is expired
-    if (kioskData.expires_at && new Date(kioskData.expires_at) < new Date()) {
-      return NextResponse.json({ error: 'Kiosk token expired' }, { status: 403 });
-    }
-
-    const userId = kioskData.user_id;
+    const userId = profile.id;
 
     // Fetch children
     const { data: children, error: childrenError } = await supabase
