@@ -165,13 +165,22 @@ export default function EmailsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 relative overflow-hidden">
-      {/* Background Cottle Crest Watermark */}
-      <div className="fixed top-0 right-0 opacity-10 pointer-events-none z-0">
+      {/* Cottle Crest on Left and Right Margins - BIG and BOLD */}
+      <div className="fixed -left-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
         <Image
           src="/images/cottlecrest.JPG"
-          alt="Cottle Crest Background"
-          width={500}
-          height={500}
+          alt="Cottle Crest Left"
+          width={800}
+          height={800}
+          className="object-contain"
+        />
+      </div>
+      <div className="fixed -right-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
+        <Image
+          src="/images/cottlecrest.JPG"
+          alt="Cottle Crest Right"
+          width={800}
+          height={800}
           className="object-contain"
         />
       </div>

@@ -133,13 +133,22 @@ export default function AccountabilityPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Background AI Max Watermark */}
-      <div className="fixed bottom-0 left-0 opacity-10 pointer-events-none z-0">
+      {/* AI Max on Left and Right Margins - BIG and BOLD */}
+      <div className="fixed -left-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
         <Image
           src="/images/aimaxhead.png"
-          alt="AI Max Background"
-          width={600}
-          height={600}
+          alt="AI Max Left"
+          width={800}
+          height={800}
+          className="object-contain"
+        />
+      </div>
+      <div className="fixed -right-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
+        <Image
+          src="/images/aimaxhead.png"
+          alt="AI Max Right"
+          width={800}
+          height={800}
           className="object-contain"
         />
       </div>
