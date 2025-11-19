@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
@@ -38,7 +38,7 @@ interface ChildChecklistData {
   };
 }
 
-export default function KioskChecklistPage() {
+function KioskChecklistContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
@@ -336,5 +336,17 @@ export default function KioskChecklistPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function KioskChecklistPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-lg text-gray-600">Loading...</div>
+      </div>
+    }>
+      <KioskChecklistContent />
+    </Suspense>
   );
 }
