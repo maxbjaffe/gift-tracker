@@ -3,8 +3,11 @@
  * Fetches active consequences and today's commitments for DAKboard-style display
  */
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +18,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No token provided' }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    // Use service role key for kiosk access (no cookies needed)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify the kiosk token and get user_id from profiles table
     const { data: profile, error: profileError } = await supabase
