@@ -65,7 +65,7 @@ export class GmailService {
     const gmail = await this.initializeGmail();
     const supabase = await createClient();
 
-    const limit = options.limit || 500; // Fetch up to 500 emails per sync
+    const limit = options.limit || 100; // Fetch 100 emails per sync (fits within 60s timeout)
     const pageSize = 100; // Gmail API batch size (100 per page)
 
     try {
@@ -300,7 +300,7 @@ export class GmailService {
       const service = new GmailService(account);
       const emails = await service.fetchEmails({
         since: account.fetch_since_date ? new Date(account.fetch_since_date) : undefined,
-        limit: 500, // Fetch 500 emails per sync (will auto-skip duplicates)
+        limit: 100, // Fetch 100 emails per sync (fits within 60s timeout)
       });
 
       console.log(`\nSaving ${emails.length} emails to database...`);
