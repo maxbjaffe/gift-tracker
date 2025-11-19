@@ -40,7 +40,7 @@ interface ChildChecklistData {
 
 function KioskChecklistContent() {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams?.get('token') || null;
 
   const [children, setChildren] = useState<Child[]>([]);
   const [childrenData, setChildrenData] = useState<Map<string, ChildChecklistData>>(new Map());
@@ -49,12 +49,13 @@ function KioskChecklistContent() {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (token) {
-      verifyTokenAndLoadData();
-    } else {
-      setError('No kiosk token provided');
+    if (!token) {
+      setError('No kiosk token provided in URL');
       setLoading(false);
+      return;
     }
+
+    verifyTokenAndLoadData();
   }, [token]);
 
   async function verifyTokenAndLoadData() {
@@ -62,32 +63,53 @@ function KioskChecklistContent() {
       setLoading(true);
       setError(null);
 
-      // Verify token and get user ID
-      const verifyResponse = await fetch(`/api/kiosk/verify?token=${token}`);
-      const verifyData = await verifyResponse.json();
-
-      if (!verifyResponse.ok) {
-        setError(verifyData.error || 'Invalid token');
+      if (!token) {
+        setError('No token provided');
         setLoading(false);
         return;
       }
 
+      // Verify token and get user ID
+      const verifyResponse = await fetch(`/api/kiosk/verify?token=${encodeURIComponent(token)}`);
+
+      if (!verifyResponse.ok) {
+        const verifyData = await verifyResponse.json().catch(() => ({ error: 'Invalid response' }));
+        setError(verifyData.error || `Invalid token (${verifyResponse.status})`);
+        setLoading(false);
+        return;
+      }
+
+      const verifyData = await verifyResponse.json();
       setUserId(verifyData.userId);
       await loadData(verifyData.userId);
     } catch (error) {
       console.error('Error verifying token:', error);
-      setError('Failed to verify kiosk token');
+      setError(`Failed to verify kiosk token: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setLoading(false);
     }
   }
 
   async function loadData(uid: string) {
     try {
+      if (!token) {
+        setError('No token available');
+        setLoading(false);
+        return;
+      }
+
       // Load children with token auth
-      const childrenResponse = await fetch(`/api/kiosk/children?token=${token}`);
+      const childrenResponse = await fetch(`/api/kiosk/children?token=${encodeURIComponent(token)}`);
+
+      if (!childrenResponse.ok) {
+        const errorData = await childrenResponse.json().catch(() => ({ error: 'Failed to load' }));
+        setError(`Failed to load children: ${errorData.error}`);
+        setLoading(false);
+        return;
+      }
+
       const childrenDataResponse = await childrenResponse.json();
 
-      if (childrenResponse.ok && childrenDataResponse.children) {
+      if (childrenDataResponse.children) {
         setChildren(childrenDataResponse.children);
 
         // Load checklist data for each child
@@ -95,11 +117,11 @@ function KioskChecklistContent() {
 
         for (const child of childrenDataResponse.children) {
           const checklistResponse = await fetch(
-            `/api/kiosk/checklist/${child.id}?token=${token}`
+            `/api/kiosk/checklist/${child.id}?token=${encodeURIComponent(token)}`
           );
-          const checklistData = await checklistResponse.json();
 
           if (checklistResponse.ok) {
+            const checklistData = await checklistResponse.json();
             dataMap.set(child.id, {
               checklist: checklistData.checklist || [],
               stats: checklistData.stats,
@@ -111,7 +133,7 @@ function KioskChecklistContent() {
       }
     } catch (error) {
       console.error('Error loading checklist data:', error);
-      setError('Failed to load checklist data');
+      setError(`Failed to load checklist data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -119,13 +141,18 @@ function KioskChecklistContent() {
 
   async function toggleItem(childId: string, itemId: string, isCurrentlyCompleted: boolean) {
     try {
+      if (!token) {
+        toast.error('No token available');
+        return;
+      }
+
       if (isCurrentlyCompleted) {
         await fetch(
-          `/api/kiosk/checklist/completions?token=${token}&child_id=${childId}&item_id=${itemId}`,
+          `/api/kiosk/checklist/completions?token=${encodeURIComponent(token)}&child_id=${childId}&item_id=${itemId}`,
           { method: 'DELETE' }
         );
       } else {
-        await fetch(`/api/kiosk/checklist/completions?token=${token}`, {
+        await fetch(`/api/kiosk/checklist/completions?token=${encodeURIComponent(token)}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ child_id: childId, item_id: itemId }),
@@ -138,7 +165,7 @@ function KioskChecklistContent() {
       }
     } catch (error) {
       console.error('Error toggling item:', error);
-      toast.error('Failed to update checklist');
+      toast.error(`Failed to update checklist: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
