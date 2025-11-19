@@ -85,15 +85,25 @@ export class AIAnalysisService {
   static async analyzeEmail(email: SchoolEmail, userId: string): Promise<EmailAnalysisResult> {
     const supabase = await createClient();
 
+    console.log(`[AI Analysis] Starting analysis for email ${email.id}, user ${userId}`);
+
     // Load children for this user dynamically
-    const { data: children } = await supabase
+    const { data: children, error: childrenError } = await supabase
       .from('children')
       .select('name, age, grade, notes')
       .eq('user_id', userId);
 
+    if (childrenError) {
+      console.error('[AI Analysis] Error loading children:', childrenError);
+      throw new Error(`Failed to load children: ${childrenError.message}`);
+    }
+
     if (!children || children.length === 0) {
+      console.error('[AI Analysis] No children found for user');
       throw new Error('No children found for user. Please add children first.');
     }
+
+    console.log(`[AI Analysis] Loaded ${children.length} children for user`);
 
     // Build children description
     let childrenDesc = '';
@@ -160,6 +170,8 @@ Use the past associations to learn patterns - if you see similar senders, subjec
 Return ONLY the JSON object, no other text.`;
 
     try {
+      console.log(`[AI Analysis] Calling Claude API for email: ${email.subject}`);
+
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2000,
@@ -173,10 +185,12 @@ Return ONLY the JSON object, no other text.`;
 
       const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
 
+      console.log(`[AI Analysis] Got response from Claude, parsing JSON...`);
+
       // Parse JSON response
       const analysis: EmailAnalysisResult = JSON.parse(responseText);
 
-      console.log('AI Analysis complete:', {
+      console.log('[AI Analysis] Analysis complete:', {
         subject: email.subject,
         category: analysis.category,
         priority: analysis.priority,
@@ -185,7 +199,12 @@ Return ONLY the JSON object, no other text.`;
 
       return analysis;
     } catch (error) {
-      console.error('Error analyzing email with AI:', error);
+      console.error('[AI Analysis] Error analyzing email with AI:', error);
+      console.error('[AI Analysis] Email details:', {
+        id: email.id,
+        subject: email.subject,
+        from: email.from_address,
+      });
       throw error;
     }
   }
