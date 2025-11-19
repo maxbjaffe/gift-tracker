@@ -164,28 +164,22 @@ export default function EmailsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 relative overflow-hidden">
+      {/* Background Cottle Crest Watermark */}
+      <div className="fixed top-0 right-0 opacity-10 pointer-events-none z-0">
+        <Image
+          src="/images/cottlecrest.JPG"
+          alt="Cottle Crest Background"
+          width={500}
+          height={500}
+          className="object-contain"
+        />
+      </div>
+      <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-4">
-              <div className="flex gap-2">
-                <Image
-                  src="/images/cottlecrest.JPG"
-                  alt="Cottle Crest"
-                  width={80}
-                  height={80}
-                  className="rounded-lg shadow-md"
-                />
-                <Image
-                  src="/images/cottlepeace.JPG"
-                  alt="Cottle Peace"
-                  width={80}
-                  height={80}
-                  className="rounded-lg shadow-md"
-                />
-              </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 School Emails
               </h1>

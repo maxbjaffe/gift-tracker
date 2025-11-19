@@ -132,27 +132,28 @@ export default function AccountabilityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 relative overflow-hidden">
+      {/* Background AI Max Watermark */}
+      <div className="fixed bottom-0 left-0 opacity-10 pointer-events-none z-0">
+        <Image
+          src="/images/aimaxhead.png"
+          alt="AI Max Background"
+          width={600}
+          height={600}
+          className="object-contain"
+        />
+      </div>
+      <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start justify-between gap-4 mb-2">
-            <div className="flex items-center gap-4">
-              <Image
-                src="/images/aimaxhead.png"
-                alt="AI Max"
-                width={120}
-                height={120}
-                className="rounded-full shadow-lg"
-              />
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  Family Accountability
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Track consequences and commitments to build responsibility
-                </p>
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Family Accountability
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Track consequences and commitments to build responsibility
+              </p>
             </div>
             <Button asChild className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
               <Link href="/accountability/checklist">

@@ -41,7 +41,24 @@ interface ChecklistItem {
   weekdays_only: boolean;
 }
 
-const EMOJI_OPTIONS = ['🪥', '🍳', '🎒', '👕', '🧦', '👟', '📚', '🥣', '💊', '🧴', '🛏️', '🚪'];
+const EMOJI_OPTIONS = [
+  // Morning hygiene
+  '🪥', '🚿', '🧼', '🪮', '🧴', '💧',
+  // Getting ready
+  '👕', '🧦', '👟', '🎒', '📚', '✏️',
+  // Food & meals
+  '🍳', '🥣', '🍎', '🥪', '🍌', '🥤',
+  // Bedroom & chores
+  '🛏️', '🧹', '🧺', '🗑️', '🧽', '🧸',
+  // Activities & learning
+  '📖', '📝', '🎨', '🎵', '⚽', '🏃',
+  // Health & wellness
+  '💊', '😴', '🧘', '💪', '☀️', '🌙',
+  // Pets & nature
+  '🐕', '🐈', '🐠', '🌱', '🌻', '🦜',
+  // Special & rewards
+  '⭐', '🏆', '✅', '🎁', '🎉', '🚪'
+];
 
 export default function ManageChecklistPage() {
   const [children, setChildren] = useState<Child[]>([]);
@@ -300,13 +317,13 @@ export default function ManageChecklistPage() {
 
                 <div>
                   <Label htmlFor="icon">Icon</Label>
-                  <div className="grid grid-cols-6 gap-2 mt-2">
+                  <div className="grid grid-cols-8 gap-2 mt-2 max-h-64 overflow-y-auto p-2 border rounded">
                     {EMOJI_OPTIONS.map(emoji => (
                       <button
                         key={emoji}
                         type="button"
                         onClick={() => setFormData({ ...formData, icon: emoji })}
-                        className={`text-3xl p-3 rounded border-2 transition-all ${
+                        className={`text-2xl p-2 rounded border-2 transition-all ${
                           formData.icon === emoji
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200 hover:border-gray-300'

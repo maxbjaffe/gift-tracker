@@ -78,37 +78,38 @@ export default function ChecklistDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
+      {/* Background Tiger Watermark */}
+      <div className="fixed bottom-0 right-0 opacity-10 pointer-events-none z-0">
+        <Image
+          src="/images/cottletiger.JPG"
+          alt="Cottle Tiger Background"
+          width={500}
+          height={500}
+          className="object-contain"
+        />
+      </div>
+      <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-4">
-              <Image
-                src="/images/cottletiger.JPG"
-                alt="Cottle Tiger"
-                width={100}
-                height={100}
-                className="rounded-lg shadow-md"
-              />
-              <div>
-                <Button variant="ghost" size="sm" asChild className="mb-2">
-                  <Link href="/accountability">
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Back to Dashboard
-                  </Link>
-                </Button>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                  Morning Checklist
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  {new Date().toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
+            <div>
+              <Button variant="ghost" size="sm" asChild className="mb-2">
+                <Link href="/accountability">
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Back to Dashboard
+                </Link>
+              </Button>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                Morning Checklist
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
             </div>
             <Button variant="outline" asChild>
               <Link href="/accountability/checklist/manage">
