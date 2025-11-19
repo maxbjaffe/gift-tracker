@@ -36,7 +36,7 @@ export default function EmailsPage() {
   const [category, setCategory] = useState<string>('all');
   const [priority, setPriority] = useState<string>('all');
   const [childId, setChildId] = useState<string>('all');
-  const [filter, setFilter] = useState<string>('unread');
+  const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
     loadChildren();

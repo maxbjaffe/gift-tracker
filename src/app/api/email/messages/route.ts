@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const isStarred = searchParams.get('is_starred');
     const isArchived = searchParams.get('is_archived');
     const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = parseInt(searchParams.get('limit') || '500');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Build query
