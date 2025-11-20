@@ -12,8 +12,8 @@ import {
   Target,
   Ban,
   CheckCircle2,
-  AlertCircle,
   MapPin,
+  Loader2,
   Sparkles,
   Smile,
 } from 'lucide-react';
@@ -117,9 +117,9 @@ function DashboardKioskContent() {
   const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
   const [commitments, setCommitments] = useState<Commitment[]>([]);
   const [consequences, setConsequences] = useState<Consequence[]>([]);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Get today's quote and joke (rotates daily)
   const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
@@ -159,12 +159,7 @@ function DashboardKioskContent() {
         return;
       }
 
-      await Promise.all([
-        loadWeather(),
-        loadEvents(),
-        loadAccountability(),
-      ]);
-
+      await loadDashboard();
       setError(null);
       setLoading(false);
     } catch (error) {
@@ -174,99 +169,109 @@ function DashboardKioskContent() {
     }
   }
 
-  async function loadWeather() {
+  async function loadDashboard() {
     try {
-      const response = await fetch('/api/weather');
-      if (response.ok) {
-        const data = await response.json();
-        setWeather(data.weather);
-      }
+      await Promise.all([
+        loadWeather().catch(e => console.error('Weather error:', e)),
+        loadEvents().catch(e => console.error('Events error:', e)),
+        loadAccountability().catch(e => console.error('Accountability error:', e)),
+      ]);
     } catch (error) {
-      console.error('Error loading weather:', error);
+      console.error('Dashboard load error:', error);
     }
+  }
+
+  async function loadWeather() {
+    const response = await fetch('/api/weather');
+    if (!response.ok) {
+      if (response.status === 400) {
+        return; // No location set, skip silently
+      }
+      throw new Error('Failed to load weather');
+    }
+    const data = await response.json();
+    setWeather(data.weather);
   }
 
   async function loadEvents() {
-    try {
-      const now = new Date();
-      const weekFromNow = addDays(now, 7);
+    const now = new Date();
+    const weekFromNow = addDays(now, 7);
 
-      const response = await fetch(
-        `/api/calendar/events?start=${now.toISOString()}&end=${weekFromNow.toISOString()}`
-      );
+    const response = await fetch(
+      `/api/calendar/events?start=${now.toISOString()}&end=${weekFromNow.toISOString()}`
+    );
 
-      if (response.ok) {
-        const data = await response.json();
-        const allEvents = data.events || [];
-
-        // Filter events for today
-        const todaysEvents = allEvents.filter((e: CalendarEvent) => {
-          try {
-            return isToday(parseISO(e.start_time));
-          } catch {
-            return false;
-          }
-        });
-
-        // Get next 3 upcoming events (not today)
-        const upcoming = allEvents
-          .filter((e: CalendarEvent) => {
-            try {
-              const eventDate = parseISO(e.start_time);
-              return !isToday(eventDate) && isWithinInterval(eventDate, { start: now, end: weekFromNow });
-            } catch {
-              return false;
-            }
-          })
-          .slice(0, 3);
-
-        setTodayEvents(todaysEvents);
-        setUpcomingEvents(upcoming);
-      }
-    } catch (error) {
-      console.error('Error loading events:', error);
+    if (!response.ok) {
+      throw new Error('Failed to load events');
     }
+
+    const data = await response.json();
+    const allEvents = data.events || [];
+
+    // Filter events for today
+    const todaysEvents = allEvents.filter((e: CalendarEvent) => {
+      try {
+        return isToday(parseISO(e.start_time));
+      } catch {
+        return false;
+      }
+    });
+
+    // Get next 5 upcoming events (not today)
+    const upcoming = allEvents
+      .filter((e: CalendarEvent) => {
+        try {
+          const eventDate = parseISO(e.start_time);
+          return !isToday(eventDate) && isWithinInterval(eventDate, { start: now, end: weekFromNow });
+        } catch {
+          return false;
+        }
+      })
+      .slice(0, 5);
+
+    setTodayEvents(todaysEvents);
+    setUpcomingEvents(upcoming);
   }
 
   async function loadAccountability() {
-    try {
-      const response = await fetch('/api/accountability/dashboard');
-      if (response.ok) {
-        const data = await response.json();
-
-        // Get active commitments due soon
-        const activeCommitments = (data.commitments || [])
-          .filter((c: Commitment) => c.status === 'active')
-          .sort((a: Commitment, b: Commitment) =>
-            new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-          )
-          .slice(0, 3);
-
-        // Get active consequences
-        const activeConsequences = (data.consequences || [])
-          .filter((c: Consequence) => {
-            if (!c.expires_at) return true;
-            return !isPast(parseISO(c.expires_at));
-          })
-          .slice(0, 3);
-
-        setCommitments(activeCommitments);
-        setConsequences(activeConsequences);
-      }
-    } catch (error) {
-      console.error('Error loading accountability:', error);
+    const response = await fetch('/api/accountability/dashboard');
+    if (!response.ok) {
+      throw new Error('Failed to load accountability');
     }
+
+    const data = await response.json();
+
+    // Get active commitments due soon
+    const now = new Date();
+    const activeCommitments = (data.commitments || [])
+      .filter((c: Commitment) => c.status === 'active')
+      .sort((a: Commitment, b: Commitment) =>
+        new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+      )
+      .slice(0, 5);
+
+    // Get active consequences
+    const activeConsequences = (data.consequences || [])
+      .filter((c: Consequence) => {
+        // Only show if not expired
+        if (!c.expires_at) return true;
+        return !isPast(parseISO(c.expires_at));
+      })
+      .slice(0, 5);
+
+    setCommitments(activeCommitments);
+    setConsequences(activeConsequences);
   }
 
   const getWeatherIcon = (condition: string) => {
     const cond = condition.toLowerCase();
     if (cond.includes('rain') || cond.includes('drizzle'))
-      return <CloudRain className="h-24 w-24 text-blue-500" />;
+      return <CloudRain className="h-12 w-12 text-blue-500" />;
     if (cond.includes('snow'))
-      return <CloudSnow className="h-24 w-24 text-blue-300" />;
+      return <CloudSnow className="h-12 w-12 text-blue-300" />;
     if (cond.includes('cloud'))
-      return <Cloud className="h-24 w-24 text-gray-400" />;
-    return <Sun className="h-24 w-24 text-yellow-500" />;
+      return <Cloud className="h-12 w-12 text-gray-400" />;
+    return <Sun className="h-12 w-12 text-yellow-500" />;
   };
 
   if (error) {
@@ -292,30 +297,30 @@ function DashboardKioskContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
       {/* Background Images */}
-      <div className="fixed -left-24 top-1/4 opacity-10 pointer-events-none z-0">
+      <div className="fixed -left-24 top-1/4 opacity-20 pointer-events-none z-0">
         <Image
           src="/images/cottletiger.JPG"
           alt="Cottle Tiger"
-          width={500}
-          height={500}
+          width={400}
+          height={400}
           className="object-contain transform -rotate-12"
         />
       </div>
-      <div className="fixed -right-24 bottom-1/4 opacity-10 pointer-events-none z-0">
+      <div className="fixed -right-24 bottom-1/4 opacity-20 pointer-events-none z-0">
         <Image
           src="/images/aimaxhead.png"
           alt="AI Max"
-          width={500}
-          height={500}
+          width={400}
+          height={400}
           className="object-contain transform rotate-12"
         />
       </div>
 
-      <div className="relative z-10 h-full">
-        {/* Header with Clock */}
-        <div className="text-center mb-8">
+      <div className="container mx-auto px-4 py-6 max-w-7xl relative z-10">
+        {/* Header with Live Clock */}
+        <div className="mb-8 text-center">
           <h1 className="text-7xl md:text-8xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
             Family Command Center
           </h1>
@@ -327,119 +332,158 @@ function DashboardKioskContent() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-[1800px] mx-auto">
-          {/* Left Side */}
-          <div className="space-y-8">
-            {/* Weather */}
-            {weather && (
-              <Card className="shadow-2xl border-4 border-blue-300 hover:scale-105 transition-transform">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Weather, Quote, Joke */}
+          <div className="space-y-6">
+            {/* Weather Widget */}
+            {weather ? (
+              <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300">
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-8xl font-black">
-                        {Math.round(weather.currentTemp)}�
+                      <div className="text-6xl font-black text-transparent bg-gradient-to-br from-blue-600 to-cyan-400 bg-clip-text">
+                        {Math.round(weather.currentTemp)}°
                       </div>
-                      <div className="text-2xl flex items-center gap-2 mt-2">
-                        <MapPin className="h-6 w-6" />
+                      <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                        <MapPin className="h-3 w-3" />
                         {weather.location}
                       </div>
                     </div>
                     {getWeatherIcon(weather.condition)}
                   </div>
-                  <p className="text-2xl font-bold mt-2">{weather.condition}</p>
+                  <p className="text-gray-700 font-bold">{weather.condition}</p>
                 </CardHeader>
-                {weather.forecast.length > 0 && (
-                  <CardContent className="pt-6">
-                    <div className="grid grid-cols-3 gap-4">
-                      {weather.forecast.slice(0, 3).map((day, idx) => (
-                        <div key={idx} className="text-center bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border-2 border-blue-200">
-                          <div className="text-xl text-gray-600 font-bold mb-2">
-                            {idx === 0 ? 'Today' : format(parseISO(day.date), 'EEE')}
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Feels like:</span>
+                      <span className="font-bold">{Math.round(weather.feelsLike)}°F</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Humidity:</span>
+                      <span className="font-bold">{weather.humidity}%</span>
+                    </div>
+                  </div>
+
+                  {/* 3-Day Forecast */}
+                  {weather.forecast.length > 0 && (
+                    <div className="pt-3 border-t">
+                      <h4 className="text-sm font-bold mb-2">3-Day Forecast</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {weather.forecast.slice(0, 3).map((day, idx) => (
+                          <div key={idx} className="text-center bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-2">
+                            <div className="text-xs text-gray-600 font-bold">
+                              {idx === 0 ? 'Today' : format(parseISO(day.date), 'EEE')}
+                            </div>
+                            <img
+                              src={day.conditionIcon}
+                              alt={day.condition}
+                              className="h-8 w-8 mx-auto my-1"
+                            />
+                            <div className="text-sm font-bold">
+                              {Math.round(day.maxTemp)}° / {Math.round(day.minTemp)}°
+                            </div>
                           </div>
-                          <img
-                            src={day.conditionIcon}
-                            alt={day.condition}
-                            className="h-16 w-16 mx-auto my-2"
-                          />
-                          <div className="text-2xl font-black">
-                            {Math.round(day.maxTemp)}� / {Math.round(day.minTemp)}�
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Weather Alerts */}
+                  {weather.alerts.length > 0 && (
+                    <div className="pt-3 border-t">
+                      {weather.alerts.map((alert, idx) => (
+                        <div key={idx} className="flex items-start gap-2 text-sm bg-red-50 p-2 rounded-lg border-2 border-red-300">
+                          <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold text-red-900">{alert.event}</p>
+                            <p className="text-red-700 text-xs">{alert.headline}</p>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                )}
+                  )}
+                </CardContent>
               </Card>
-            )}
+            ) : null}
 
             {/* Quote of the Day */}
-            <Card className="shadow-2xl bg-gradient-to-br from-purple-100 via-pink-100 to-purple-50 border-4 border-purple-400 hover:scale-105 transition-transform">
+            <Card className="shadow-lg hover:shadow-2xl transition-all hover:scale-105 duration-300 bg-gradient-to-br from-purple-100 via-pink-100 to-purple-50 border-4 border-purple-300">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 justify-center">
-                  <Sparkles className="h-10 w-10 text-purple-600 animate-pulse" />
-                  <span className="text-4xl text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-black">
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-purple-600 animate-pulse" />
+                  <span className="text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-black text-xl">
                     Quote of the Day
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold italic text-gray-800 leading-relaxed text-center mb-4" style={{ fontFamily: 'Georgia, serif' }}>
-                  "{todayQuote.text}"
-                </p>
-                <p className="text-2xl text-purple-700 font-black text-right">
-                   {todayQuote.author}
-                </p>
+                <div className="space-y-3">
+                  <p className="text-lg font-bold italic text-gray-800 leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
+                    "{todayQuote.text}"
+                  </p>
+                  <p className="text-base text-purple-700 font-black text-right">
+                    — {todayQuote.author}
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
             {/* Joke of the Day */}
-            <Card className="shadow-2xl bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 border-4 border-orange-400 hover:scale-105 transition-transform">
+            <Card className="shadow-lg hover:shadow-2xl transition-all hover:scale-105 duration-300 bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 border-4 border-orange-300">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 justify-center">
-                  <Smile className="h-10 w-10 text-orange-600 animate-bounce" />
-                  <span className="text-4xl text-transparent bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text font-black">
+                <CardTitle className="flex items-center gap-2">
+                  <Smile className="h-6 w-6 text-orange-600 animate-bounce" />
+                  <span className="text-transparent bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text font-black text-xl">
                     Joke of the Day
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-gray-800 mb-4 text-center">
-                  {todayJoke.setup}
-                </p>
-                <div className="p-6 bg-white rounded-2xl border-l-8 border-orange-500 shadow-lg">
-                  <p className="text-3xl font-black text-orange-700 text-center">
-                    {todayJoke.punchline}
+                <div className="space-y-3">
+                  <p className="text-base font-bold text-gray-800">
+                    {todayJoke.setup}
                   </p>
+                  <div className="p-4 bg-white rounded-xl border-l-8 border-orange-500 shadow-md">
+                    <p className="text-lg font-black text-orange-700">
+                      {todayJoke.punchline}
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Side */}
-          <div className="space-y-8">
+          {/* Middle Column - Calendar Events */}
+          <div className="space-y-6">
             {/* Today's Events */}
-            <Card className="shadow-2xl border-4 border-blue-400 hover:scale-105 transition-transform">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
-                <CardTitle className="flex items-center gap-3 text-3xl">
-                  <Calendar className="h-10 w-10" />
-                  Today's Events
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-blue-300">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-6 w-6" />
+                  <span className="font-black text-xl">Today's Events</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4">
                 {todayEvents.length === 0 ? (
-                  <p className="text-2xl text-gray-500 text-center py-8 font-bold">Nothing scheduled today! <�</p>
+                  <p className="text-sm text-gray-500 text-center py-6 font-semibold">Nothing scheduled today! 🎉</p>
                 ) : (
-                  <div className="space-y-4">
-                    {todayEvents.slice(0, 3).map((event) => (
+                  <div className="space-y-3">
+                    {todayEvents.map((event) => (
                       <div
                         key={event.id}
-                        className="p-6 rounded-2xl bg-gradient-to-r from-blue-100 to-cyan-100 border-3 border-blue-400"
+                        className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-100 to-cyan-100 border-2 border-blue-300 hover:scale-105 transition-transform"
                       >
-                        <p className="text-2xl font-black text-gray-900 mb-2">{event.title}</p>
-                        <p className="text-xl text-gray-700 font-bold">
-                          {event.all_day ? 'All day' : format(parseISO(event.start_time), 'h:mm a')}
-                          {event.location && ` " ${event.location}`}
-                        </p>
+                        <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-black text-sm text-gray-900">{event.title}</p>
+                          <p className="text-xs text-gray-700 font-bold">
+                            {event.all_day
+                              ? 'All day'
+                              : format(parseISO(event.start_time), 'h:mm a')}
+                            {event.location && ` • ${event.location}`}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -447,30 +491,32 @@ function DashboardKioskContent() {
               </CardContent>
             </Card>
 
-            {/* Upcoming This Week */}
-            <Card className="shadow-2xl border-4 border-purple-400 hover:scale-105 transition-transform">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                <CardTitle className="flex items-center gap-3 text-3xl">
-                  <Calendar className="h-10 w-10" />
-                  Coming Up This Week
+            {/* This Week */}
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-purple-300">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-6 w-6" />
+                  <span className="font-black text-xl">This Week</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4">
                 {upcomingEvents.length === 0 ? (
-                  <p className="text-2xl text-gray-500 text-center py-8 font-bold">No upcoming events</p>
+                  <p className="text-sm text-gray-500 text-center py-6 font-semibold">No upcoming events this week</p>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {upcomingEvents.map((event) => {
                       const eventDate = parseISO(event.start_time);
                       return (
                         <div
                           key={event.id}
-                          className="p-6 rounded-2xl bg-gradient-to-r from-purple-100 to-pink-100 border-3 border-purple-400"
+                          className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 hover:border-purple-400 hover:scale-105 transition-all"
                         >
-                          <p className="text-2xl font-black text-gray-900 mb-2">{event.title}</p>
-                          <p className="text-xl text-gray-700 font-bold">
-                            {isTomorrow(eventDate) ? 'Tomorrow' : format(eventDate, 'EEEE, MMM d')}
-                            {' " '}
+                          <p className="font-black text-sm text-gray-900">{event.title}</p>
+                          <p className="text-xs text-gray-700 font-bold">
+                            {isTomorrow(eventDate)
+                              ? 'Tomorrow'
+                              : format(eventDate, 'EEE, MMM d')}
+                            {' • '}
                             {event.all_day ? 'All day' : format(eventDate, 'h:mm a')}
                           </p>
                         </div>
@@ -480,73 +526,83 @@ function DashboardKioskContent() {
                 )}
               </CardContent>
             </Card>
+          </div>
 
-            {/* Accountability Section */}
-            <div className="grid grid-cols-2 gap-8">
-              {/* Commitments */}
-              <Card className="shadow-2xl border-4 border-green-400 hover:scale-105 transition-transform">
-                <CardHeader className="bg-gradient-to-r from-green-500 to-teal-500 text-white">
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <Target className="h-8 w-8" />
-                    <span className="font-black">Commitments</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  {commitments.length === 0 ? (
-                    <p className="text-lg text-gray-500 text-center py-4 font-semibold">All clear! </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {commitments.map((commitment) => {
-                        const dueDate = parseISO(commitment.due_date);
-                        const isOverdue = isPast(dueDate);
-                        return (
-                          <div
-                            key={commitment.id}
-                            className={`p-4 rounded-xl border-3 ${
-                              isOverdue
-                                ? 'bg-gradient-to-r from-red-100 to-orange-100 border-red-400'
-                                : 'bg-gradient-to-r from-green-100 to-teal-100 border-green-400'
-                            }`}
-                          >
-                            <p className="font-black text-base text-gray-900">{commitment.child.name}</p>
-                            <p className="text-sm text-gray-700 font-bold">{commitment.commitment_text}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Consequences */}
-              <Card className="shadow-2xl border-4 border-red-400 hover:scale-105 transition-transform">
-                <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white">
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <Ban className="h-8 w-8" />
-                    <span className="font-black">Consequences</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  {consequences.length === 0 ? (
-                    <div className="text-center py-4">
-                      <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-2 animate-bounce" />
-                      <p className="text-lg text-green-600 font-black">All clear! <�</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {consequences.map((consequence) => (
-                        <div key={consequence.id} className="p-4 rounded-xl bg-gradient-to-r from-red-100 to-pink-100 border-3 border-red-400">
-                          <p className="font-black text-base text-gray-900">{consequence.child.name}</p>
-                          <p className="text-sm text-gray-700 font-bold">{consequence.restriction_item}</p>
+          {/* Right Column - Accountability (Commitments & Consequences) */}
+          <div className="space-y-6">
+            {/* Active Commitments */}
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-green-300">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-6 w-6" />
+                  <span className="font-black text-xl">Active Commitments</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {commitments.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-6 font-semibold">No active commitments</p>
+                ) : (
+                  <div className="space-y-3">
+                    {commitments.map((commitment) => {
+                      const dueDate = parseISO(commitment.due_date);
+                      const isOverdue = isPast(dueDate);
+                      return (
+                        <div
+                          key={commitment.id}
+                          className={`p-4 rounded-xl border-3 hover:scale-105 transition-transform ${
+                            isOverdue
+                              ? 'bg-gradient-to-r from-red-100 to-orange-100 border-red-400'
+                              : 'bg-gradient-to-r from-green-100 to-teal-100 border-green-400'
+                          }`}
+                        >
+                          <p className="font-black text-sm text-gray-900">{commitment.child.name}</p>
+                          <p className="text-xs text-gray-700 mb-1 font-bold">{commitment.commitment_text}</p>
+                          <p className={`text-xs font-black ${isOverdue ? 'text-red-600' : 'text-green-600'}`}>
+                            {isOverdue ? '⚠️ Overdue!' : `📅 Due ${format(dueDate, 'MMM d, h:mm a')}`}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Active Consequences */}
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-red-300">
+              <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Ban className="h-6 w-6" />
+                  <span className="font-black text-xl">Active Consequences</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {consequences.length === 0 ? (
+                  <div className="text-center py-6">
+                    <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-3 animate-bounce" />
+                    <p className="text-lg text-green-600 font-black">All clear! 🎉</p>
+                    <p className="text-xs text-gray-500 mt-1 font-semibold">No active consequences</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {consequences.map((consequence) => (
+                      <div key={consequence.id} className="p-4 rounded-xl bg-gradient-to-r from-red-100 to-pink-100 border-3 border-red-400 hover:scale-105 transition-transform">
+                        <p className="font-black text-sm text-gray-900">{consequence.child.name}</p>
+                        <p className="text-xs text-gray-700 mb-1 font-bold">{consequence.restriction_item}</p>
+                        {consequence.expires_at && (
+                          <p className="text-xs text-red-600 font-black">
+                            ⏰ Until {format(parseISO(consequence.expires_at), 'MMM d, h:mm a')}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
+
       </div>
     </div>
   );
