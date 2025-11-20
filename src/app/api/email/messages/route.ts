@@ -93,6 +93,7 @@ export async function GET(request: NextRequest) {
     // Enrich emails with child and event data
     let enrichedEmails = emails;
     if (emails && emails.length > 0) {
+      try {
       // Get all unique child IDs
       const childIds = [...new Set(
         emails.flatMap((email: any) =>
@@ -110,11 +111,15 @@ export async function GET(request: NextRequest) {
       // Fetch children data
       let childrenMap = new Map();
       if (childIds.length > 0) {
-        const { data: children } = await supabase
+        const { data: children, error: childrenError } = await supabase
           .from('children')
-          .select('id, name, avatar_color')
+          .select('id, name, avatar_type, avatar_data, avatar_background')
           .in('id', childIds)
           .eq('user_id', user.id);
+
+        if (childrenError) {
+          console.error('Error fetching children:', childrenError);
+        }
 
         if (children) {
           childrenMap = new Map(children.map(child => [child.id, child]));
@@ -124,11 +129,15 @@ export async function GET(request: NextRequest) {
       // Fetch events data
       let eventsMap = new Map();
       if (eventIds.length > 0) {
-        const { data: events } = await supabase
+        const { data: events, error: eventsError } = await supabase
           .from('calendar_events')
           .select('id, title, start_time')
           .in('id', eventIds)
           .eq('user_id', user.id);
+
+        if (eventsError) {
+          console.error('Error fetching events:', eventsError);
+        }
 
         if (events) {
           eventsMap = new Map(events.map(event => [event.id, event]));
@@ -149,6 +158,17 @@ export async function GET(request: NextRequest) {
           event: eventsMap.get(assoc.calendar_event_id) || null
         }))
       }));
+      } catch (enrichError) {
+        console.error('Error enriching emails:', enrichError);
+        // Return emails without enrichment if enrichment fails
+        enrichedEmails = emails.map((email: any) => ({
+          ...email,
+          attachments: email.email_attachments || [],
+          actions: email.email_actions || [],
+          child_relevance: email.email_child_relevance || [],
+          event_associations: email.email_event_associations || []
+        }));
+      }
     }
 
     // Filter by child if specified (join filter)
