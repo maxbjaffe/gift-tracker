@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Cloud,
   CloudRain,
@@ -17,12 +18,13 @@ import {
   Sparkles,
   Smile,
   AlertCircle,
+  Paintbrush,
 } from 'lucide-react';
 import { format, parseISO, isToday, isTomorrow, isPast, isWithinInterval, addDays } from 'date-fns';
 import Image from 'next/image';
 import { BrainTeaser } from '@/components/kiosk/BrainTeaser';
 import { WeatherAnimation } from '@/components/kiosk/WeatherAnimation';
-import { DoodleBoard } from '@/components/kiosk/DoodleBoard';
+import Link from 'next/link';
 
 interface WeatherData {
   location: string;
@@ -447,6 +449,19 @@ function DashboardKioskContent() {
           <p className="text-3xl text-gray-600 mt-2 font-bold">
             {format(currentTime, 'EEEE, MMMM d, yyyy')}
           </p>
+
+          {/* Doodle Board Button */}
+          <div className="mt-6">
+            <Link href={token ? `/kiosk/doodle?token=${token}` : '/kiosk/doodle'}>
+              <Button
+                size="lg"
+                className="text-2xl px-8 py-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-2xl transition-all hover:scale-110 duration-300 animate-pulse"
+              >
+                <Paintbrush className="h-8 w-8 mr-3" />
+                Open Doodle Board 🎨
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -799,11 +814,6 @@ function DashboardKioskContent() {
             </CardContent>
           </Card>
         )}
-
-        {/* Doodle Board - Fun drawing area for kids */}
-        <div className="mt-6">
-          <DoodleBoard />
-        </div>
 
       </div>
     </div>

@@ -157,7 +157,7 @@ export function DoodleBoard() {
             <canvas
               ref={canvasRef}
               className="w-full touch-none cursor-crosshair"
-              style={{ height: '300px' }}
+              style={{ height: '500px' }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={stopDrawing}
