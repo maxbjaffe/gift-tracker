@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all teachers for user
+    // Get all teachers for user (without nested child data to avoid RLS conflicts)
     const { data: teachers, error } = await supabase
       .from('teachers')
       .select(`
@@ -28,8 +28,7 @@ export async function GET(request: NextRequest) {
           id,
           child_id,
           subject,
-          is_primary,
-          child:children(id, name)
+          is_primary
         )
       `)
       .eq('user_id', user.id)
@@ -40,7 +39,41 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ teachers: teachers || [] });
+    // Enrich with child data (client-side join to respect RLS)
+    let enrichedTeachers = teachers;
+    if (teachers && teachers.length > 0) {
+      // Get all unique child IDs
+      const childIds = [...new Set(
+        teachers.flatMap((teacher: any) =>
+          teacher.child_teachers?.map((ct: any) => ct.child_id) || []
+        )
+      )];
+
+      // Fetch children data separately (respects RLS)
+      let childrenMap = new Map();
+      if (childIds.length > 0) {
+        const { data: children } = await supabase
+          .from('children')
+          .select('id, name')
+          .in('id', childIds)
+          .eq('user_id', user.id);
+
+        if (children) {
+          childrenMap = new Map(children.map(child => [child.id, child]));
+        }
+      }
+
+      // Enrich teachers with child data
+      enrichedTeachers = teachers.map((teacher: any) => ({
+        ...teacher,
+        child_teachers: (teacher.child_teachers || []).map((ct: any) => ({
+          ...ct,
+          child: childrenMap.get(ct.child_id) || null
+        }))
+      }));
+    }
+
+    return NextResponse.json({ teachers: enrichedTeachers || [] });
   } catch (error: any) {
     console.error('Error in GET /api/teachers:', error);
     return NextResponse.json(

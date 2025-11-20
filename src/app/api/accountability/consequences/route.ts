@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Child not found or access denied' }, { status: 404 });
     }
 
-    // Create consequence
+    // Create consequence (without nested child to avoid RLS conflicts)
     const { data: consequence, error: createError } = await supabase
       .from('consequences')
       .insert({
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         status: status || 'active',
         created_by: user.id,
       })
-      .select('*, child:children(*)')
+      .select('*')
       .single();
 
     if (createError) {
@@ -75,7 +75,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ consequence }, { status: 201 });
+    // Fetch child data separately (respects RLS)
+    const { data: childData } = await supabase
+      .from('children')
+      .select('*')
+      .eq('id', child_id)
+      .eq('user_id', user.id)
+      .single();
+
+    return NextResponse.json({
+      consequence: {
+        ...consequence,
+        child: childData || null
+      }
+    }, { status: 201 });
   } catch (error) {
     console.error('Unexpected error in consequences API:', error);
     return NextResponse.json(
@@ -112,10 +125,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ consequences: [] });
     }
 
-    // Build query
+    // Build query (without nested child to avoid RLS conflicts)
     let query = supabase
       .from('consequences')
-      .select('*, child:children(*)')
+      .select('*')
       .in('child_id', childIds)
       .order('created_at', { ascending: false });
 
@@ -137,7 +150,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ consequences: consequences || [] });
+    // Enrich with child data (client-side join to respect RLS)
+    let enrichedConsequences = consequences;
+    if (consequences && consequences.length > 0) {
+      // Fetch all children data (we already have childIds)
+      const { data: childrenData } = await supabase
+        .from('children')
+        .select('*')
+        .in('id', childIds)
+        .eq('user_id', user.id);
+
+      const childrenMap = new Map(childrenData?.map(child => [child.id, child]) || []);
+
+      // Enrich consequences with child data
+      enrichedConsequences = consequences.map((consequence: any) => ({
+        ...consequence,
+        child: childrenMap.get(consequence.child_id) || null
+      }));
+    }
+
+    return NextResponse.json({ consequences: enrichedConsequences || [] });
   } catch (error) {
     console.error('Unexpected error in consequences API:', error);
     return NextResponse.json(

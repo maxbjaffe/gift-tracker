@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Child not found or access denied' }, { status: 404 });
     }
 
-    // Create commitment
+    // Create commitment (without nested child to avoid RLS conflicts)
     const { data: commitment, error: createError } = await supabase
       .from('commitments')
       .insert({
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         status: status || 'active',
         committed_by: user.id,
       })
-      .select('*, child:children(*)')
+      .select('*')
       .single();
 
     if (createError) {
@@ -63,7 +63,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ commitment }, { status: 201 });
+    // Fetch child data separately (respects RLS)
+    const { data: childData } = await supabase
+      .from('children')
+      .select('*')
+      .eq('id', child_id)
+      .eq('user_id', user.id)
+      .single();
+
+    return NextResponse.json({
+      commitment: {
+        ...commitment,
+        child: childData || null
+      }
+    }, { status: 201 });
   } catch (error) {
     console.error('Unexpected error in commitments API:', error);
     return NextResponse.json(
@@ -100,10 +113,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ commitments: [] });
     }
 
-    // Build query
+    // Build query (without nested child to avoid RLS conflicts)
     let query = supabase
       .from('commitments')
-      .select('*, child:children(*)')
+      .select('*')
       .in('child_id', childIds)
       .order('due_date', { ascending: true });
 
@@ -125,7 +138,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ commitments: commitments || [] });
+    // Enrich with child data (client-side join to respect RLS)
+    let enrichedCommitments = commitments;
+    if (commitments && commitments.length > 0) {
+      // Fetch all children data (we already have childIds)
+      const { data: childrenData } = await supabase
+        .from('children')
+        .select('*')
+        .in('id', childIds)
+        .eq('user_id', user.id);
+
+      const childrenMap = new Map(childrenData?.map(child => [child.id, child]) || []);
+
+      // Enrich commitments with child data
+      enrichedCommitments = commitments.map((commitment: any) => ({
+        ...commitment,
+        child: childrenMap.get(commitment.child_id) || null
+      }));
+    }
+
+    return NextResponse.json({ commitments: enrichedCommitments || [] });
   } catch (error) {
     console.error('Unexpected error in commitments API:', error);
     return NextResponse.json(
