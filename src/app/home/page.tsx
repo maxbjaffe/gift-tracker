@@ -17,6 +17,8 @@ import {
   RefreshCw,
   MapPin,
   Loader2,
+  Sparkles,
+  Smile,
 } from 'lucide-react';
 import { format, parseISO, isToday, isTomorrow, isPast, isWithinInterval, addDays } from 'date-fns';
 import Link from 'next/link';
@@ -72,6 +74,44 @@ interface Consequence {
   child: { name: string };
 }
 
+// Kid-friendly quotes that rotate daily
+const DAILY_QUOTES = [
+  { text: "You are braver than you believe, stronger than you seem, and smarter than you think.", author: "Winnie the Pooh" },
+  { text: "The more that you read, the more things you will know. The more that you learn, the more places you'll go!", author: "Dr. Seuss" },
+  { text: "You're off to great places! Today is your day! Your mountain is waiting, so get on your way!", author: "Dr. Seuss" },
+  { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+  { text: "In every job that must be done, there is an element of fun.", author: "Mary Poppins" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "Do or do not. There is no try.", author: "Yoda" },
+  { text: "Why fit in when you were born to stand out?", author: "Dr. Seuss" },
+  { text: "A person's a person, no matter how small.", author: "Dr. Seuss" },
+  { text: "You have brains in your head. You have feet in your shoes. You can steer yourself any direction you choose.", author: "Dr. Seuss" },
+  { text: "Life is like riding a bicycle. To keep your balance, you must keep moving.", author: "Albert Einstein" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Be kind whenever possible. It is always possible.", author: "Dalai Lama" },
+];
+
+// Kid-friendly jokes that rotate daily
+const DAILY_JOKES = [
+  { setup: "What do you call a bear with no teeth?", punchline: "A gummy bear!" },
+  { setup: "Why don't scientists trust atoms?", punchline: "Because they make up everything!" },
+  { setup: "What do you call a dinosaur that crashes his car?", punchline: "Tyrannosaurus Wrecks!" },
+  { setup: "Why did the math book look so sad?", punchline: "Because it had too many problems!" },
+  { setup: "What do you call cheese that isn't yours?", punchline: "Nacho cheese!" },
+  { setup: "Why can't a bicycle stand up by itself?", punchline: "Because it's two tired!" },
+  { setup: "What did one wall say to the other wall?", punchline: "I'll meet you at the corner!" },
+  { setup: "Why did the cookie go to the doctor?", punchline: "Because it felt crumbly!" },
+  { setup: "What do you call a sleeping bull?", punchline: "A bulldozer!" },
+  { setup: "Why did the student eat his homework?", punchline: "Because the teacher said it was a piece of cake!" },
+  { setup: "What's orange and sounds like a parrot?", punchline: "A carrot!" },
+  { setup: "How do you organize a space party?", punchline: "You planet!" },
+  { setup: "Why don't eggs tell jokes?", punchline: "They'd crack each other up!" },
+  { setup: "What did the ocean say to the beach?", punchline: "Nothing, it just waved!" },
+  { setup: "Why did the scarecrow win an award?", punchline: "Because he was outstanding in his field!" },
+];
+
 export default function HomePage() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [todayEvents, setTodayEvents] = useState<CalendarEvent[]>([]);
@@ -80,6 +120,11 @@ export default function HomePage() {
   const [consequences, setConsequences] = useState<Consequence[]>([]);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
+
+  // Get today's quote and joke (rotates daily)
+  const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const todayQuote = DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
+  const todayJoke = DAILY_JOKES[dayOfYear % DAILY_JOKES.length];
 
   useEffect(() => {
     loadDashboard();
@@ -425,6 +470,48 @@ export default function HomePage() {
                     View Full Calendar
                   </Button>
                 </Link>
+              </CardContent>
+            </Card>
+
+            {/* Quote of the Day */}
+            <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  Quote of the Day
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-lg font-medium italic text-gray-800 leading-relaxed">
+                    "{todayQuote.text}"
+                  </p>
+                  <p className="text-sm text-purple-700 font-semibold text-right">
+                    — {todayQuote.author}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Joke of the Day */}
+            <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smile className="h-5 w-5 text-orange-600" />
+                  Joke of the Day
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-base font-medium text-gray-800">
+                    {todayJoke.setup}
+                  </p>
+                  <div className="p-3 bg-white rounded-lg border-l-4 border-orange-400">
+                    <p className="text-base font-bold text-orange-700">
+                      {todayJoke.punchline}
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
