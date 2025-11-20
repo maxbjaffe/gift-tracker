@@ -315,6 +315,8 @@ function DashboardKioskContent() {
           width={400}
           height={400}
           className="object-contain transform rotate-12"
+          loading="lazy"
+          priority={false}
         />
       </div>
 

@@ -47,45 +47,90 @@ export default function AccountabilityPage() {
   }
 
   async function handleLiftConsequence(id: string) {
+    if (!dashboard) return;
+
+    // Optimistic update - remove consequence from UI immediately
+    const originalDashboard = dashboard;
+    setDashboard({
+      ...dashboard,
+      activeConsequences: dashboard.activeConsequences.filter(c => c.id !== id)
+    });
+    toast.success('Consequence lifted');
+
     try {
       await updateConsequenceStatus(id, { status: 'lifted' });
-      toast.success('Consequence lifted');
+      // Success - refresh to get updated stats
       loadDashboard();
     } catch (error) {
-      toast.error('Failed to lift consequence');
+      // Revert on error
+      setDashboard(originalDashboard);
+      toast.error('Failed to lift consequence - reverted');
     }
   }
 
   async function handleConfirmConsequence(id: string) {
+    if (!dashboard) return;
+
+    // Optimistic update - mark as active
+    const originalDashboard = dashboard;
+    setDashboard({
+      ...dashboard,
+      activeConsequences: dashboard.activeConsequences.map(c =>
+        c.id === id ? { ...c, status: 'active' as const } : c
+      )
+    });
+    toast.success('Consequence confirmed');
+
     try {
       await updateConsequenceStatus(id, { status: 'active' });
-      toast.success('Consequence confirmed');
       loadDashboard();
     } catch (error) {
-      toast.error('Failed to confirm consequence');
+      setDashboard(originalDashboard);
+      toast.error('Failed to confirm consequence - reverted');
     }
   }
 
   async function handleCompleteCommitment(id: string, onTime: boolean) {
+    if (!dashboard) return;
+
+    // Optimistic update - remove commitment from UI immediately
+    const originalDashboard = dashboard;
+    setDashboard({
+      ...dashboard,
+      activeCommitments: dashboard.activeCommitments.filter(c => c.id !== id)
+    });
+    toast.success(onTime ? 'Commitment completed on time!' : 'Commitment completed');
+
     try {
       await updateCommitmentStatus(id, {
         status: 'completed',
         completed_on_time: onTime,
       });
-      toast.success(onTime ? 'Commitment completed on time!' : 'Commitment completed');
+      // Success - refresh to get updated stats
       loadDashboard();
     } catch (error) {
-      toast.error('Failed to mark commitment as complete');
+      setDashboard(originalDashboard);
+      toast.error('Failed to mark commitment as complete - reverted');
     }
   }
 
   async function handleMissedCommitment(id: string) {
+    if (!dashboard) return;
+
+    // Optimistic update - remove commitment from UI immediately
+    const originalDashboard = dashboard;
+    setDashboard({
+      ...dashboard,
+      activeCommitments: dashboard.activeCommitments.filter(c => c.id !== id)
+    });
+    toast.error('Commitment marked as missed');
+
     try {
       await updateCommitmentStatus(id, { status: 'missed' });
-      toast.error('Commitment marked as missed');
       loadDashboard();
     } catch (error) {
-      toast.error('Failed to mark commitment as missed');
+      setDashboard(originalDashboard);
+      toast.error('Failed to mark commitment as missed - reverted');
     }
   }
 
