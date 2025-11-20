@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { format, parseISO, isToday, isTomorrow, isPast, isWithinInterval, addDays } from 'date-fns';
 import Image from 'next/image';
+import { BrainTeaser } from '@/components/kiosk/BrainTeaser';
+import { WeatherAnimation } from '@/components/kiosk/WeatherAnimation';
 
 interface WeatherData {
   location: string;
@@ -451,8 +453,10 @@ function DashboardKioskContent() {
           <div className="space-y-6">
             {/* Weather Widget */}
             {weather ? (
-              <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300">
-                <CardHeader className="pb-3">
+              <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 relative overflow-hidden">
+                {/* Animated Weather Effects */}
+                <WeatherAnimation condition={weather.condition} />
+                <CardHeader className="pb-3 relative z-10">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-6xl font-black text-transparent bg-gradient-to-br from-blue-600 to-cyan-400 bg-clip-text">
@@ -467,7 +471,7 @@ function DashboardKioskContent() {
                   </div>
                   <p className="text-gray-700 font-bold">{weather.condition}</p>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 relative z-10">
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Feels like:</span>
@@ -566,6 +570,9 @@ function DashboardKioskContent() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Brain Teaser */}
+            <BrainTeaser dayOfYear={dayOfYear} />
           </div>
 
           {/* Middle Column - Calendar Events */}
