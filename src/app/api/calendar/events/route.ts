@@ -30,11 +30,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Build query with deduplication
+    // We'll dedupe by selecting distinct on (title, start_time) to avoid showing
+    // the same event multiple times from different calendar subscriptions
     let query = supabase
       .from('calendar_events')
       .select(`
-        *,
-        subscription:calendar_subscriptions(name, color)
+        id,
+        title,
+        description,
+        location,
+        start_time,
+        end_time,
+        all_day,
+        category,
+        color,
+        source_type
       `)
       .eq('user_id', user.id)
       .eq('is_cancelled', false)
@@ -62,7 +73,17 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    return NextResponse.json({ events });
+    // Deduplicate events by title + start_time
+    // Keep the first occurrence of each unique event
+    const deduped = events?.reduce((acc: any[], event: any) => {
+      const key = `${event.title}|${event.start_time}`;
+      if (!acc.find((e: any) => `${e.title}|${e.start_time}` === key)) {
+        acc.push(event);
+      }
+      return acc;
+    }, []) || [];
+
+    return NextResponse.json({ events: deduped });
   } catch (error) {
     console.error('Error in GET /api/calendar/events:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
