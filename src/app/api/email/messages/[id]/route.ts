@@ -22,20 +22,15 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get email without nested relations to avoid RLS conflicts
     const { data: email, error } = await supabase
       .from('school_emails')
       .select(`
         *,
         attachments:email_attachments(*),
         actions:email_actions(*),
-        child_relevance:email_child_relevance(
-          *,
-          child:children(*)
-        ),
-        event_associations:email_event_associations(
-          *,
-          event:calendar_events(*)
-        )
+        child_relevance:email_child_relevance(*),
+        event_associations:email_event_associations(*)
       `)
       .eq('id', params.id)
       .eq('user_id', user.id)
@@ -45,7 +40,61 @@ export async function GET(
       return NextResponse.json({ error: 'Email not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ email });
+    // Enrich with child and event data (client-side join to respect RLS)
+    let enrichedEmail = email;
+
+    // Get unique child IDs
+    const childIds = [...new Set(
+      (email.child_relevance as any)?.map((rel: any) => rel.child_id) || []
+    )];
+
+    // Get unique event IDs
+    const eventIds = [...new Set(
+      (email.event_associations as any)?.map((assoc: any) => assoc.calendar_event_id).filter(Boolean) || []
+    )];
+
+    // Fetch children data
+    let childrenMap = new Map();
+    if (childIds.length > 0) {
+      const { data: children } = await supabase
+        .from('children')
+        .select('*')
+        .in('id', childIds)
+        .eq('user_id', user.id);
+
+      if (children) {
+        childrenMap = new Map(children.map(child => [child.id, child]));
+      }
+    }
+
+    // Fetch events data
+    let eventsMap = new Map();
+    if (eventIds.length > 0) {
+      const { data: events } = await supabase
+        .from('calendar_events')
+        .select('*')
+        .in('id', eventIds)
+        .eq('user_id', user.id);
+
+      if (events) {
+        eventsMap = new Map(events.map(event => [event.id, event]));
+      }
+    }
+
+    // Enrich the email
+    enrichedEmail = {
+      ...email,
+      child_relevance: (email.child_relevance as any)?.map((rel: any) => ({
+        ...rel,
+        child: childrenMap.get(rel.child_id) || null
+      })) || [],
+      event_associations: (email.event_associations as any)?.map((assoc: any) => ({
+        ...assoc,
+        event: eventsMap.get(assoc.calendar_event_id) || null
+      })) || []
+    };
+
+    return NextResponse.json({ email: enrichedEmail });
   } catch (error) {
     console.error('Error in GET /api/email/messages/[id]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

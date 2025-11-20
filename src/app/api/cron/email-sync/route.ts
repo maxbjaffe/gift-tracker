@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Get all active email accounts
     const { data: accounts, error: accountsError } = await supabase
       .from('email_accounts')
-      .select('*, user:user_id')
+      .select('*')
       .eq('is_active', true);
 
     if (accountsError) {
