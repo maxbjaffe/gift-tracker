@@ -17,6 +17,7 @@ export default function SettingsPage() {
   const [name, setName] = useState('');
   const [kioskUrl, setKioskUrl] = useState('');
   const [accountabilityKioskUrl, setAccountabilityKioskUrl] = useState('');
+  const [dashboardKioskUrl, setDashboardKioskUrl] = useState('');
   const [loadingKiosk, setLoadingKiosk] = useState(false);
 
   useEffect(() => {
@@ -78,6 +79,9 @@ export default function SettingsPage() {
         // Generate accountability kiosk URL by replacing /kiosk with /kiosk/accountability
         const accountabilityUrl = data.url.replace('/kiosk?', '/kiosk/accountability?');
         setAccountabilityKioskUrl(accountabilityUrl);
+        // Generate dashboard kiosk URL by replacing /kiosk with /kiosk/dashboard
+        const dashboardUrl = data.url.replace('/kiosk?', '/kiosk/dashboard?');
+        setDashboardKioskUrl(dashboardUrl);
       } else {
         console.error('Error loading kiosk URL:', data);
         toast.error(`Failed to load kiosk URL: ${data.error || 'Unknown error'}`);
@@ -98,6 +102,9 @@ export default function SettingsPage() {
         // Generate accountability kiosk URL
         const accountabilityUrl = data.url.replace('/kiosk?', '/kiosk/accountability?');
         setAccountabilityKioskUrl(accountabilityUrl);
+        // Generate dashboard kiosk URL
+        const dashboardUrl = data.url.replace('/kiosk?', '/kiosk/dashboard?');
+        setDashboardKioskUrl(dashboardUrl);
         toast.success('Kiosk URLs regenerated!');
       } else {
         toast.error('Failed to regenerate kiosk URL');
@@ -118,6 +125,11 @@ export default function SettingsPage() {
   const copyAccountabilityKioskUrl = () => {
     navigator.clipboard.writeText(accountabilityKioskUrl);
     toast.success('Accountability kiosk URL copied to clipboard!');
+  };
+
+  const copyDashboardKioskUrl = () => {
+    navigator.clipboard.writeText(dashboardKioskUrl);
+    toast.success('Dashboard kiosk URL copied to clipboard!');
   };
 
   const handleSave = async () => {
@@ -347,6 +359,38 @@ export default function SettingsPage() {
                 </div>
               </div>
 
+              {/* Dashboard Kiosk URL */}
+              <div>
+                <Label className="text-base font-semibold">Dashboard Kiosk</Label>
+                <p className="text-xs text-gray-600 mb-2">Full family command center with weather, events, quotes, and accountability</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={dashboardKioskUrl}
+                    readOnly
+                    className="bg-gray-50 font-mono text-sm"
+                    placeholder="Loading..."
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyDashboardKioskUrl}
+                    disabled={!dashboardKioskUrl}
+                    title="Copy URL"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => window.open(dashboardKioskUrl, '_blank')}
+                    disabled={!dashboardKioskUrl}
+                    title="Open in new tab"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                 <p className="text-xs text-gray-600">
                   ⚠️ These URLs allow access without logging in. Keep them private and secure!
@@ -358,11 +402,12 @@ export default function SettingsPage() {
                   How to use Kiosk Mode:
                 </h4>
                 <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                  <li>Open either kiosk URL on your wall-mounted tablet or device</li>
+                  <li>Open any kiosk URL on your wall-mounted tablet or device</li>
                   <li>Bookmark for easy access</li>
                   <li>No login required - perfect for kids to use independently</li>
-                  <li>Checklist: Daily morning routines with completion tracking</li>
-                  <li>Accountability: Live view of consequences and commitments</li>
+                  <li><strong>Checklist:</strong> Daily morning routines with completion tracking</li>
+                  <li><strong>Accountability:</strong> Live view of consequences and commitments</li>
+                  <li><strong>Dashboard:</strong> Full family command center with weather, events, quotes, jokes, and accountability</li>
                   <li>Ideal for Dakboard or dedicated family dashboard displays</li>
                 </ul>
               </div>
