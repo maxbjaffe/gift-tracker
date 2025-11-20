@@ -26,7 +26,7 @@ export async function GET() {
     console.log('[Dashboard] Fetching children for user:', user.id);
     const { data: children, error: childrenError } = await supabase
       .from('children')
-      .select('id, name, avatar_url')
+      .select('id, name, avatar_color')
       .eq('user_id', user.id);
 
     console.log('[Dashboard] Children result:', {
