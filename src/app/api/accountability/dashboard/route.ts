@@ -17,24 +17,35 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch commitments with child info
-    // Join through children table since commitments don't have parent_id
+    // First, fetch user's children (RLS will filter this automatically)
+    const { data: children, error: childrenError } = await supabase
+      .from('children')
+      .select('id, name, avatar_url')
+      .eq('user_id', user.id);
+
+    if (childrenError) {
+      console.error('Error fetching children:', childrenError);
+      return NextResponse.json(
+        { error: 'Failed to fetch children', details: childrenError.message },
+        { status: 500 }
+      );
+    }
+
+    const childIds = children?.map((c) => c.id) || [];
+
+    if (childIds.length === 0) {
+      // No children, return empty arrays
+      return NextResponse.json({
+        commitments: [],
+        consequences: [],
+      });
+    }
+
+    // Fetch commitments for user's children
     const { data: commitments, error: commitmentsError } = await supabase
       .from('commitments')
-      .select(`
-        id,
-        child_id,
-        commitment_text,
-        due_date,
-        status,
-        created_at,
-        child:children (
-          id,
-          name,
-          avatar_url,
-          user_id
-        )
-      `)
+      .select('*')
+      .in('child_id', childIds)
       .order('due_date', { ascending: true });
 
     if (commitmentsError) {
@@ -45,25 +56,11 @@ export async function GET() {
       );
     }
 
-    // Filter commitments by user_id through children relationship
-    const userCommitments = commitments?.filter((c: any) => c.child?.user_id === user.id) || [];
-
-    // Fetch consequences with child info
+    // Fetch consequences for user's children
     const { data: consequences, error: consequencesError } = await supabase
       .from('consequences')
-      .select(`
-        id,
-        child_id,
-        restriction_item,
-        expires_at,
-        created_at,
-        child:children (
-          id,
-          name,
-          avatar_url,
-          user_id
-        )
-      `)
+      .select('*')
+      .in('child_id', childIds)
       .order('created_at', { ascending: false });
 
     if (consequencesError) {
@@ -74,12 +71,23 @@ export async function GET() {
       );
     }
 
-    // Filter consequences by user_id through children relationship
-    const userConsequences = consequences?.filter((c: any) => c.child?.user_id === user.id) || [];
+    // Create a map of children for easy lookup
+    const childMap = new Map(children?.map((c) => [c.id, c]));
+
+    // Add child info to commitments and consequences
+    const commitmentsWithChildren = commitments?.map((c: any) => ({
+      ...c,
+      child: childMap.get(c.child_id),
+    })) || [];
+
+    const consequencesWithChildren = consequences?.map((c: any) => ({
+      ...c,
+      child: childMap.get(c.child_id),
+    })) || [];
 
     return NextResponse.json({
-      commitments: userCommitments,
-      consequences: userConsequences,
+      commitments: commitmentsWithChildren,
+      consequences: consequencesWithChildren,
     });
   } catch (error) {
     console.error('Error in GET /api/accountability/dashboard:', error);
