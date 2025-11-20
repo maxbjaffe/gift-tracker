@@ -40,7 +40,7 @@ export default function EmailsPage() {
   const [filter, setFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalEmails, setTotalEmails] = useState(0);
-  const pageSize = 50;
+  const [pageSize, setPageSize] = useState(50);
 
   useEffect(() => {
     loadChildren();
@@ -48,11 +48,16 @@ export default function EmailsPage() {
 
   useEffect(() => {
     setPage(1); // Reset to first page when filters change
-  }, [category, priority, childId, filter, search]);
+  }, [category, priority, childId, filter, search, pageSize]);
 
+  // Debounced search - auto-search 300ms after user stops typing
   useEffect(() => {
-    loadEmails();
-  }, [category, priority, childId, filter, page]);
+    const timeout = setTimeout(() => {
+      loadEmails();
+    }, search === '' ? 0 : 300); // No delay if search cleared
+
+    return () => clearTimeout(timeout);
+  }, [category, priority, childId, filter, page, pageSize, search]);
 
   async function loadChildren() {
     try {
@@ -124,11 +129,6 @@ export default function EmailsPage() {
     }
   }
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    loadEmails();
-  }
-
   async function handleProcessWithAI() {
     try {
       setProcessing(true);
@@ -176,6 +176,8 @@ export default function EmailsPage() {
           width={800}
           height={800}
           className="object-contain"
+          loading="lazy"
+          priority={false}
         />
       </div>
       <div className="fixed -right-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
@@ -185,6 +187,8 @@ export default function EmailsPage() {
           width={800}
           height={800}
           className="object-contain"
+          loading="lazy"
+          priority={false}
         />
       </div>
       <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">
@@ -288,20 +292,19 @@ export default function EmailsPage() {
         {/* Filters */}
         <Card className="p-4 mb-6">
           <div className="space-y-4">
-            {/* Search */}
-            <form onSubmit={handleSearch} className="flex gap-2">
+            {/* Search - Auto-searches as you type (debounced) */}
+            <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search emails..."
+                  placeholder="Search emails (auto-searches as you type)..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
                 />
               </div>
-              <Button type="submit">Search</Button>
-            </form>
+            </div>
 
             {/* Filter Tabs */}
             <div className="flex gap-2 flex-wrap">
@@ -338,8 +341,8 @@ export default function EmailsPage() {
               </Button>
             </div>
 
-            {/* Category, Priority & Child Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Category, Priority, Child & Page Size Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Category</label>
                 <Select value={category} onValueChange={setCategory}>
@@ -389,6 +392,21 @@ export default function EmailsPage() {
                         {child.name}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Per Page</label>
+                <Select value={String(pageSize)} onValueChange={(val) => setPageSize(Number(val))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10 emails</SelectItem>
+                    <SelectItem value="25">25 emails</SelectItem>
+                    <SelectItem value="50">50 emails</SelectItem>
+                    <SelectItem value="100">100 emails</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

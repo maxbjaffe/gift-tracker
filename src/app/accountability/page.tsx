@@ -143,6 +143,8 @@ export default function AccountabilityPage() {
           width={800}
           height={800}
           className="object-contain"
+          loading="lazy"
+          priority={false}
         />
       </div>
       <div className="fixed -right-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
@@ -152,6 +154,8 @@ export default function AccountabilityPage() {
           width={800}
           height={800}
           className="object-contain"
+          loading="lazy"
+          priority={false}
         />
       </div>
       <div className="container mx-auto px-4 py-6 max-w-6xl relative z-10">

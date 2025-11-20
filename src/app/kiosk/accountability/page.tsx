@@ -203,6 +203,8 @@ function AccountabilityKioskContent() {
           width={800}
           height={800}
           className="object-contain"
+          loading="lazy"
+          priority={false}
         />
       </div>
       <div className="fixed -right-32 top-1/2 -translate-y-1/2 opacity-60 pointer-events-none z-0">
@@ -212,6 +214,8 @@ function AccountabilityKioskContent() {
           width={800}
           height={800}
           className="object-contain"
+          loading="lazy"
+          priority={false}
         />
       </div>
 
