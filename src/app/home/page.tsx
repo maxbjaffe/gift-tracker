@@ -311,15 +311,15 @@ export default function HomePage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Weather & Today */}
+          {/* Left Column - Weather, Quote, Joke */}
           <div className="space-y-6">
             {/* Weather Widget */}
             {weather ? (
-              <Card className="shadow-lg hover:shadow-xl transition-shadow">
+              <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-6xl font-black text-gray-900">
+                      <div className="text-6xl font-black text-transparent bg-gradient-to-br from-blue-600 to-cyan-400 bg-clip-text">
                         {Math.round(weather.currentTemp)}°
                       </div>
                       <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
@@ -329,28 +329,28 @@ export default function HomePage() {
                     </div>
                     {getWeatherIcon(weather.condition)}
                   </div>
-                  <p className="text-gray-700 font-medium">{weather.condition}</p>
+                  <p className="text-gray-700 font-bold">{weather.condition}</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Feels like:</span>
-                      <span className="font-semibold">{Math.round(weather.feelsLike)}°F</span>
+                      <span className="font-bold">{Math.round(weather.feelsLike)}°F</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Humidity:</span>
-                      <span className="font-semibold">{weather.humidity}%</span>
+                      <span className="font-bold">{weather.humidity}%</span>
                     </div>
                   </div>
 
                   {/* 3-Day Forecast */}
                   {weather.forecast.length > 0 && (
                     <div className="pt-3 border-t">
-                      <h4 className="text-sm font-semibold mb-2">3-Day Forecast</h4>
+                      <h4 className="text-sm font-bold mb-2">3-Day Forecast</h4>
                       <div className="grid grid-cols-3 gap-2">
                         {weather.forecast.slice(0, 3).map((day, idx) => (
-                          <div key={idx} className="text-center bg-gray-50 rounded p-2">
-                            <div className="text-xs text-gray-600 font-medium">
+                          <div key={idx} className="text-center bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-2">
+                            <div className="text-xs text-gray-600 font-bold">
                               {idx === 0 ? 'Today' : format(parseISO(day.date), 'EEE')}
                             </div>
                             <img
@@ -371,10 +371,10 @@ export default function HomePage() {
                   {weather.alerts.length > 0 && (
                     <div className="pt-3 border-t">
                       {weather.alerts.map((alert, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-sm bg-red-50 p-2 rounded">
+                        <div key={idx} className="flex items-start gap-2 text-sm bg-red-50 p-2 rounded-lg border-2 border-red-300">
                           <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                           <div>
-                            <p className="font-semibold text-red-900">{alert.event}</p>
+                            <p className="font-bold text-red-900">{alert.event}</p>
                             <p className="text-red-700 text-xs">{alert.headline}</p>
                           </div>
                         </div>
@@ -395,28 +395,77 @@ export default function HomePage() {
               </Card>
             )}
 
-            {/* Today's Events */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            {/* Quote of the Day */}
+            <Card className="shadow-lg hover:shadow-2xl transition-all hover:scale-105 duration-300 bg-gradient-to-br from-purple-100 via-pink-100 to-purple-50 border-4 border-purple-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                  Today's Events
+                  <Sparkles className="h-6 w-6 text-purple-600 animate-pulse" />
+                  <span className="text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-black text-xl">
+                    Quote of the Day
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                <div className="space-y-3">
+                  <p className="text-lg font-bold italic text-gray-800 leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
+                    "{todayQuote.text}"
+                  </p>
+                  <p className="text-base text-purple-700 font-black text-right">
+                    — {todayQuote.author}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Joke of the Day */}
+            <Card className="shadow-lg hover:shadow-2xl transition-all hover:scale-105 duration-300 bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 border-4 border-orange-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smile className="h-6 w-6 text-orange-600 animate-bounce" />
+                  <span className="text-transparent bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text font-black text-xl">
+                    Joke of the Day
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-base font-bold text-gray-800">
+                    {todayJoke.setup}
+                  </p>
+                  <div className="p-4 bg-white rounded-xl border-l-8 border-orange-500 shadow-md">
+                    <p className="text-lg font-black text-orange-700">
+                      {todayJoke.punchline}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Middle Column - Calendar Events */}
+          <div className="space-y-6">
+            {/* Today's Events */}
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-blue-300">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-6 w-6" />
+                  <span className="font-black text-xl">Today's Events</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
                 {todayEvents.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-6">Nothing scheduled today</p>
+                  <p className="text-sm text-gray-500 text-center py-6 font-semibold">Nothing scheduled today! 🎉</p>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {todayEvents.map((event) => (
                       <div
                         key={event.id}
-                        className="flex items-start gap-2 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200"
+                        className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-100 to-cyan-100 border-2 border-blue-300 hover:scale-105 transition-transform"
                       >
-                        <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-gray-900">{event.title}</p>
-                          <p className="text-xs text-gray-600">
+                          <p className="font-black text-sm text-gray-900">{event.title}</p>
+                          <p className="text-xs text-gray-700 font-bold">
                             {event.all_day
                               ? 'All day'
                               : format(parseISO(event.start_time), 'h:mm a')}
@@ -429,31 +478,29 @@ export default function HomePage() {
                 )}
               </CardContent>
             </Card>
-          </div>
 
-          {/* Middle Column - Upcoming Events */}
-          <div className="space-y-6">
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
+            {/* This Week */}
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-purple-300">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-purple-600" />
-                  This Week
+                  <Calendar className="h-6 w-6" />
+                  <span className="font-black text-xl">This Week</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 {upcomingEvents.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-6">No upcoming events this week</p>
+                  <p className="text-sm text-gray-500 text-center py-6 font-semibold">No upcoming events this week</p>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {upcomingEvents.map((event) => {
                       const eventDate = parseISO(event.start_time);
                       return (
                         <div
                           key={event.id}
-                          className="p-3 rounded-lg bg-white border border-gray-200 hover:border-purple-300 transition-colors"
+                          className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 hover:border-purple-400 hover:scale-105 transition-all"
                         >
-                          <p className="font-semibold text-sm text-gray-900">{event.title}</p>
-                          <p className="text-xs text-gray-600">
+                          <p className="font-black text-sm text-gray-900">{event.title}</p>
+                          <p className="text-xs text-gray-700 font-bold">
                             {isTomorrow(eventDate)
                               ? 'Tomorrow'
                               : format(eventDate, 'EEE, MMM d')}
@@ -466,123 +513,78 @@ export default function HomePage() {
                   </div>
                 )}
                 <Link href="/calendar">
-                  <Button variant="outline" size="sm" className="w-full mt-4">
-                    View Full Calendar
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Quote of the Day */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-600" />
-                  Quote of the Day
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <p className="text-lg font-medium italic text-gray-800 leading-relaxed">
-                    "{todayQuote.text}"
-                  </p>
-                  <p className="text-sm text-purple-700 font-semibold text-right">
-                    — {todayQuote.author}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Joke of the Day */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Smile className="h-5 w-5 text-orange-600" />
-                  Joke of the Day
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <p className="text-base font-medium text-gray-800">
-                    {todayJoke.setup}
-                  </p>
-                  <div className="p-3 bg-white rounded-lg border-l-4 border-orange-400">
-                    <p className="text-base font-bold text-orange-700">
-                      {todayJoke.punchline}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Active Commitments */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  Active Commitments
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {commitments.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-6">No active commitments</p>
-                ) : (
-                  <div className="space-y-2">
-                    {commitments.map((commitment) => {
-                      const dueDate = parseISO(commitment.due_date);
-                      const isOverdue = isPast(dueDate);
-                      return (
-                        <div
-                          key={commitment.id}
-                          className={`p-3 rounded-lg border-2 ${
-                            isOverdue ? 'bg-red-50 border-red-300' : 'bg-blue-50 border-blue-300'
-                          }`}
-                        >
-                          <p className="font-semibold text-sm text-gray-900">{commitment.child.name}</p>
-                          <p className="text-xs text-gray-700 mb-1">{commitment.commitment_text}</p>
-                          <p className={`text-xs font-medium ${isOverdue ? 'text-red-600' : 'text-blue-600'}`}>
-                            {isOverdue ? '⚠️ Overdue' : `Due ${format(dueDate, 'MMM d, h:mm a')}`}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                <Link href="/accountability">
-                  <Button variant="outline" size="sm" className="w-full mt-4">
-                    View Accountability
+                  <Button variant="outline" size="sm" className="w-full mt-4 font-bold border-2 hover:bg-purple-100">
+                    📅 View Full Calendar
                   </Button>
                 </Link>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Column - Consequences & Quick Actions */}
+          {/* Right Column - Accountability (Commitments & Consequences) */}
           <div className="space-y-6">
-            {/* Active Consequences */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
+            {/* Active Commitments */}
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-green-300">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-2">
-                  <Ban className="h-5 w-5 text-red-600" />
-                  Active Consequences
+                  <Target className="h-6 w-6" />
+                  <span className="font-black text-xl">Active Commitments</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
+                {commitments.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-6 font-semibold">No active commitments</p>
+                ) : (
+                  <div className="space-y-3">
+                    {commitments.map((commitment) => {
+                      const dueDate = parseISO(commitment.due_date);
+                      const isOverdue = isPast(dueDate);
+                      return (
+                        <div
+                          key={commitment.id}
+                          className={`p-4 rounded-xl border-3 hover:scale-105 transition-transform ${
+                            isOverdue
+                              ? 'bg-gradient-to-r from-red-100 to-orange-100 border-red-400'
+                              : 'bg-gradient-to-r from-green-100 to-teal-100 border-green-400'
+                          }`}
+                        >
+                          <p className="font-black text-sm text-gray-900">{commitment.child.name}</p>
+                          <p className="text-xs text-gray-700 mb-1 font-bold">{commitment.commitment_text}</p>
+                          <p className={`text-xs font-black ${isOverdue ? 'text-red-600' : 'text-green-600'}`}>
+                            {isOverdue ? '⚠️ Overdue!' : `📅 Due ${format(dueDate, 'MMM d, h:mm a')}`}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Active Consequences */}
+            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 duration-300 border-3 border-red-300">
+              <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Ban className="h-6 w-6" />
+                  <span className="font-black text-xl">Active Consequences</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
                 {consequences.length === 0 ? (
                   <div className="text-center py-6">
-                    <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto mb-2" />
-                    <p className="text-sm text-green-600 font-semibold">All clear!</p>
-                    <p className="text-xs text-gray-500 mt-1">No active consequences</p>
+                    <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-3 animate-bounce" />
+                    <p className="text-lg text-green-600 font-black">All clear! 🎉</p>
+                    <p className="text-xs text-gray-500 mt-1 font-semibold">No active consequences</p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {consequences.map((consequence) => (
-                      <div key={consequence.id} className="p-3 rounded-lg bg-red-50 border-2 border-red-300">
-                        <p className="font-semibold text-sm text-gray-900">{consequence.child.name}</p>
-                        <p className="text-xs text-gray-700 mb-1">{consequence.restriction_item}</p>
+                      <div key={consequence.id} className="p-4 rounded-xl bg-gradient-to-r from-red-100 to-pink-100 border-3 border-red-400 hover:scale-105 transition-transform">
+                        <p className="font-black text-sm text-gray-900">{consequence.child.name}</p>
+                        <p className="text-xs text-gray-700 mb-1 font-bold">{consequence.restriction_item}</p>
                         {consequence.expires_at && (
-                          <p className="text-xs text-red-600 font-medium">
-                            Until {format(parseISO(consequence.expires_at), 'MMM d, h:mm a')}
+                          <p className="text-xs text-red-600 font-black">
+                            ⏰ Until {format(parseISO(consequence.expires_at), 'MMM d, h:mm a')}
                           </p>
                         )}
                       </div>
@@ -591,45 +593,73 @@ export default function HomePage() {
                 )}
               </CardContent>
             </Card>
+          </div>
+        </div>
 
-            {/* Quick Links */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Links</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
+        {/* Quick Links - Full Width at Bottom */}
+        <Card className="shadow-xl hover:shadow-2xl transition-shadow mt-8 border-4 border-gradient-to-r from-blue-400 to-purple-400">
+          <CardHeader>
+            <CardTitle className="text-2xl font-black text-center text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text">
+              Quick Links
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Calendar Links */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">📅 Calendar</h3>
                 <Link href="/calendar">
-                  <Button variant="outline" className="w-full justify-start hover:bg-blue-50">
+                  <Button variant="outline" className="w-full justify-start hover:bg-blue-100 border-2 font-bold hover:scale-110 transition-transform">
                     <Calendar className="h-4 w-4 mr-2" />
-                    Calendar
-                  </Button>
-                </Link>
-                <Link href="/accountability">
-                  <Button variant="outline" className="w-full justify-start hover:bg-purple-50">
-                    <Target className="h-4 w-4 mr-2" />
-                    Accountability
-                  </Button>
-                </Link>
-                <Link href="/gifts">
-                  <Button variant="outline" className="w-full justify-start hover:bg-pink-50">
-                    <Gift className="h-4 w-4 mr-2" />
-                    Gifts
-                  </Button>
-                </Link>
-                <Link href="/emails">
-                  <Button variant="outline" className="w-full justify-start hover:bg-blue-50">
-                    📧 School Emails
+                    View Calendar
                   </Button>
                 </Link>
                 <Link href="/calendar/settings">
-                  <Button variant="outline" className="w-full justify-start hover:bg-gray-50">
-                    ⚙️ Calendar Settings
+                  <Button variant="outline" className="w-full justify-start hover:bg-blue-100 border-2 font-bold hover:scale-110 transition-transform">
+                    ⚙️ Settings
                   </Button>
                 </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+
+              {/* Accountability Links */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">🎯 Accountability</h3>
+                <Link href="/accountability">
+                  <Button variant="outline" className="w-full justify-start hover:bg-green-100 border-2 font-bold hover:scale-110 transition-transform">
+                    <Target className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href="/children">
+                  <Button variant="outline" className="w-full justify-start hover:bg-green-100 border-2 font-bold hover:scale-110 transition-transform">
+                    👨‍👩‍👧‍👦 Children
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Gift Links */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">🎁 Gifts</h3>
+                <Link href="/gifts">
+                  <Button variant="outline" className="w-full justify-start hover:bg-pink-100 border-2 font-bold hover:scale-110 transition-transform">
+                    <Gift className="h-4 w-4 mr-2" />
+                    Gift Tracker
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Email Links */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">📧 School</h3>
+                <Link href="/emails">
+                  <Button variant="outline" className="w-full justify-start hover:bg-purple-100 border-2 font-bold hover:scale-110 transition-transform">
+                    📧 School Emails
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
