@@ -18,6 +18,7 @@ export async function GET() {
     }
 
     // Fetch commitments with child info
+    // Join through children table since commitments don't have parent_id
     const { data: commitments, error: commitmentsError } = await supabase
       .from('commitments')
       .select(`
@@ -27,13 +28,13 @@ export async function GET() {
         due_date,
         status,
         created_at,
-        child:children!commitments_child_id_fkey (
+        child:children (
           id,
           name,
-          avatar_url
+          avatar_url,
+          user_id
         )
       `)
-      .eq('parent_id', user.id)
       .order('due_date', { ascending: true });
 
     if (commitmentsError) {
@@ -44,6 +45,9 @@ export async function GET() {
       );
     }
 
+    // Filter commitments by user_id through children relationship
+    const userCommitments = commitments?.filter((c: any) => c.child?.user_id === user.id) || [];
+
     // Fetch consequences with child info
     const { data: consequences, error: consequencesError } = await supabase
       .from('consequences')
@@ -53,13 +57,13 @@ export async function GET() {
         restriction_item,
         expires_at,
         created_at,
-        child:children!consequences_child_id_fkey (
+        child:children (
           id,
           name,
-          avatar_url
+          avatar_url,
+          user_id
         )
       `)
-      .eq('parent_id', user.id)
       .order('created_at', { ascending: false });
 
     if (consequencesError) {
@@ -70,9 +74,12 @@ export async function GET() {
       );
     }
 
+    // Filter consequences by user_id through children relationship
+    const userConsequences = consequences?.filter((c: any) => c.child?.user_id === user.id) || [];
+
     return NextResponse.json({
-      commitments: commitments || [],
-      consequences: consequences || [],
+      commitments: userCommitments,
+      consequences: userConsequences,
     });
   } catch (error) {
     console.error('Error in GET /api/accountability/dashboard:', error);
