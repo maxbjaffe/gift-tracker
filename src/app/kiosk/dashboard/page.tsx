@@ -22,6 +22,7 @@ import { format, parseISO, isToday, isTomorrow, isPast, isWithinInterval, addDay
 import Image from 'next/image';
 import { BrainTeaser } from '@/components/kiosk/BrainTeaser';
 import { WeatherAnimation } from '@/components/kiosk/WeatherAnimation';
+import { DoodleBoard } from '@/components/kiosk/DoodleBoard';
 
 interface WeatherData {
   location: string;
@@ -798,6 +799,11 @@ function DashboardKioskContent() {
             </CardContent>
           </Card>
         )}
+
+        {/* Doodle Board - Fun drawing area for kids */}
+        <div className="mt-6">
+          <DoodleBoard />
+        </div>
 
       </div>
     </div>
