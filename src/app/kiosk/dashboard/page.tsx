@@ -214,7 +214,7 @@ function DashboardKioskContent() {
     const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
     try {
-      const response = await fetch('/api/weather', { signal: controller.signal });
+      const response = await fetch(`/api/kiosk/weather?token=${encodeURIComponent(token!)}`, { signal: controller.signal });
       clearTimeout(timeoutId);
 
       if (!response.ok) {
