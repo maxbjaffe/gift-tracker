@@ -120,6 +120,12 @@ function DashboardKioskContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [loadStatus, setLoadStatus] = useState<{
+    token: string;
+    weather: string;
+    events: string;
+    accountability: string;
+  }>({ token: 'pending', weather: 'pending', events: 'pending', accountability: 'pending' });
 
   // Get today's quote and joke (rotates daily)
   const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
@@ -150,21 +156,35 @@ function DashboardKioskContent() {
     try {
       if (!token) return;
 
-      // Verify token
-      const verifyResponse = await fetch(`/api/kiosk/verify?token=${encodeURIComponent(token)}`);
+      setLoadStatus(s => ({ ...s, token: 'verifying' }));
+
+      // Verify token with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const verifyResponse = await fetch(
+        `/api/kiosk/verify?token=${encodeURIComponent(token)}`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timeoutId);
+
       if (!verifyResponse.ok) {
         const verifyData = await verifyResponse.json().catch(() => ({ error: 'Invalid response' }));
         setError(verifyData.error || `Invalid token (${verifyResponse.status})`);
+        setLoadStatus(s => ({ ...s, token: 'failed' }));
         setLoading(false);
         return;
       }
 
+      setLoadStatus(s => ({ ...s, token: 'verified' }));
       await loadDashboard();
       setError(null);
       setLoading(false);
     } catch (error) {
       console.error('Error loading dashboard:', error);
-      setError(`Failed to load: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setError(`Failed to load: ${errorMsg}`);
+      setLoadStatus(s => ({ ...s, token: 'failed' }));
       setLoading(false);
     }
   }
@@ -182,30 +202,50 @@ function DashboardKioskContent() {
   }
 
   async function loadWeather() {
-    const response = await fetch('/api/weather');
-    if (!response.ok) {
-      if (response.status === 400) {
-        return; // No location set, skip silently
+    setLoadStatus(s => ({ ...s, weather: 'loading' }));
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
+    try {
+      const response = await fetch('/api/weather', { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          setLoadStatus(s => ({ ...s, weather: 'skipped' }));
+          return; // No location set, skip silently
+        }
+        throw new Error('Failed to load weather');
       }
-      throw new Error('Failed to load weather');
+      const data = await response.json();
+      setWeather(data.weather);
+      setLoadStatus(s => ({ ...s, weather: 'loaded' }));
+    } catch (error) {
+      setLoadStatus(s => ({ ...s, weather: 'failed' }));
+      throw error;
     }
-    const data = await response.json();
-    setWeather(data.weather);
   }
 
   async function loadEvents() {
+    setLoadStatus(s => ({ ...s, events: 'loading' }));
     const now = new Date();
     const weekFromNow = addDays(now, 7);
 
-    const response = await fetch(
-      `/api/calendar/events?start=${now.toISOString()}&end=${weekFromNow.toISOString()}`
-    );
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-    if (!response.ok) {
-      throw new Error('Failed to load events');
-    }
+    try {
+      const response = await fetch(
+        `/api/calendar/events?start=${now.toISOString()}&end=${weekFromNow.toISOString()}`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timeoutId);
 
-    const data = await response.json();
+      if (!response.ok) {
+        throw new Error('Failed to load events');
+      }
+
+      const data = await response.json();
     const allEvents = data.events || [];
 
     // Filter events for today
@@ -231,15 +271,27 @@ function DashboardKioskContent() {
 
     setTodayEvents(todaysEvents);
     setUpcomingEvents(upcoming);
+    setLoadStatus(s => ({ ...s, events: 'loaded' }));
+    } catch (error) {
+      setLoadStatus(s => ({ ...s, events: 'failed' }));
+      throw error;
+    }
   }
 
   async function loadAccountability() {
-    const response = await fetch('/api/accountability/dashboard');
-    if (!response.ok) {
-      throw new Error('Failed to load accountability');
-    }
+    setLoadStatus(s => ({ ...s, accountability: 'loading' }));
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-    const data = await response.json();
+    try {
+      const response = await fetch('/api/accountability/dashboard', { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error('Failed to load accountability');
+      }
+
+      const data = await response.json();
 
     // Get active commitments due soon
     const now = new Date();
@@ -261,6 +313,11 @@ function DashboardKioskContent() {
 
     setCommitments(activeCommitments);
     setConsequences(activeConsequences);
+    setLoadStatus(s => ({ ...s, accountability: 'loaded' }));
+    } catch (error) {
+      setLoadStatus(s => ({ ...s, accountability: 'failed' }));
+      throw error;
+    }
   }
 
   const getWeatherIcon = (condition: string) => {
@@ -290,9 +347,51 @@ function DashboardKioskContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-2xl text-gray-600 font-bold">Loading Family Command Center...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+        <Card className="p-8 max-w-lg">
+          <div className="text-2xl text-gray-900 font-bold mb-6 text-center">Loading Family Command Center...</div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700">Token Verification</span>
+              <StatusBadge status={loadStatus.token} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700">Weather Data</span>
+              <StatusBadge status={loadStatus.weather} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700">Calendar Events</span>
+              <StatusBadge status={loadStatus.events} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700">Accountability</span>
+              <StatusBadge status={loadStatus.accountability} />
+            </div>
+          </div>
+          {Object.values(loadStatus).some(s => s === 'failed') && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+              Some data failed to load. The dashboard will show with available data.
+            </div>
+          )}
+        </Card>
       </div>
+    );
+  }
+
+  function StatusBadge({ status }: { status: string }) {
+    const styles = {
+      pending: 'bg-gray-200 text-gray-700',
+      verifying: 'bg-blue-200 text-blue-700',
+      verified: 'bg-green-200 text-green-700',
+      loading: 'bg-blue-200 text-blue-700',
+      loaded: 'bg-green-200 text-green-700',
+      failed: 'bg-red-200 text-red-700',
+      skipped: 'bg-gray-200 text-gray-600'
+    };
+    return (
+      <span className={`px-2 py-1 rounded text-xs font-semibold ${styles[status as keyof typeof styles] || styles.pending}`}>
+        {status}
+      </span>
     );
   }
 
