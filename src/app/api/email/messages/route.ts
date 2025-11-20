@@ -30,24 +30,23 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '500');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Build query
+    // Build query - simplified to avoid RLS conflicts
     let query = supabase
       .from('school_emails')
       .select(`
         *,
-        attachments:email_attachments(count),
-        actions:email_actions(count),
-        child_relevance:email_child_relevance(
+        email_attachments(id),
+        email_actions(id),
+        email_child_relevance(
           id,
           child_id,
           relevance_type,
           is_verified,
-          is_rejected,
-          child:children(id, name, avatar_color)
+          is_rejected
         ),
-        event_associations:email_event_associations(
+        email_event_associations(
           id,
-          event:calendar_events(id, title, start_date)
+          calendar_event_id
         )
       `, { count: 'exact' })
       .eq('user_id', user.id)
@@ -88,13 +87,74 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching emails:', error);
-      return NextResponse.json({ error: 'Failed to fetch emails' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch emails', details: error.message }, { status: 500 });
+    }
+
+    // Enrich emails with child and event data
+    let enrichedEmails = emails;
+    if (emails && emails.length > 0) {
+      // Get all unique child IDs
+      const childIds = [...new Set(
+        emails.flatMap((email: any) =>
+          email.email_child_relevance?.map((rel: any) => rel.child_id) || []
+        )
+      )];
+
+      // Get all unique event IDs
+      const eventIds = [...new Set(
+        emails.flatMap((email: any) =>
+          email.email_event_associations?.map((assoc: any) => assoc.calendar_event_id) || []
+        ).filter(Boolean)
+      )];
+
+      // Fetch children data
+      let childrenMap = new Map();
+      if (childIds.length > 0) {
+        const { data: children } = await supabase
+          .from('children')
+          .select('id, name, avatar_color')
+          .in('id', childIds)
+          .eq('user_id', user.id);
+
+        if (children) {
+          childrenMap = new Map(children.map(child => [child.id, child]));
+        }
+      }
+
+      // Fetch events data
+      let eventsMap = new Map();
+      if (eventIds.length > 0) {
+        const { data: events } = await supabase
+          .from('calendar_events')
+          .select('id, title, start_time')
+          .in('id', eventIds)
+          .eq('user_id', user.id);
+
+        if (events) {
+          eventsMap = new Map(events.map(event => [event.id, event]));
+        }
+      }
+
+      // Enrich the emails
+      enrichedEmails = emails.map((email: any) => ({
+        ...email,
+        attachments: email.email_attachments || [],
+        actions: email.email_actions || [],
+        child_relevance: (email.email_child_relevance || []).map((rel: any) => ({
+          ...rel,
+          child: childrenMap.get(rel.child_id) || null
+        })),
+        event_associations: (email.email_event_associations || []).map((assoc: any) => ({
+          ...assoc,
+          event: eventsMap.get(assoc.calendar_event_id) || null
+        }))
+      }));
     }
 
     // Filter by child if specified (join filter)
-    let filteredEmails = emails;
+    let filteredEmails = enrichedEmails;
     if (childId) {
-      filteredEmails = emails?.filter(email =>
+      filteredEmails = enrichedEmails?.filter(email =>
         email.child_relevance?.some((rel: any) => rel.child_id === childId)
       ) || [];
     }
