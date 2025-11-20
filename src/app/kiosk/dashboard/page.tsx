@@ -16,6 +16,7 @@ import {
   Loader2,
   Sparkles,
   Smile,
+  AlertCircle,
 } from 'lucide-react';
 import { format, parseISO, isToday, isTomorrow, isPast, isWithinInterval, addDays } from 'date-fns';
 import Image from 'next/image';
@@ -111,6 +112,7 @@ const DAILY_JOKES = [
 function DashboardKioskContent() {
   const searchParams = useSearchParams();
   const token = searchParams?.get('token') || null;
+  const debugMode = searchParams?.get('debug') === 'true';
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [todayEvents, setTodayEvents] = useState<CalendarEvent[]>([]);
@@ -126,6 +128,11 @@ function DashboardKioskContent() {
     events: string;
     accountability: string;
   }>({ token: 'pending', weather: 'pending', events: 'pending', accountability: 'pending' });
+  const [loadErrors, setLoadErrors] = useState<{
+    weather?: string;
+    events?: string;
+    accountability?: string;
+  }>({});
 
   // Get today's quote and joke (rotates daily)
   const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
@@ -215,12 +222,14 @@ function DashboardKioskContent() {
           setLoadStatus(s => ({ ...s, weather: 'skipped' }));
           return; // No location set, skip silently
         }
-        throw new Error('Failed to load weather');
+        throw new Error(`Failed to load weather: ${response.status}`);
       }
       const data = await response.json();
       setWeather(data.weather);
       setLoadStatus(s => ({ ...s, weather: 'loaded' }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setLoadErrors(e => ({ ...e, weather: errorMsg }));
       setLoadStatus(s => ({ ...s, weather: 'failed' }));
       throw error;
     }
@@ -242,7 +251,7 @@ function DashboardKioskContent() {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error('Failed to load events');
+        throw new Error(`Failed to load events: ${response.status}`);
       }
 
       const data = await response.json();
@@ -273,6 +282,8 @@ function DashboardKioskContent() {
     setUpcomingEvents(upcoming);
     setLoadStatus(s => ({ ...s, events: 'loaded' }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setLoadErrors(e => ({ ...e, events: errorMsg }));
       setLoadStatus(s => ({ ...s, events: 'failed' }));
       throw error;
     }
@@ -288,7 +299,7 @@ function DashboardKioskContent() {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error('Failed to load accountability');
+        throw new Error(`Failed to load accountability: ${response.status}`);
       }
 
       const data = await response.json();
@@ -315,6 +326,8 @@ function DashboardKioskContent() {
     setConsequences(activeConsequences);
     setLoadStatus(s => ({ ...s, accountability: 'loaded' }));
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setLoadErrors(e => ({ ...e, accountability: errorMsg }));
       setLoadStatus(s => ({ ...s, accountability: 'failed' }));
       throw error;
     }
@@ -703,6 +716,81 @@ function DashboardKioskContent() {
             </Card>
           </div>
         </div>
+
+        {/* Debug Panel - only shown when debug=true in URL */}
+        {debugMode && (
+          <Card className="mt-6 border-4 border-yellow-400 bg-yellow-50">
+            <CardHeader className="bg-yellow-100">
+              <CardTitle className="text-yellow-900">Debug Information</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-bold text-lg mb-2">Load Status</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex justify-between items-center p-2 bg-white rounded">
+                      <span>Token:</span>
+                      <StatusBadge status={loadStatus.token} />
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-white rounded">
+                      <span>Weather:</span>
+                      <StatusBadge status={loadStatus.weather} />
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-white rounded">
+                      <span>Events:</span>
+                      <StatusBadge status={loadStatus.events} />
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-white rounded">
+                      <span>Accountability:</span>
+                      <StatusBadge status={loadStatus.accountability} />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-lg mb-2">Data Counts</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2 bg-white rounded">
+                      <span className="font-semibold">Today Events:</span> {todayEvents.length}
+                    </div>
+                    <div className="p-2 bg-white rounded">
+                      <span className="font-semibold">Upcoming Events:</span> {upcomingEvents.length}
+                    </div>
+                    <div className="p-2 bg-white rounded">
+                      <span className="font-semibold">Commitments:</span> {commitments.length}
+                    </div>
+                    <div className="p-2 bg-white rounded">
+                      <span className="font-semibold">Consequences:</span> {consequences.length}
+                    </div>
+                  </div>
+                </div>
+
+                {Object.keys(loadErrors).length > 0 && (
+                  <div>
+                    <h3 className="font-bold text-lg mb-2 text-red-700">Errors</h3>
+                    <div className="space-y-2">
+                      {loadErrors.weather && (
+                        <div className="p-2 bg-red-100 border border-red-300 rounded text-sm">
+                          <span className="font-semibold">Weather:</span> {loadErrors.weather}
+                        </div>
+                      )}
+                      {loadErrors.events && (
+                        <div className="p-2 bg-red-100 border border-red-300 rounded text-sm">
+                          <span className="font-semibold">Events:</span> {loadErrors.events}
+                        </div>
+                      )}
+                      {loadErrors.accountability && (
+                        <div className="p-2 bg-red-100 border border-red-300 rounded text-sm">
+                          <span className="font-semibold">Accountability:</span> {loadErrors.accountability}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       </div>
     </div>
