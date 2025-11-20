@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const [kioskUrl, setKioskUrl] = useState('');
   const [accountabilityKioskUrl, setAccountabilityKioskUrl] = useState('');
   const [dashboardKioskUrl, setDashboardKioskUrl] = useState('');
+  const [doodleKioskUrl, setDoodleKioskUrl] = useState('');
   const [loadingKiosk, setLoadingKiosk] = useState(false);
 
   useEffect(() => {
@@ -82,6 +83,9 @@ export default function SettingsPage() {
         // Generate dashboard kiosk URL by replacing /kiosk with /kiosk/dashboard
         const dashboardUrl = data.url.replace('/kiosk?', '/kiosk/dashboard?');
         setDashboardKioskUrl(dashboardUrl);
+        // Generate doodle kiosk URL by replacing /kiosk with /kiosk/doodle
+        const doodleUrl = data.url.replace('/kiosk?', '/kiosk/doodle?');
+        setDoodleKioskUrl(doodleUrl);
       } else {
         console.error('Error loading kiosk URL:', data);
         toast.error(`Failed to load kiosk URL: ${data.error || 'Unknown error'}`);
@@ -105,6 +109,9 @@ export default function SettingsPage() {
         // Generate dashboard kiosk URL
         const dashboardUrl = data.url.replace('/kiosk?', '/kiosk/dashboard?');
         setDashboardKioskUrl(dashboardUrl);
+        // Generate doodle kiosk URL
+        const doodleUrl = data.url.replace('/kiosk?', '/kiosk/doodle?');
+        setDoodleKioskUrl(doodleUrl);
         toast.success('Kiosk URLs regenerated!');
       } else {
         toast.error('Failed to regenerate kiosk URL');
@@ -130,6 +137,11 @@ export default function SettingsPage() {
   const copyDashboardKioskUrl = () => {
     navigator.clipboard.writeText(dashboardKioskUrl);
     toast.success('Dashboard kiosk URL copied to clipboard!');
+  };
+
+  const copyDoodleKioskUrl = () => {
+    navigator.clipboard.writeText(doodleKioskUrl);
+    toast.success('Doodle Board kiosk URL copied to clipboard!');
   };
 
   const handleSave = async () => {
@@ -384,6 +396,38 @@ export default function SettingsPage() {
                     size="icon"
                     onClick={() => window.open(dashboardKioskUrl, '_blank')}
                     disabled={!dashboardKioskUrl}
+                    title="Open in new tab"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Doodle Board Kiosk URL */}
+              <div>
+                <Label className="text-base font-semibold">Doodle Board Kiosk 🎨</Label>
+                <p className="text-xs text-gray-600 mb-2">Interactive drawing board perfect for kids on touch screens</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={doodleKioskUrl}
+                    readOnly
+                    className="bg-gray-50 font-mono text-sm"
+                    placeholder="Loading..."
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyDoodleKioskUrl}
+                    disabled={!doodleKioskUrl}
+                    title="Copy URL"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => window.open(doodleKioskUrl, '_blank')}
+                    disabled={!doodleKioskUrl}
                     title="Open in new tab"
                   >
                     <ExternalLink className="h-4 w-4" />

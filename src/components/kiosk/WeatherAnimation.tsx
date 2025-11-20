@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import styles from './WeatherAnimation.module.css';
 
 interface WeatherAnimationProps {
   condition: string;
@@ -13,7 +14,6 @@ interface Particle {
   speed: number;
   size: number;
   delay: number;
-  animationClass: string;
 }
 
 export function WeatherAnimation({ condition }: WeatherAnimationProps) {
@@ -36,7 +36,7 @@ export function WeatherAnimation({ condition }: WeatherAnimationProps) {
     } else if (conditionLower.includes('cloud') || conditionLower.includes('overcast')) {
       particleCount = 8;
       type = 'cloud';
-    } else if (conditionLower.includes('clear') || conditionLower.includes('sun')) {
+    } else if (conditionLower.includes('clear') || conditionLower.includes('sunny')) {
       particleCount = 12;
       type = 'sun';
     }
@@ -51,7 +51,6 @@ export function WeatherAnimation({ condition }: WeatherAnimationProps) {
       speed: 3 + Math.random() * 4, // Animation duration variation
       size: 0.5 + Math.random() * 1.5,
       delay: Math.random() * 3, // Stagger start times
-      animationClass: type || '',
     }));
 
     setParticles(newParticles);
@@ -60,89 +59,65 @@ export function WeatherAnimation({ condition }: WeatherAnimationProps) {
   if (!animationType) return null;
 
   return (
-    <>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {animationType === 'rain' && particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute w-0.5 bg-blue-400/60"
-            style={{
-              left: `${particle.x}%`,
-              height: `${particle.size * 20}px`,
-              animation: `fall ${particle.speed}s linear infinite`,
-              animationDelay: `${particle.delay}s`,
-            }}
-          />
-        ))}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {animationType === 'rain' && particles.map((particle) => (
+        <div
+          key={particle.id}
+          className={styles.rainDrop}
+          style={{
+            left: `${particle.x}%`,
+            height: `${particle.size * 20}px`,
+            animationDuration: `${particle.speed}s`,
+            animationDelay: `${particle.delay}s`,
+          }}
+        />
+      ))}
 
-        {animationType === 'snow' && particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute rounded-full bg-white/80"
-            style={{
-              left: `${particle.x}%`,
-              width: `${particle.size * 6}px`,
-              height: `${particle.size * 6}px`,
-              animation: `snow ${particle.speed * 2}s ease-in-out infinite`,
-              animationDelay: `${particle.delay}s`,
-            }}
-          />
-        ))}
+      {animationType === 'snow' && particles.map((particle) => (
+        <div
+          key={particle.id}
+          className={styles.snowFlake}
+          style={{
+            left: `${particle.x}%`,
+            width: `${particle.size * 8}px`,
+            height: `${particle.size * 8}px`,
+            animationDuration: `${particle.speed * 2}s`,
+            animationDelay: `${particle.delay}s`,
+          }}
+        />
+      ))}
 
-        {animationType === 'cloud' && particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute opacity-20"
-            style={{
-              left: `${particle.x}%`,
-              top: `${20 + particle.id * 8}%`,
-              width: `${particle.size * 60}px`,
-              height: `${particle.size * 30}px`,
-              animation: `float ${particle.speed * 3}s ease-in-out infinite`,
-              animationDelay: `${particle.delay}s`,
-            }}
-          >
-            <div className="w-full h-full bg-gray-400 rounded-full blur-sm" />
-          </div>
-        ))}
+      {animationType === 'cloud' && particles.map((particle) => (
+        <div
+          key={particle.id}
+          className={styles.cloudPuff}
+          style={{
+            left: `${particle.x}%`,
+            top: `${20 + particle.id * 8}%`,
+            width: `${particle.size * 80}px`,
+            height: `${particle.size * 40}px`,
+            animationDuration: `${particle.speed * 4}s`,
+            animationDelay: `${particle.delay}s`,
+          }}
+        >
+          <div className={styles.cloudPuffInner} />
+        </div>
+      ))}
 
-        {animationType === 'sun' && particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute opacity-40"
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y + 20}%`,
-              width: '2px',
-              height: `${particle.size * 40}px`,
-              background: 'linear-gradient(to bottom, rgba(255, 215, 0, 0.6), transparent)',
-              transformOrigin: 'top center',
-              animation: `sunray ${particle.speed * 2}s ease-in-out infinite`,
-              animationDelay: `${particle.delay}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <style jsx global>{`
-        @keyframes fall {
-          from { transform: translateY(-20px); }
-          to { transform: translateY(100vh); }
-        }
-        @keyframes snow {
-          0% { transform: translateY(-10px) translateX(0); }
-          50% { transform: translateY(50vh) translateX(20px); }
-          100% { transform: translateY(100vh) translateX(0); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateX(0) translateY(0); }
-          50% { transform: translateX(30px) translateY(-10px); }
-        }
-        @keyframes sunray {
-          0%, 100% { opacity: 0.3; transform: rotate(0deg) scaleY(1); }
-          50% { opacity: 0.6; transform: rotate(5deg) scaleY(1.2); }
-        }
-      `}</style>
-    </>
+      {animationType === 'sun' && particles.map((particle) => (
+        <div
+          key={particle.id}
+          className={styles.sunRay}
+          style={{
+            left: `${particle.x}%`,
+            top: `${particle.y + 20}%`,
+            width: '3px',
+            height: `${particle.size * 50}px`,
+            animationDuration: `${particle.speed * 2}s`,
+            animationDelay: `${particle.delay}s`,
+          }}
+        />
+      ))}
+    </div>
   );
 }
