@@ -59,8 +59,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to load events' }, { status: 500 });
     }
 
+    // Deduplicate events by title + start_time
+    // This handles cases where the same event is synced from multiple sources
+    const uniqueEvents = events?.reduce((acc: any[], event: any) => {
+      const key = `${event.title}|${event.start_time}`;
+      if (!acc.find((e: any) => `${e.title}|${e.start_time}` === key)) {
+        acc.push(event);
+      }
+      return acc;
+    }, []) || [];
+
     return NextResponse.json({
-      events: events || [],
+      events: uniqueEvents,
     });
   } catch (error) {
     console.error('[Kiosk API] Unexpected error:', error);
