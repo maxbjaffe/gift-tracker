@@ -12,9 +12,11 @@ import {
   Filter,
   Plus,
   Loader2,
+  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { QuickAddModal } from '@/components/family-info/QuickAddModal';
 
 interface FamilyInfo {
   id: string;
@@ -32,6 +34,7 @@ export default function FamilyInfoPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('');
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   const types = [
     'Insurance',
@@ -48,6 +51,19 @@ export default function FamilyInfoPage() {
   useEffect(() => {
     loadEntries();
   }, [filterType]);
+
+  // Keyboard shortcut for Quick Add (Cmd+K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setQuickAddOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   const loadEntries = async () => {
     setLoading(true);
@@ -135,19 +151,23 @@ export default function FamilyInfoPage() {
             </Card>
           </Link>
 
-          <Link href="/family-info/new">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-green-200 hover:border-green-400">
-              <CardContent className="flex items-center gap-4 p-6">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Plus className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg">Add Entry</h3>
-                  <p className="text-sm text-gray-600">Create new information</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+          <Card
+            className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-yellow-200 hover:border-yellow-400"
+            onClick={() => setQuickAddOpen(true)}
+          >
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <Zap className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                  Quick Add
+                  <kbd className="px-2 py-1 text-xs bg-gray-100 rounded border">⌘K</kbd>
+                </h3>
+                <p className="text-sm text-gray-600">Fast entry with templates</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Search and Filter */}
@@ -264,6 +284,21 @@ export default function FamilyInfoPage() {
             ))}
           </div>
         )}
+
+        {/* Floating Quick Add Button */}
+        <button
+          onClick={() => setQuickAddOpen(true)}
+          className="fixed bottom-8 right-8 p-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 transition-all z-50 group"
+          aria-label="Quick Add"
+        >
+          <Zap className="h-6 w-6" />
+          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+            Quick Add (⌘K)
+          </span>
+        </button>
+
+        {/* Quick Add Modal */}
+        <QuickAddModal open={quickAddOpen} onOpenChange={setQuickAddOpen} />
       </div>
     </div>
   );
