@@ -23,25 +23,25 @@ document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
   try {
-    console.log('Gift Tracker: Initializing...');
+    console.log('GiftStash: Initializing...');
 
     // Store Supabase config
     await chrome.storage.local.set({
       supabaseUrl: SUPABASE_URL,
       supabaseAnonKey: SUPABASE_ANON_KEY
     });
-    console.log('Gift Tracker: Config stored');
+    console.log('GiftStash: Config stored');
 
     // Initialize Supabase client
     await window.supabaseClient.init();
-    console.log('Gift Tracker: Supabase client initialized');
+    console.log('GiftStash: Supabase client initialized');
 
     // Check authentication
     currentUser = await window.supabaseClient.getUser();
-    console.log('Gift Tracker: Current user:', currentUser ? currentUser.email : 'Not signed in');
+    console.log('GiftStash: Current user:', currentUser ? currentUser.email : 'Not signed in');
 
     if (!currentUser) {
-      console.log('Gift Tracker: Showing sign-in view');
+      console.log('GiftStash: Showing sign-in view');
       showView('signIn');
       setupSignInListeners();
       return;
@@ -49,11 +49,11 @@ async function init() {
 
     // Load recipients
     await loadRecipients();
-    console.log('Gift Tracker: Loaded', recipients.length, 'recipients');
+    console.log('GiftStash: Loaded', recipients.length, 'recipients');
 
     // Load current product
     await loadCurrentProduct();
-    console.log('Gift Tracker: Current product:', currentProduct ? currentProduct.title : 'None');
+    console.log('GiftStash: Current product:', currentProduct ? currentProduct.title : 'None');
 
     // Setup all event listeners
     setupEventListeners();
@@ -219,7 +219,7 @@ async function handleSignIn(e) {
   const email = document.getElementById('signInEmail').value;
   const password = document.getElementById('signInPassword').value;
 
-  console.log('Gift Tracker: Attempting sign in for:', email);
+  console.log('GiftStash: Attempting sign in for:', email);
 
   // Reset error
   errorDiv.classList.add('hidden');
@@ -230,16 +230,16 @@ async function handleSignIn(e) {
   submitBtn.textContent = 'Signing in...';
 
   try {
-    console.log('Gift Tracker: Getting Supabase client...');
+    console.log('GiftStash: Getting Supabase client...');
     const client = await window.supabaseClient.getClient();
 
-    console.log('Gift Tracker: Calling signInWithPassword...');
+    console.log('GiftStash: Calling signInWithPassword...');
     const { data, error } = await client.auth.signInWithPassword({
       email,
       password
     });
 
-    console.log('Gift Tracker: Sign in response:', {
+    console.log('GiftStash: Sign in response:', {
       hasData: !!data,
       hasUser: !!data?.user,
       hasError: !!error,
@@ -249,8 +249,8 @@ async function handleSignIn(e) {
     if (error) throw error;
 
     if (data.user) {
-      console.log('Gift Tracker: Sign in successful! User:', data.user.email);
-      console.log('Gift Tracker: Reloading popup...');
+      console.log('GiftStash: Sign in successful! User:', data.user.email);
+      console.log('GiftStash: Reloading popup...');
       // Success! Reload to show authenticated state
       setTimeout(() => {
         window.location.reload();
@@ -259,7 +259,7 @@ async function handleSignIn(e) {
       throw new Error('No user returned from sign in');
     }
   } catch (error) {
-    console.error('Gift Tracker: Sign in error:', error);
+    console.error('GiftStash: Sign in error:', error);
     errorDiv.textContent = error.message || 'Failed to sign in. Please check your credentials.';
     errorDiv.classList.remove('hidden');
     submitBtn.disabled = false;

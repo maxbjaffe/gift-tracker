@@ -69,10 +69,10 @@ export default function RecipientsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 p-4 md:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-giftstash-orange mx-auto"></div>
             <p className="mt-4 text-sm md:text-base text-gray-600">Loading recipients...</p>
           </div>
         </div>
@@ -81,7 +81,7 @@ export default function RecipientsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
           <div>
@@ -98,7 +98,7 @@ export default function RecipientsPage() {
               setSelectedRecipient(null);
               setIsModalOpen(true);
             }}
-            className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap h-11 md:h-12 px-4 md:px-6"
+            className="w-full md:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap h-11 md:h-12 px-4 md:px-6"
           >
             + Add Recipient
           </Button>
@@ -118,7 +118,7 @@ export default function RecipientsPage() {
                 setSelectedRecipient(null);
                 setIsModalOpen(true);
               }}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-sm md:text-base h-11 md:h-12 px-4 md:px-6"
+              className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light text-sm md:text-base h-11 md:h-12 px-4 md:px-6"
             >
               Add Your First Recipient
             </Button>
@@ -156,7 +156,7 @@ export default function RecipientsPage() {
                     />
                   </div>
 
-                  <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-center text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-center text-gray-900 mb-2 group-hover:text-giftstash-orange transition-colors">
                     {recipient.name}
                   </h2>
 

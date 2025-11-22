@@ -12,7 +12,7 @@ import {
 } from 'recharts'
 import { TrendingUp, DollarSign, Package, Users } from 'lucide-react'
 
-const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1']
+const COLORS = ['#F57F20', '#2E7BB4', '#5CB85C', '#FF9A4D', '#4A9FD8', '#f59e0b', '#ef4444']
 
 export default function AnalyticsPage() {
   const { gifts, loading: giftsLoading } = useGifts()
@@ -109,11 +109,11 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs md:text-sm text-gray-600 mb-1">Total Spent</p>
-              <p className="text-xl md:text-2xl font-bold text-purple-600">
+              <p className="text-xl md:text-2xl font-bold text-giftstash-orange">
                 ${analytics.totalSpent.toFixed(2)}
               </p>
             </div>
-            <DollarSign className="h-8 w-8 md:h-10 md:w-10 text-purple-600" />
+            <DollarSign className="h-8 w-8 md:h-10 md:w-10 text-giftstash-orange" />
           </div>
         </Card>
 
@@ -121,11 +121,11 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs md:text-sm text-gray-600 mb-1">Average Gift</p>
-              <p className="text-xl md:text-2xl font-bold text-blue-600">
+              <p className="text-xl md:text-2xl font-bold text-giftstash-blue">
                 ${analytics.averageGiftPrice.toFixed(2)}
               </p>
             </div>
-            <TrendingUp className="h-8 w-8 md:h-10 md:w-10 text-blue-600" />
+            <TrendingUp className="h-8 w-8 md:h-10 md:w-10 text-giftstash-blue" />
           </div>
         </Card>
 
@@ -261,7 +261,7 @@ export default function AnalyticsPage() {
                 </div>
               </div>
               <div className="text-right w-full sm:w-auto">
-                <p className="text-xl md:text-2xl font-bold text-purple-600">
+                <p className="text-xl md:text-2xl font-bold text-giftstash-orange">
                   ${gift.current_price?.toFixed(2)}
                 </p>
                 {gift.store && (

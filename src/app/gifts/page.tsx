@@ -266,26 +266,26 @@ export default function UnifiedGiftsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 flex items-center justify-center">
         <LoadingSpinner type="card" count={3} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Gift Tracker
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
+              GiftStash
             </h1>
             <p className="text-gray-600 mt-1">Smart gift management with budget insights</p>
           </div>
           <Button
             onClick={() => setIsRecipientModalOpen(true)}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 gap-2"
+            className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light gap-2"
           >
             <UserPlus className="h-4 w-4" />
             Add Recipient
@@ -299,13 +299,13 @@ export default function UnifiedGiftsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Value</p>
-                  <p className="text-2xl font-bold text-purple-600">
+                  <p className="text-2xl font-bold text-giftstash-orange">
                     ${analytics.totalValue.toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">{analytics.giftCount} gifts</p>
                 </div>
-                <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-purple-600" />
+                <div className="h-12 w-12 bg-gradient-to-br from-giftstash-orange/10 to-giftstash-blue/10 rounded-full flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-giftstash-orange" />
                 </div>
               </div>
             </CardContent>
@@ -316,13 +316,13 @@ export default function UnifiedGiftsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Purchased</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-giftstash-green">
                     ${analytics.purchasedValue.toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">{analytics.purchasedCount} gifts</p>
                 </div>
-                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <ShoppingCart className="h-6 w-6 text-green-600" />
+                <div className="h-12 w-12 bg-gradient-to-br from-giftstash-green/10 to-giftstash-blue/10 rounded-full flex items-center justify-center">
+                  <ShoppingCart className="h-6 w-6 text-giftstash-green" />
                 </div>
               </div>
             </CardContent>
@@ -333,13 +333,13 @@ export default function UnifiedGiftsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Ideas</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-giftstash-blue">
                     ${analytics.ideasValue.toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">{analytics.ideasCount} ideas</p>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Lightbulb className="h-6 w-6 text-blue-600" />
+                <div className="h-12 w-12 bg-gradient-to-br from-giftstash-blue/10 to-giftstash-orange/10 rounded-full flex items-center justify-center">
+                  <Lightbulb className="h-6 w-6 text-giftstash-blue" />
                 </div>
               </div>
             </CardContent>
@@ -350,7 +350,7 @@ export default function UnifiedGiftsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Top Recipient</p>
-                  <p className="text-lg font-bold text-pink-600 truncate">
+                  <p className="text-lg font-bold text-giftstash-orange truncate">
                     {Object.values(analytics.byRecipient).sort((a, b) => b.value - a.value)[0]
                       ?.name || 'None'}
                   </p>
@@ -361,8 +361,8 @@ export default function UnifiedGiftsPage() {
                       ?.value.toFixed(2) || '0.00'}
                   </p>
                 </div>
-                <div className="h-12 w-12 bg-pink-100 rounded-full flex items-center justify-center">
-                  <Package className="h-6 w-6 text-pink-600" />
+                <div className="h-12 w-12 bg-gradient-to-br from-giftstash-orange/10 to-giftstash-green/10 rounded-full flex items-center justify-center">
+                  <Package className="h-6 w-6 text-giftstash-orange" />
                 </div>
               </div>
             </CardContent>
@@ -371,11 +371,11 @@ export default function UnifiedGiftsPage() {
 
         {/* Bulk Actions Toolbar */}
         {selectedGifts.size > 0 && (
-          <Card className="mb-4 bg-purple-50 border-purple-200">
+          <Card className="mb-4 bg-gradient-to-r from-giftstash-orange/5 to-giftstash-blue/5 border-giftstash-orange/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="font-semibold text-purple-900">
+                  <span className="font-semibold text-giftstash-orange">
                     {selectedGifts.size} selected
                   </span>
                   <Button variant="outline" size="sm" onClick={deselectAll}>
@@ -441,7 +441,7 @@ export default function UnifiedGiftsPage() {
                 onClick={() => setViewMode('recipients')}
                 className={
                   viewMode === 'recipients'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                    ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue'
                     : ''
                 }
               >
@@ -452,7 +452,7 @@ export default function UnifiedGiftsPage() {
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 onClick={() => setViewMode('grid')}
                 className={
-                  viewMode === 'grid' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : ''
+                  viewMode === 'grid' ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue' : ''
                 }
               >
                 <LayoutGrid className="h-4 w-4 mr-2" />
@@ -467,7 +467,7 @@ export default function UnifiedGiftsPage() {
               size="sm"
               onClick={() => setStatusFilter('all')}
               className={
-                statusFilter === 'all' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : ''
+                statusFilter === 'all' ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue' : ''
               }
             >
               All
@@ -679,8 +679,8 @@ export default function UnifiedGiftsPage() {
                     />
                   )}
                   {(!gift.source_metadata?.screenshot && !gift.image_url) && (
-                    <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                      <Package className="h-16 w-16 text-purple-300" />
+                    <div className="w-full h-48 bg-gradient-to-br from-giftstash-orange/10 to-giftstash-blue/10 flex items-center justify-center">
+                      <Package className="h-16 w-16 text-giftstash-orange/30" />
                     </div>
                   )}
                   <div className="absolute top-2 left-2">

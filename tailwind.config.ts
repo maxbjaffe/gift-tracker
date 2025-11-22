@@ -15,6 +15,14 @@ const config: Config = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			// GiftStash Brand Colors
+  			giftstash: {
+  				orange: '#F57F20',
+  				'orange-light': '#FF9A4D',
+  				blue: '#2E7BB4',
+  				'blue-light': '#4A9FD8',
+  				green: '#5CB85C',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

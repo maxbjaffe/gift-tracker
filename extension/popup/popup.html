@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gift Tracker</title>
+  <title>GiftStash</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -16,8 +16,8 @@
   <!-- Sign In State -->
   <div id="signIn" class="sign-in hidden">
     <div class="header">
-      <h1>🎁 Gift Tracker</h1>
-      <p>Sign in to save gift ideas</p>
+      <img src="../assets/GiftStashFullLogoV2.png" alt="GiftStash" class="logo-main">
+      <p class="tagline">Sign in to save gift ideas</p>
     </div>
 
     <form id="signInForm" class="sign-in-form">
@@ -61,7 +61,8 @@
   <!-- No Product Detected State -->
   <div id="noProduct" class="no-product hidden">
     <div class="header">
-      <h1>🎁 Gift Tracker</h1>
+      <img src="../assets/GiftStashIconGSv2.png" alt="GiftStash" class="logo-icon">
+      <h1>GiftStash</h1>
     </div>
     <div class="empty-state">
       <p class="empty-icon">🔍</p>
@@ -77,6 +78,7 @@
   <!-- Product Detected State -->
   <div id="productView" class="product-view hidden">
     <div class="header">
+      <img src="../assets/GiftStashIconGSv2.png" alt="GiftStash" class="logo-icon-small">
       <h2>Save Gift Idea</h2>
     </div>
 

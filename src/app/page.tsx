@@ -1,8 +1,9 @@
 // src/app/page.tsx - Family Hub Homepage
+import Image from 'next/image'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -19,15 +20,27 @@ export default function HomePage() {
 
         {/* Three Main Systems */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {/* Gift Tracker System */}
-          <div className="bg-white rounded-3xl shadow-2xl p-8 border-4 border-purple-200 hover:border-purple-400 transition-all">
+          {/* GiftStash System */}
+          <div className="bg-white rounded-3xl shadow-2xl p-8 border-4 border-orange-200 hover:border-giftstash-orange transition-all">
             <div className="text-center mb-6">
-              <div className="text-7xl mb-4">🎁</div>
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-                Gift Tracker
-              </h2>
-              <p className="text-gray-600 text-lg">
-                Never forget a gift idea again
+              <div className="flex justify-center mb-4">
+                <Image
+                  src="/images/GiftStashIconGSv2.png"
+                  alt="GiftStash"
+                  width={160}
+                  height={160}
+                  className="w-40 h-40"
+                />
+              </div>
+              <Image
+                src="/images/GiftStashNamev2.png"
+                alt="GiftStash"
+                width={300}
+                height={80}
+                className="mx-auto mb-3 h-16 w-auto"
+              />
+              <p className="text-gray-600 text-lg font-medium">
+                Your personal gift idea stash
               </p>
             </div>
 
@@ -57,9 +70,9 @@ export default function HomePage() {
 
             <a
               href="/dashboard"
-              className="block w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg font-semibold text-center text-lg"
+              className="block w-full px-6 py-4 bg-gradient-to-r from-giftstash-orange to-giftstash-blue text-white rounded-xl hover:from-giftstash-orange-light hover:to-giftstash-blue-light transition-all shadow-lg font-semibold text-center text-lg"
             >
-              Open Gift Tracker →
+              Open GiftStash →
             </a>
           </div>
 
@@ -158,17 +171,17 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <a
               href="/recipients"
-              className="p-4 text-center rounded-xl hover:bg-purple-50 transition-all border border-gray-200 hover:border-purple-300"
+              className="p-4 text-center rounded-xl hover:bg-orange-50 transition-all border border-gray-200 hover:border-giftstash-orange group"
             >
-              <div className="text-3xl mb-2">👥</div>
-              <div className="text-sm font-medium text-gray-700">Recipients</div>
+              <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">👥</div>
+              <div className="text-sm font-medium text-gray-700 group-hover:text-giftstash-orange">Recipients</div>
             </a>
             <a
               href="/gifts"
-              className="p-4 text-center rounded-xl hover:bg-purple-50 transition-all border border-gray-200 hover:border-purple-300"
+              className="p-4 text-center rounded-xl hover:bg-orange-50 transition-all border border-gray-200 hover:border-giftstash-orange group"
             >
-              <div className="text-3xl mb-2">🎁</div>
-              <div className="text-sm font-medium text-gray-700">Gifts</div>
+              <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🎁</div>
+              <div className="text-sm font-medium text-gray-700 group-hover:text-giftstash-orange">Gifts</div>
             </a>
             <a
               href="/accountability"

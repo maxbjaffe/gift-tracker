@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import Link from 'next/link'
+import Image from 'next/image'
 import { UserMenu } from '@/components/shared/UserMenu'
 import { MobileNav } from '@/components/shared/MobileNav'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
@@ -11,8 +12,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Family Hub - Gift Tracking & Accountability',
-  description: 'All-in-one family management platform with gift tracking, accountability features, and SMS control',
+  title: 'Family Hub - GiftStash & Accountability',
+  description: 'All-in-one family management platform with GiftStash gift tracking, accountability features, and SMS control',
 }
 
 export default async function RootLayout({
@@ -30,44 +31,54 @@ export default async function RootLayout({
       <body className={inter.className}>
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container flex h-16 items-center px-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <Link href="/" className="flex items-center gap-2">
                 <span className="text-2xl md:text-3xl">🏠</span>
                 <span className="text-lg md:text-xl font-bold">Family Hub</span>
+              </Link>
+              <div className="h-8 w-px bg-border hidden md:block" />
+              <Link href="/dashboard" className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <Image
+                  src="/images/GiftStashIconGSv2.png"
+                  alt="GiftStash"
+                  width={80}
+                  height={40}
+                  className="h-10 w-auto"
+                />
               </Link>
             </div>
 
             {/* Desktop Navigation - Hidden on mobile */}
             <nav className="ml-auto hidden md:flex items-center gap-6">
-              {/* Gift Tracker Section */}
+              {/* GiftStash Section */}
               <div className="flex items-center gap-4">
                 <Link
                   href="/dashboard"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm font-medium text-giftstash-orange hover:text-giftstash-orange-light transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/recipients"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
                 >
                   Recipients
                 </Link>
                 <Link
                   href="/gifts"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
                 >
                   Gifts
                 </Link>
                 <Link
                   href="/inspiration"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors flex items-center gap-1"
                 >
                   ✨ Inspiration
                 </Link>
                 <Link
                   href="/analytics"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
                 >
                   Analytics
                 </Link>
@@ -116,9 +127,21 @@ export default async function RootLayout({
 
         <main className="min-h-[calc(100vh-4rem)]">{children}</main>
 
-        <footer className="border-t">
-          <div className="container py-8 text-center text-sm text-muted-foreground">
-            © 2025 Family Hub. Built with Next.js, Supabase, and Claude AI.
+        <footer className="border-t bg-gradient-to-r from-gray-50 to-gray-100">
+          <div className="container py-8 text-center">
+            <div className="flex justify-center items-center gap-2 mb-3">
+              <Image
+                src="/images/GiftStashIconGSv2.png"
+                alt="GiftStash"
+                width={48}
+                height={48}
+                className="h-12 w-12"
+              />
+              <span className="font-semibold text-gray-900">Family Hub</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2025 GiftStash & Family Hub. Built with Next.js, Supabase, and Claude AI.
+            </p>
           </div>
         </footer>
 

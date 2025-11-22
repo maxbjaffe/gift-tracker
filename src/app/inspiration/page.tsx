@@ -157,12 +157,12 @@ export default function InspirationPage() {
   const hasActiveFilters = category || minPrice || maxPrice || ageRange || occasion;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            Gift Inspiration
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent mb-3">
+            GiftStash Inspiration
           </h1>
           <p className="text-gray-600 text-lg">
             Discover trending and popular gift ideas
@@ -300,7 +300,7 @@ export default function InspirationPage() {
         {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-12 w-12 animate-spin text-purple-600 mb-4" />
+            <Loader2 className="h-12 w-12 animate-spin text-giftstash-orange mb-4" />
             <p className="text-gray-600">Finding amazing gift ideas...</p>
           </div>
         )}

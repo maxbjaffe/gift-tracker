@@ -63,7 +63,9 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto p-4 md:p-6 lg:p-8">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
+          GiftStash Dashboard
+        </h1>
         <p className="text-sm md:text-base text-gray-600 mt-2">
           Welcome back! Here's your gift tracking overview.
         </p>
@@ -77,8 +79,8 @@ export default function DashboardPage() {
               <p className="text-xs md:text-sm text-gray-600">Total Recipients</p>
               <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{recipients.length}</p>
             </div>
-            <div className="h-10 w-10 md:h-12 md:w-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Users className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-giftstash-orange/10 to-giftstash-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Users className="h-5 w-5 md:h-6 md:w-6 text-giftstash-blue" />
             </div>
           </div>
         </Card>
@@ -89,8 +91,8 @@ export default function DashboardPage() {
               <p className="text-xs md:text-sm text-gray-600">Gift Ideas</p>
               <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{totalGifts}</p>
             </div>
-            <div className="h-10 w-10 md:h-12 md:w-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Gift className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-giftstash-orange/10 to-giftstash-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Gift className="h-5 w-5 md:h-6 md:w-6 text-giftstash-orange" />
             </div>
           </div>
         </Card>
@@ -101,8 +103,8 @@ export default function DashboardPage() {
               <p className="text-xs md:text-sm text-gray-600">Upcoming Birthdays</p>
               <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">{upcomingBirthdays.length}</p>
             </div>
-            <div className="h-10 w-10 md:h-12 md:w-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Calendar className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-giftstash-green/10 to-giftstash-blue/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Calendar className="h-5 w-5 md:h-6 md:w-6 text-giftstash-green" />
             </div>
           </div>
         </Card>
@@ -113,8 +115,8 @@ export default function DashboardPage() {
               <p className="text-xs md:text-sm text-gray-600">Total Spent</p>
               <p className="text-2xl md:text-3xl font-bold mt-1 md:mt-2">${totalValue.toFixed(0)}</p>
             </div>
-            <div className="h-10 w-10 md:h-12 md:w-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-yellow-600" />
+            <div className="h-10 w-10 md:h-12 md:w-12 bg-gradient-to-br from-giftstash-orange/10 to-giftstash-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <DollarSign className="h-5 w-5 md:h-6 md:w-6 text-giftstash-green" />
             </div>
           </div>
         </Card>
@@ -205,7 +207,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
+                      className="h-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue transition-all"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
@@ -254,7 +256,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-green-500 transition-all"
+                          className="h-full bg-giftstash-green transition-all"
                           style={{ width: `${Math.min(percentage, 100)}%` }}
                         />
                       </div>
@@ -301,7 +303,7 @@ export default function DashboardPage() {
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all ${
-                            isOverBudget ? 'bg-red-500' : percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                            isOverBudget ? 'bg-red-500' : percentage > 80 ? 'bg-giftstash-orange' : 'bg-giftstash-green'
                           }`}
                           style={{ width: `${Math.min(percentage, 100)}%` }}
                         />
