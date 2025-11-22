@@ -13,6 +13,8 @@ import {
   Plus,
   Loader2,
   Zap,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -30,23 +32,36 @@ interface FamilyInfo {
 }
 
 export default function FamilyInfoPage() {
+  const typeInfo: Record<string, { icon: string; color: string; description: string }> = {
+    Insurance: { icon: '🛡️', color: 'blue', description: 'Coverage & policies' },
+    Contact: { icon: '📞', color: 'green', description: 'Important contacts' },
+    Financial: { icon: '💰', color: 'purple', description: 'Accounts & investments' },
+    Healthcare: { icon: '🏥', color: 'red', description: 'Medical providers' },
+    Education: { icon: '🎓', color: 'yellow', description: 'Schools & programs' },
+    Home: { icon: '🏠', color: 'pink', description: 'Property & utilities' },
+    Auto: { icon: '🚗', color: 'orange', description: 'Vehicles & registration' },
+    Legal: { icon: '⚖️', color: 'gray', description: 'Documents & estate' },
+    Other: { icon: '📋', color: 'slate', description: 'General information' },
+  };
+
+  const types = Object.keys(typeInfo);
+
   const [entries, setEntries] = useState<FamilyInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('');
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
-  const types = [
-    'Insurance',
-    'Contact',
-    'Financial',
-    'Healthcare',
-    'Education',
-    'Home',
-    'Auto',
-    'Legal',
-    'Other',
-  ];
+  const toggleCategory = (type: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(type)) {
+      newExpanded.delete(type);
+    } else {
+      newExpanded.add(type);
+    }
+    setExpandedCategories(newExpanded);
+  };
 
   useEffect(() => {
     loadEntries();
@@ -207,81 +222,113 @@ export default function FamilyInfoPage() {
           </CardContent>
         </Card>
 
-        {/* Entries List */}
+        {/* Entries List - Organized by Category */}
         {loading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
           </div>
         ) : entries.length === 0 ? (
-          <Card>
+          <Card className="border-2 border-dashed">
             <CardContent className="text-center py-12">
               <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">No information yet</h3>
               <p className="text-gray-600 mb-4">
                 Start by adding family information or uploading documents
               </p>
-              <div className="flex gap-3 justify-center">
-                <Link href="/family-info/new">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Entry
-                  </Button>
-                </Link>
-                <Link href="/family-info/upload">
-                  <Button variant="outline">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Document
-                  </Button>
-                </Link>
-              </div>
+              <Button onClick={() => setQuickAddOpen(true)} size="lg">
+                <Zap className="h-4 w-4 mr-2" />
+                Quick Add Entry
+              </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {entries.map((entry) => (
-              <Link key={entry.id} href={`/family-info/${entry.id}`}>
-                <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer h-full">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div
-                          className={`inline-block px-2 py-1 rounded text-xs font-semibold mb-2 border ${getTypeColor(
-                            entry.type
-                          )}`}
-                        >
-                          {entry.type}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {types
+              .map((type) => ({
+                type,
+                entries: entries.filter((e) => e.type === type),
+              }))
+              .filter(({ entries }) => entries.length > 0)
+              .map(({ type, entries: typeEntries }) => {
+                const isExpanded = expandedCategories.has(type);
+                const info = typeInfo[type];
+
+                return (
+                  <Card key={type} className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow h-fit">
+                    {/* Category Header */}
+                    <button
+                      onClick={() => toggleCategory(type)}
+                      className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="text-3xl">{info.icon}</div>
+                        <div className="text-left">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-lg font-bold text-gray-900">{type}</h3>
+                            <span className="px-2.5 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+                              {typeEntries.length}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500">{info.description}</p>
                         </div>
-                        <CardTitle className="text-lg">{entry.title}</CardTitle>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {entry.description && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {entry.description}
-                      </p>
-                    )}
-                    {entry.tags && entry.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {entry.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {entry.tags.length > 3 && (
-                          <span className="px-2 py-0.5 text-gray-500 text-xs">
-                            +{entry.tags.length - 3} more
-                          </span>
+                      <div className="flex items-center gap-2">
+                        {isExpanded ? (
+                          <ChevronDown className="h-5 w-5 text-gray-400" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-400" />
                         )}
                       </div>
+                    </button>
+
+                    {/* Category Items */}
+                    {isExpanded && (
+                      <div className="px-6 pb-4 space-y-2">
+                        <div className="border-t pt-4">
+                          {typeEntries.map((entry) => (
+                            <Link key={entry.id} href={`/family-info/${entry.id}`}>
+                              <div className="p-4 rounded-lg hover:bg-purple-50 transition-colors border border-transparent hover:border-purple-200 group">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors">
+                                      {entry.title}
+                                    </h4>
+                                    {entry.description && (
+                                      <p className="text-sm text-gray-600 mt-1 line-clamp-1">
+                                        {entry.description}
+                                      </p>
+                                    )}
+                                    {entry.tags && entry.tags.length > 0 && (
+                                      <div className="flex flex-wrap gap-1.5 mt-2">
+                                        {entry.tags.slice(0, 4).map((tag) => (
+                                          <span
+                                            key={tag}
+                                            className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs"
+                                          >
+                                            {tag}
+                                          </span>
+                                        ))}
+                                        {entry.tags.length > 4 && (
+                                          <span className="px-2 py-0.5 text-gray-400 text-xs">
+                                            +{entry.tags.length - 4}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="ml-4 text-xs text-gray-400">
+                                    {new Date(entry.created_at).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                  </Card>
+                );
+              })}
           </div>
         )}
 
