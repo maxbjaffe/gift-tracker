@@ -2,7 +2,7 @@ import { detectShortcut, handleShortcut } from './shortcuts';
 import { detectBulkOperation } from './bulk-operations';
 import { getSMSContext, saveSMSContext, hasPendingClarification, mergeClarificationResponse } from './context-manager';
 
-export type MessageIntent = 'consequence' | 'commitment' | 'query' | 'response' | 'unknown' | 'shortcut' | 'bulk';
+export type MessageIntent = 'consequence' | 'commitment' | 'query' | 'response' | 'unknown' | 'shortcut' | 'bulk' | 'gift';
 
 export interface RouterResult {
   intent: MessageIntent;
@@ -77,6 +77,14 @@ const RESPONSE_KEYWORDS = [
   'extend',
 ];
 
+const GIFT_KEYWORDS = [
+  'for',      // "AirPods for Sarah"
+  'gift',     // "Gift idea: Lego for Emma"
+  'buy',      // "Buy AirPods for Mom"
+  'get',      // "Get Sarah a book"
+  'present',  // "Present for Dad"
+];
+
 /**
  * Detect message intent using keyword-based classification
  * Falls back to AI parsing if uncertain
@@ -94,7 +102,19 @@ export function detectMessageIntent(message: string): RouterResult {
     };
   }
 
-  // 2. Check for bulk operations (all kids, everyone, Emma and Jake)
+  // 2. Check for gift keywords (AirPods for Sarah, Gift for Mom, etc.)
+  if (containsKeywords(normalized, GIFT_KEYWORDS)) {
+    // Additional check: gifts usually have a recipient reference
+    if (normalized.includes(' for ') || normalized.includes('gift')) {
+      return {
+        intent: 'gift',
+        confidence: 'high',
+        message: normalized,
+      };
+    }
+  }
+
+  // 3. Check for bulk operations (all kids, everyone, Emma and Jake)
   const bulkDetection = detectBulkOperation(message);
   if (bulkDetection.isBulk) {
     return {
@@ -304,6 +324,16 @@ export async function routeMessage(
       }, null);
       return bulkResponse;
 
+    case 'gift':
+      // Handle gift tracking messages (AirPods for Sarah, etc.)
+      if (!userId) {
+        return 'Please authenticate first by logging in through the app.';
+      }
+      const { handleGiftMessage } = await import('./gift-handler');
+      const giftResponse = await handleGiftMessage(message, fromNumber, userId);
+      await saveSMSContext(fromNumber, userId, message, 'gift', {}, null);
+      return giftResponse;
+
     case 'consequence':
       const { handleConsequenceMessage } = await import('./consequence-handler');
       const consequenceResponse = await handleConsequenceMessage(message, fromNumber);
@@ -330,7 +360,7 @@ export async function routeMessage(
 
     case 'response':
       const { handleResponseMessage } = await import('./response-handler');
-      const responseMessage = await handleResponseMessage(message, fromNumber);
+      const responseMessage = await handleResponseMessage(message, fromNumber, userId);
       if (userId) {
         await saveSMSContext(fromNumber, userId, message, 'response', {}, null);
       }

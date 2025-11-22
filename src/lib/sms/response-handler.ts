@@ -1,10 +1,27 @@
 import { updateConsequenceStatus, updateCommitmentStatus } from '../services/accountability';
+import { getSMSContext } from './context-manager';
+import { handleGiftConfirmation } from './gift-handler';
 
 export async function handleResponseMessage(
   message: string,
-  fromNumber: string
+  fromNumber: string,
+  userId?: string
 ): Promise<string> {
   const normalized = message.toLowerCase().trim();
+
+  // Check for pending gift confirmation first
+  const context = await getSMSContext(fromNumber);
+  if (context && context.parsedData) {
+    const { awaitingConfirmation, awaitingSuggestionSelection, awaitingRecipientCreation } = context.parsedData;
+
+    // If there's a pending gift action, route to gift confirmation handler
+    if (awaitingConfirmation || awaitingSuggestionSelection || awaitingRecipientCreation) {
+      if (!userId) {
+        return 'Please authenticate first by logging in through the app.';
+      }
+      return await handleGiftConfirmation(message, fromNumber, userId);
+    }
+  }
 
   // Handle confirmation responses
   if (isConfirmation(normalized)) {
