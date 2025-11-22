@@ -8,12 +8,15 @@ import Image from 'next/image'
 import { UserMenu } from '@/components/shared/UserMenu'
 import { MobileNav } from '@/components/shared/MobileNav'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { isGiftStashApp, getCurrentAppConfig } from '@/lib/app-config'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const appConfig = getCurrentAppConfig()
+
 export const metadata: Metadata = {
-  title: 'Family Hub - GiftStash & Accountability',
-  description: 'All-in-one family management platform with GiftStash gift tracking, accountability features, and SMS control',
+  title: appConfig.title,
+  description: appConfig.description,
 }
 
 export default async function RootLayout({
@@ -26,9 +29,14 @@ export default async function RootLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Only show Family Hub header when not in GiftStash mode
+  // GiftStash landing page has its own header
+  const showFamilyHubHeader = !isGiftStashApp()
+
   return (
     <html lang="en">
       <body className={inter.className}>
+        {showFamilyHubHeader && (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container flex h-16 items-center px-4">
             <div className="flex items-center gap-4">
@@ -124,9 +132,11 @@ export default async function RootLayout({
             </div>
           </div>
         </header>
+        )}
 
-        <main className="min-h-[calc(100vh-4rem)]">{children}</main>
+        <main className={showFamilyHubHeader ? "min-h-[calc(100vh-4rem)]" : ""}>{children}</main>
 
+        {showFamilyHubHeader && (
         <footer className="border-t bg-gradient-to-r from-gray-50 to-gray-100">
           <div className="container py-8 text-center">
             <div className="flex justify-center items-center gap-2 mb-3">
@@ -144,6 +154,7 @@ export default async function RootLayout({
             </p>
           </div>
         </footer>
+        )}
 
         <Toaster />
       </body>

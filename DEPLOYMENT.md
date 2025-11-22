@@ -1,305 +1,344 @@
-# 🚀 Deployment Checklist - Family Accountability Platform
+# Deployment Guide - Dual Deployment Setup
 
-This checklist ensures a smooth deployment to production with all features working correctly.
+This codebase supports **two different deployments** from the same source code:
+
+1. **Family Hub** - Full family management platform (default)
+2. **GiftStash** - Standalone gift tracking app at giftstash.app
+
+## 🎯 How It Works
+
+The application uses the `NEXT_PUBLIC_APP_MODE` environment variable to determine which experience to show:
+
+- `NEXT_PUBLIC_APP_MODE=family-hub` - Shows Family Hub with all features (Accountability, School Emails, etc.)
+- `NEXT_PUBLIC_APP_MODE=giftstash` - Shows GiftStash landing page and hides non-GiftStash features
+
+### What Changes Between Modes
+
+**GiftStash Mode** (`NEXT_PUBLIC_APP_MODE=giftstash`):
+- Landing page with sign up/login
+- GiftStash branding and colors
+- Only gift tracking features visible
+- Simplified navigation
+- Custom header/footer in landing page
+
+**Family Hub Mode** (`NEXT_PUBLIC_APP_MODE=family-hub`):
+- Family Hub homepage with all systems
+- Full navigation (GiftStash, Accountability, School Emails, Family Info)
+- Family Hub header/footer
+- All features accessible
+
+### What Stays the Same
+
+Both deployments share:
+- Same Supabase database
+- Same authentication system
+- All backend API routes
+- All gift tracking functionality
+- Users can log in to either with same credentials
+
+---
+
+## 🚀 Deployment Setup
+
+### 1. Family Hub Deployment (Existing)
+
+Your existing Vercel deployment continues to work as-is.
+
+**Environment Variables in Vercel:**
+```
+NEXT_PUBLIC_APP_MODE=family-hub  # or omit (defaults to family-hub)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+ANTHROPIC_API_KEY=sk-ant-...
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+TWILIO_PHONE_NUMBER=+1...
+CRON_SECRET=...
+EMAIL_ENCRYPTION_KEY=...
+```
+
+**Cron Jobs** (from `vercel.json`):
+- Expire consequences: Every 15 minutes
+- Commitment reminders: Every 5 minutes
+- Consequence warnings: Every 30 minutes
+- Calculate reliability: Daily at 1 AM
+- Weekly report: Sundays at 6 PM
+- Cleanup SMS context: Every hour
+
+---
+
+### 2. GiftStash Deployment (New - giftstash.app)
+
+Create a **new Vercel project** for the GiftStash standalone app:
+
+#### Step 1: Create New Vercel Project
+
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click **"Add New"** → **"Project"**
+3. Import the **same GitHub repository** (gift-tracker)
+4. Name it "giftstash" or "giftstash-app"
+
+#### Step 2: Configure Environment Variables
+
+In the new Vercel project settings, add these environment variables:
+
+**CRITICAL:**
+```
+NEXT_PUBLIC_APP_MODE=giftstash  # This enables GiftStash mode!
+```
+
+**Copy from Family Hub deployment** (must be identical):
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+ANTHROPIC_API_KEY=sk-ant-...
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+TWILIO_PHONE_NUMBER=+1...
+CRON_SECRET=...
+EMAIL_ENCRYPTION_KEY=...
+```
+
+**Important Notes:**
+- All environment variables (except `NEXT_PUBLIC_APP_MODE`) must be **identical** to Family Hub
+- Both deployments use the **same database**
+- Both deployments share the **same Twilio number**
+- Cron jobs can run on **either** deployment (recommend keeping on Family Hub only)
+
+#### Step 3: Configure Custom Domain
+
+1. In Vercel project settings → **Domains**
+2. Add domain: `giftstash.app`
+3. Add domain: `www.giftstash.app` (optional)
+4. Vercel will provide DNS configuration instructions
+
+#### Step 4: Deploy
+
+1. Click **"Deploy"** in Vercel
+2. Wait for deployment to complete
+3. Visit `https://giftstash.app` to see landing page
+
+---
+
+## 🌐 DNS Configuration
+
+### For giftstash.app domain:
+
+In your domain registrar (where you bought giftstash.app), add these DNS records:
+
+**A Record:**
+```
+Type: A
+Name: @
+Value: 76.76.21.21
+TTL: Auto
+```
+
+**CNAME Record (for www):**
+```
+Type: CNAME
+Name: www
+Value: cname.vercel-dns.com
+TTL: Auto
+```
+
+**Verification:**
+- DNS propagation can take up to 48 hours (usually minutes)
+- Check status in Vercel → Domains section
+- Use `dig giftstash.app` to verify DNS records
+- Visit `https://giftstash.app` once propagated
+
+---
+
+## 💻 Local Development
+
+### Test Family Hub Mode (Default)
+
+```bash
+npm run dev
+```
+
+Visit http://localhost:3000 → Should show Family Hub homepage
+
+### Test GiftStash Mode
+
+```bash
+NEXT_PUBLIC_APP_MODE=giftstash npm run dev
+```
+
+Visit http://localhost:3000 → Should show GiftStash landing page
+
+### Clear Next.js Cache
+
+If changes don't appear:
+
+```bash
+rm -rf .next
+npm run dev
+```
+
+---
+
+## 🔒 Security Checklist
+
+### Before Going Live with GiftStash:
+
+- [ ] Verify `NEXT_PUBLIC_APP_MODE=giftstash` is set in Vercel
+- [ ] All environment variables match Family Hub deployment
+- [ ] SSL certificate is active (auto-provisioned by Vercel)
+- [ ] Test sign up flow on giftstash.app
+- [ ] Test login flow redirects to dashboard
+- [ ] Verify users can only see their own data (RLS enabled)
+- [ ] Test that Family Hub features are hidden in GiftStash mode
+- [ ] Confirm both deployments share same database
+
+### API Security:
+
+- [ ] All API routes require authentication (except webhooks)
+- [ ] Cron endpoints require `CRON_SECRET` header
+- [ ] Service role key never exposed in client code
+- [ ] RLS (Row Level Security) enabled on all database tables
+
+---
+
+## 📊 Monitoring Both Deployments
+
+### Vercel Monitoring:
+
+- **Family Hub**: Monitor all cron jobs + full app traffic
+- **GiftStash**: Monitor sign ups, logins, gift tracking usage
+
+### Supabase Monitoring:
+
+- Single database serves both deployments
+- Monitor total queries, not per-deployment
+- Check RLS policies protect user data
+
+### Twilio Monitoring:
+
+- Single phone number shared by both deployments
+- SMS commands work regardless of which app user signed up from
+
+---
+
+## 🛠️ Troubleshooting
+
+### GiftStash landing page not showing:
+
+1. Verify `NEXT_PUBLIC_APP_MODE=giftstash` in Vercel environment variables
+2. Redeploy after adding environment variable (they're baked into build)
+3. Clear browser cache
+4. Check browser console for errors
+
+### Domain not connecting:
+
+1. Verify DNS records in domain registrar
+2. Wait up to 48 hours for DNS propagation
+3. Use `dig giftstash.app` to check DNS
+4. Check Vercel → Domains shows "Valid" status
+
+### Users can't log in on giftstash.app:
+
+1. Verify Supabase environment variables are correct
+2. Check Supabase auth settings allow the new domain
+3. Test with incognito/private browsing
+4. Check browser console for CORS errors
+
+### Changes not appearing:
+
+1. Environment variables starting with `NEXT_PUBLIC_` are baked into build
+2. Must redeploy in Vercel after changing them
+3. Local: restart dev server after changing `.env.local`
+4. Clear `.next` folder: `rm -rf .next`
+
+---
 
 ## 📋 Pre-Deployment Checklist
 
-### 1. Environment Variables
+### Database (One-time Setup):
 
-Ensure all required environment variables are set in your production environment (Vercel):
+- [ ] All Supabase migrations applied
+- [ ] RLS enabled on all tables
+- [ ] Test users can only access their own data
 
-#### **Supabase** (Required)
-- [ ] `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-- [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key (public)
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (secret)
+### Family Hub Deployment:
 
-#### **Anthropic Claude AI** (Required for SMS parsing)
-- [ ] `ANTHROPIC_API_KEY` - Your Anthropic API key for Claude
+- [ ] All environment variables set in Vercel
+- [ ] Cron jobs configured in `vercel.json`
+- [ ] Twilio webhook points to Family Hub URL
+- [ ] Test SMS commands work
+- [ ] Test all features (Accountability, Emails, etc.)
 
-#### **Twilio SMS** (Required for SMS features)
-- [ ] `TWILIO_ACCOUNT_SID` - Twilio account SID
-- [ ] `TWILIO_AUTH_TOKEN` - Twilio auth token
-- [ ] `TWILIO_PHONE_NUMBER` - Your Twilio phone number (format: +1234567890)
-- [ ] `TWILIO_SMS_WEBHOOK_URL` - Public webhook URL (e.g., https://yourdomain.com/api/sms/receive)
+### GiftStash Deployment:
 
-#### **Cron Jobs** (Required)
-- [ ] `CRON_SECRET` - Secret key for authenticating cron job requests (generate with `openssl rand -base64 32`)
+- [ ] New Vercel project created
+- [ ] `NEXT_PUBLIC_APP_MODE=giftstash` set
+- [ ] All other environment variables copied from Family Hub
+- [ ] Domain `giftstash.app` added in Vercel
+- [ ] DNS records configured
+- [ ] Landing page loads correctly
+- [ ] Sign up/login works
+- [ ] Gift tracking features accessible
+- [ ] Family Hub features hidden
 
-#### **Optional**
-- [ ] `NEXT_PUBLIC_APP_URL` - Your app's production URL (for notifications)
+---
 
-### 2. Database Setup
+## 🔄 Deployment Workflow
 
-#### **Supabase Database Migrations**
+### Making Changes:
 
-Apply all migrations in order:
-
-```bash
-# In Supabase SQL Editor, run these migrations in order:
-1. add_user_id_to_tables.sql
-2. update_avatar_type_constraint.sql
-3. add_max_purchased_budget.sql
-4. add_personality_surveys.sql
-5. 20241114_create_profiles_with_phone.sql
-6. 20241114_sms_tracking.sql
-7. 20250116000000_accountability_system.sql
-8. 20250117_sms_context.sql
-```
-
-#### **Verify Tables Created**
-
-- [ ] `profiles` - User profiles with phone numbers
-- [ ] `children` - Child records
-- [ ] `consequences` - Restrictions and consequences
-- [ ] `commitments` - Child commitments
-- [ ] `commitment_stats` - Monthly reliability statistics
-- [ ] `sms_messages` - SMS message logging
-- [ ] `sms_context` - Conversation context (30-min expiry)
-
-#### **Row Level Security (RLS)**
-
-- [ ] Verify RLS is enabled on all tables
-- [ ] Test that users can only see their own data
-- [ ] Verify service role can bypass RLS for cron jobs
-
-### 3. Twilio Configuration
-
-#### **SMS Webhook Setup**
-
-1. [ ] Go to Twilio Console → Phone Numbers → Active Numbers
-2. [ ] Select your phone number
-3. [ ] Under "Messaging Configuration":
-   - [ ] Set "A MESSAGE COMES IN" webhook to: `https://yourdomain.com/api/sms/receive`
-   - [ ] Method: `POST`
-   - [ ] Content Type: `application/x-www-form-urlencoded`
-4. [ ] Save configuration
-5. [ ] Test by sending a text message
-
-#### **Phone Number Registration**
-
-- [ ] Complete A2P 10DLC registration (required for US numbers)
-- [ ] Register your use case with carriers
-- [ ] Wait for approval (can take 1-2 weeks)
-
-### 4. Vercel Deployment
-
-#### **Cron Jobs Configuration**
-
-Verify `vercel.json` includes all cron jobs:
-
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/expire-consequences",
-      "schedule": "*/15 * * * *"  // Every 15 minutes
-    },
-    {
-      "path": "/api/cron/commitment-reminders",
-      "schedule": "*/5 * * * *"  // Every 5 minutes
-    },
-    {
-      "path": "/api/cron/consequence-warnings",
-      "schedule": "*/30 * * * *"  // Every 30 minutes
-    },
-    {
-      "path": "/api/cron/calculate-reliability",
-      "schedule": "0 1 * * *"  // Daily at 1 AM
-    },
-    {
-      "path": "/api/cron/weekly-report",
-      "schedule": "0 18 * * 0"  // Sundays at 6 PM
-    },
-    {
-      "path": "/api/cron/cleanup-sms-context",
-      "schedule": "0 * * * *"  // Every hour
-    }
-  ]
-}
-```
-
-#### **Deployment Steps**
-
-1. [ ] Push code to GitHub
-2. [ ] Deploy to Vercel (automatic on push to main)
-3. [ ] Set all environment variables in Vercel dashboard
-4. [ ] Wait for deployment to complete
-5. [ ] Verify deployment URL is accessible
-
-### 5. Post-Deployment Verification
-
-#### **Basic Functionality**
-
-- [ ] Homepage loads without errors
-- [ ] User can sign up with email
-- [ ] User can sign in
-- [ ] Dashboard displays correctly
-- [ ] Can add a child
-- [ ] Can view accountability dashboard
-
-#### **SMS Features**
-
-- [ ] Send "HELP" → Receives command list
-- [ ] Send "STATUS" → Receives status summary
-- [ ] Send consequence (e.g., "No iPad 3 days Emma - homework") → Creates consequence
-- [ ] Send commitment (e.g., "Emma will finish homework by 7pm") → Creates commitment
-- [ ] Send bulk operation (e.g., "No TV for all kids 2 days") → Applies to all children
-- [ ] Verify SMS context persists for 30 minutes
-
-#### **Cron Jobs**
-
-After deployment, verify cron jobs are running:
-
-1. [ ] Check Vercel → Deployments → Functions → Cron
-2. [ ] Wait for each cron schedule to trigger
-3. [ ] Verify logs show successful execution
-4. [ ] Test manually by calling with authorization header:
+1. **Develop locally** - test both modes
    ```bash
-   curl -X GET https://yourdomain.com/api/cron/test \
-     -H "Authorization: Bearer YOUR_CRON_SECRET"
+   # Test Family Hub
+   npm run dev
+
+   # Test GiftStash
+   NEXT_PUBLIC_APP_MODE=giftstash npm run dev
    ```
 
-#### **Analytics**
+2. **Commit and push** to GitHub
+   ```bash
+   git add .
+   git commit -m "Description of changes"
+   git push origin main
+   ```
 
-- [ ] Visit `/accountability/analytics`
-- [ ] Verify charts load without errors
-- [ ] Check that reliability scores calculate correctly
-- [ ] Verify pattern detection works
+3. **Auto-deploy** - Vercel deploys both projects automatically
+   - Family Hub deployment updates
+   - GiftStash deployment updates
 
-#### **Partner Notifications**
+4. **Verify both deployments** work correctly
 
-- [ ] Create a consequence → Verify partner receives notification
-- [ ] Confirm consequence → Verify both parents notified
-- [ ] Lift consequence → Verify both parents notified
+### Database Migrations:
 
-### 6. Security Audit
+1. Apply migration in Supabase SQL Editor
+2. Update both deployments if needed (usually automatic)
+3. Test on both Family Hub and GiftStash
 
-#### **Authentication**
+### Environment Variable Changes:
 
-- [ ] Verify all API routes require authentication
-- [ ] Check that unauthenticated requests return 401
-- [ ] Verify JWT tokens expire correctly
-- [ ] Test that users can't access other users' data
+1. Update in **both** Vercel projects
+2. Redeploy both projects (env vars baked into build)
+3. Verify changes applied
 
-#### **API Security**
+---
 
-- [ ] Verify cron endpoints require `CRON_SECRET`
-- [ ] Check SMS webhook validates Twilio signature (if implemented)
-- [ ] Verify service role key is not exposed in client code
-- [ ] Check that error messages don't leak sensitive information
-
-#### **Input Validation**
-
-- [ ] Test SQL injection on all inputs (should be prevented by Supabase)
-- [ ] Test XSS on text inputs (should be sanitized)
-- [ ] Verify phone numbers are validated
-- [ ] Check that dates/times are validated
-
-#### **Rate Limiting**
-
-- [ ] Consider adding rate limiting for SMS webhook
-- [ ] Consider rate limiting for API endpoints
-- [ ] Monitor Anthropic API usage to prevent unexpected costs
-
-### 7. Monitoring & Error Tracking
-
-#### **Set Up Monitoring**
-
-- [ ] Add error tracking (e.g., Sentry)
-- [ ] Set up uptime monitoring (e.g., UptimeRobot, Better Uptime)
-- [ ] Configure Vercel Analytics
-- [ ] Set up alerts for cron job failures
-
-#### **Log Monitoring**
-
-- [ ] Monitor Vercel function logs for errors
-- [ ] Check Supabase logs for database errors
-- [ ] Monitor Twilio logs for SMS issues
-- [ ] Track Anthropic API usage and costs
-
-### 8. Performance Optimization
-
-- [ ] Enable Vercel Edge Functions for API routes (if applicable)
-- [ ] Configure CDN caching for static assets
-- [ ] Optimize images (use Next.js Image component)
-- [ ] Enable ISR (Incremental Static Regeneration) for static pages
-- [ ] Add database indexes for frequently queried columns
-
-### 9. Documentation
-
-- [ ] Update README with production setup instructions
-- [ ] Document all environment variables
-- [ ] Create user guide for SMS commands (✅ Done: /accountability/sms-guide)
-- [ ] Document API endpoints for future reference
-- [ ] Create troubleshooting guide
-
-### 10. Backup & Recovery
-
-- [ ] Set up Supabase database backups (automatic daily backups)
-- [ ] Test database restore process
-- [ ] Document rollback procedure
-- [ ] Keep a copy of all migration scripts
-
-## 🔄 Regular Maintenance
-
-### Daily
-- [ ] Check error logs
-- [ ] Monitor SMS delivery rates
-- [ ] Verify cron jobs are running
-
-### Weekly
-- [ ] Review Anthropic API usage and costs
-- [ ] Check Twilio SMS costs
-- [ ] Review user feedback
-
-### Monthly
-- [ ] Audit user accounts for issues
-- [ ] Review and optimize database queries
-- [ ] Update dependencies (npm update)
-- [ ] Review security vulnerabilities (npm audit)
-
-## 📞 Support Contacts
+## 📞 Support Resources
 
 - **Vercel Support**: https://vercel.com/support
 - **Supabase Support**: https://supabase.com/support
 - **Twilio Support**: https://www.twilio.com/help/contact
 - **Anthropic Support**: https://support.anthropic.com
 
-## 🚨 Troubleshooting
-
-### SMS Not Received
-
-1. Check Twilio logs for message status
-2. Verify webhook URL is correct and publicly accessible
-3. Check Vercel function logs for errors
-4. Verify phone number is verified (for trial accounts)
-
-### Cron Jobs Not Running
-
-1. Check Vercel cron configuration
-2. Verify `CRON_SECRET` is set correctly
-3. Check function logs for errors
-4. Test cron endpoint manually with curl
-
-### Database Errors
-
-1. Check Supabase logs
-2. Verify RLS policies are not blocking queries
-3. Check connection pool limits
-4. Verify migration order is correct
-
-### AI Parsing Errors
-
-1. Check Anthropic API key is valid
-2. Verify API usage limits not exceeded
-3. Check prompt is correct in `ai-parser.ts`
-4. Review function logs for specific errors
-
 ---
 
 ## ✅ Production Ready
 
-Once all items are checked off, your Family Accountability Platform is ready for production use! 🎉
+**Family Hub** - Existing production deployment
+**GiftStash** - New standalone app at giftstash.app
+
+Both share the same backend, database, and authentication!
 
 **Last Updated**: January 2025
-**Version**: 1.0.0
