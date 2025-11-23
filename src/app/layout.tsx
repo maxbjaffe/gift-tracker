@@ -17,6 +17,25 @@ const appConfig = getCurrentAppConfig()
 export const metadata: Metadata = {
   title: appConfig.title,
   description: appConfig.description,
+  openGraph: {
+    title: appConfig.title,
+    description: appConfig.description,
+    images: [
+      {
+        url: '/images/GiftStashOG.png',
+        width: 1200,
+        height: 634,
+        alt: 'GiftStash - Never forget a gift idea again',
+      },
+    ],
+    siteName: appConfig.name,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: appConfig.title,
+    description: appConfig.description,
+    images: ['/images/GiftStashOG.png'],
+  },
 }
 
 export default async function RootLayout({
