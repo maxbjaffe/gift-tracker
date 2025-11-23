@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useRecipients } from '@/lib/hooks/useRecipients';
 import { useGifts } from '@/lib/hooks/useGifts';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { GiftStashNav } from '@/components/GiftStashNav';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -266,15 +267,20 @@ export default function UnifiedGiftsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 flex items-center justify-center">
-        <LoadingSpinner type="card" count={3} />
-      </div>
+      <>
+        <GiftStashNav />
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 flex items-center justify-center">
+          <LoadingSpinner type="card" count={3} />
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <>
+      <GiftStashNav />
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
@@ -753,15 +759,16 @@ export default function UnifiedGiftsPage() {
         )}
       </div>
 
-      {/* Recipient Modal */}
-      <RecipientModal
-        isOpen={isRecipientModalOpen}
-        onClose={() => setIsRecipientModalOpen(false)}
-        onSuccess={() => {
-          refetchRecipients();
-          refetch();
-        }}
-      />
-    </div>
+        {/* Recipient Modal */}
+        <RecipientModal
+          isOpen={isRecipientModalOpen}
+          onClose={() => setIsRecipientModalOpen(false)}
+          onSuccess={() => {
+            refetchRecipients();
+            refetch();
+          }}
+        />
+      </div>
+    </>
   );
 }
