@@ -57,6 +57,34 @@ export function GiftStashLanding() {
             </p>
           </div>
 
+          {/* SMS Quick Start Card */}
+          <div className="w-full max-w-2xl bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200">
+            <div className="flex flex-col items-center gap-4">
+              <div className="text-4xl">📱</div>
+              <h3 className="text-xl md:text-2xl font-bold text-center">
+                Text Gift Ideas On The Go
+              </h3>
+              <p className="text-center text-gray-700">
+                Add GiftStash to your contacts and text gift ideas anytime - no app needed!
+              </p>
+              <a
+                href="/api/contact/vcard"
+                download="GiftStash.vcf"
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-gradient-to-r from-giftstash-blue to-giftstash-orange hover:shadow-xl text-white text-lg px-8 py-6"
+                >
+                  📇 Add to Contacts
+                </Button>
+              </a>
+              <p className="text-sm text-gray-600 text-center">
+                Then text: "LEGO set for Mom" or "AirPods for Sarah - $249"
+              </p>
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link href="/signup" className="w-full sm:w-auto">
               <Button
