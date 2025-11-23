@@ -6,7 +6,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 // GET /api/recipients/[id] - Get a single recipient
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -14,7 +14,7 @@ export async function GET(
     // Get authenticated user (may be null in development with service role)
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { id } = params;
+    const { id } = await params;
 
     // In development with service role, skip user_id filter
     let query = supabase
@@ -50,7 +50,7 @@ export async function GET(
 // PUT /api/recipients/[id] - Update a recipient
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -58,7 +58,7 @@ export async function PUT(
     // Get authenticated user (may be null in development with service role)
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     const {
@@ -130,7 +130,7 @@ export async function PUT(
 // DELETE /api/recipients/[id] - Delete a recipient
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -138,7 +138,7 @@ export async function DELETE(
     // Get authenticated user (may be null in development with service role)
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { id } = params;
+    const { id } = await params;
 
     // In development with service role, skip user_id filter
     let query = supabase
