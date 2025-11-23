@@ -73,33 +73,49 @@ export function GiftStashLanding() {
             </Link>
           </div>
 
-          {/* Hero Image/Animation Placeholder */}
-          <div className="w-full max-w-3xl mt-12 bg-white rounded-2xl shadow-2xl p-8 border-4 border-orange-200">
-            <Image
-              src="/images/GiftStashFullLogoV2.png"
-              alt="GiftStash App Preview"
-              width={800}
-              height={500}
-              className="w-full h-auto rounded-lg"
-            />
+          {/* Hero Image - App Preview */}
+          <div className="w-full max-w-4xl mt-12 bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-gray-100">
+            <div className="flex flex-col items-center gap-8">
+              <Image
+                src="/images/GiftStashFull-800.png"
+                alt="GiftStash Logo"
+                width={800}
+                height={211}
+                className="w-full max-w-2xl h-auto"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                <div className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
+                  <div className="text-4xl">🛒</div>
+                  <p className="text-sm font-semibold text-center">Save from Anywhere</p>
+                </div>
+                <div className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                  <div className="text-4xl">📱</div>
+                  <p className="text-sm font-semibold text-center">Text to Save</p>
+                </div>
+                <div className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                  <div className="text-4xl">🤖</div>
+                  <p className="text-sm font-semibold text-center">AI Suggestions</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="features" className="container px-4 py-16 md:px-6 bg-white/50">
-        <div className="max-w-6xl mx-auto">
+      <section id="features" className="py-16 md:py-24 bg-white">
+        <div className="container px-4 md:px-6 max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             How It Works
           </h2>
-          <p className="text-xl text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
             Three simple steps to never miss the perfect gift
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Step 1 */}
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue flex items-center justify-center text-white text-2xl font-bold">
+            <Card className="flex flex-col items-center text-center space-y-4 p-8 bg-white hover:shadow-xl transition-shadow border-2 border-transparent hover:border-orange-200">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                 1
               </div>
               <div className="text-6xl">💡</div>
@@ -107,11 +123,11 @@ export function GiftStashLanding() {
               <p className="text-gray-600">
                 Capture gift ideas from anywhere - websites, texts, or random thoughts
               </p>
-            </div>
+            </Card>
 
             {/* Step 2 */}
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue flex items-center justify-center text-white text-2xl font-bold">
+            <Card className="flex flex-col items-center text-center space-y-4 p-8 bg-white hover:shadow-xl transition-shadow border-2 border-transparent hover:border-blue-200">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                 2
               </div>
               <div className="text-6xl">📋</div>
@@ -119,11 +135,11 @@ export function GiftStashLanding() {
               <p className="text-gray-600">
                 Organize by person, occasion, and budget with our smart tracking
               </p>
-            </div>
+            </Card>
 
             {/* Step 3 */}
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue flex items-center justify-center text-white text-2xl font-bold">
+            <Card className="flex flex-col items-center text-center space-y-4 p-8 bg-white hover:shadow-xl transition-shadow border-2 border-transparent hover:border-purple-200">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                 3
               </div>
               <div className="text-6xl">🎁</div>
@@ -131,27 +147,27 @@ export function GiftStashLanding() {
               <p className="text-gray-600">
                 Shop with confidence knowing you have the perfect gift ready
               </p>
-            </div>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section className="container px-4 py-16 md:px-6">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/50 via-blue-50/50 to-purple-50/50">
+        <div className="container px-4 md:px-6 max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Powerful Features
           </h2>
-          <p className="text-xl text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
             Everything you need to become the best gift-giver
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {config.features.map((feature, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card key={index} className="hover:shadow-xl transition-all hover:scale-105 bg-white border border-gray-100">
                 <CardContent className="p-6">
                   <div className="text-5xl mb-4">{feature.icon}</div>
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                  <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">{feature.title}</h3>
                   <p className="text-gray-600">{feature.description}</p>
                 </CardContent>
               </Card>
@@ -161,8 +177,8 @@ export function GiftStashLanding() {
       </section>
 
       {/* CTA Section */}
-      <section className="container px-4 py-16 md:py-24 md:px-6 bg-gradient-to-r from-giftstash-orange to-giftstash-blue">
-        <div className="max-w-4xl mx-auto text-center space-y-8 text-white">
+      <section className="py-16 md:py-24 bg-gradient-to-r from-giftstash-orange to-giftstash-blue">
+        <div className="container px-4 md:px-6 max-w-4xl mx-auto text-center space-y-8 text-white">
           <h2 className="text-3xl md:text-5xl font-bold">
             Ready to Start Saving Gift Ideas?
           </h2>
@@ -172,7 +188,7 @@ export function GiftStashLanding() {
           <Link href="/signup">
             <Button
               size="lg"
-              className="bg-white text-giftstash-orange hover:bg-gray-100 text-lg px-8 py-6"
+              className="bg-white text-giftstash-orange hover:bg-gray-100 text-lg px-8 py-6 shadow-xl"
             >
               Get Started Free - No Credit Card Required
             </Button>
