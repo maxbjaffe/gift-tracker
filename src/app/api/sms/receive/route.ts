@@ -119,21 +119,62 @@ export async function POST(request: NextRequest) {
       console.error('Error logging SMS:', smsError);
     }
 
-    // Note: Images received but vision AI not available - we'll save URLs only
+    // Process images with Vision AI if present
     const hasImages = mediaUrls.length > 0;
+    let imageData: any[] = [];
 
     if (hasImages) {
-      console.log(
-        `Received ${mediaUrls.length} image(s). Saving URLs (vision AI not available with current API key)`
-      );
+      console.log(`Received ${mediaUrls.length} image(s). Processing with Vision AI...`);
+
+      // Download and encode images for Vision API
+      for (let i = 0; i < mediaUrls.length; i++) {
+        try {
+          const imageResponse = await fetch(mediaUrls[i]);
+          const imageBuffer = await imageResponse.arrayBuffer();
+          const base64Image = Buffer.from(imageBuffer).toString('base64');
+
+          imageData.push({
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: mediaTypes[i],
+              data: base64Image,
+            },
+          });
+        } catch (error) {
+          console.error(`Error downloading image ${i}:`, error);
+        }
+      }
     }
 
-    // Parse text message only (vision not available)
-    const parsePrompt = `You are a gift tracking assistant. Parse this SMS message and extract gift information.
+    // Build prompt for Claude (with or without vision)
+    const parsePrompt = hasImages && imageData.length > 0
+      ? `You are a gift tracking assistant. Analyze the image(s) and text message to extract gift information.
 
-SMS Message: "${body || '(image received - please describe the gift in your message)'}"
+SMS Message: "${body || '(no text - analyze image only)'}"
 
-${hasImages ? 'Note: User sent image(s) - they may be describing what\'s in the photo.' : ''}
+Look at the image(s) and extract:
+- recipient_names: Who is this gift for? Extract ALL names mentioned in text (array of strings). Examples: ["Sarah"], ["Mom", "Dad"], ["the kids"]. If no names in text, return []
+- gift_name: What is the product/gift shown in the image?
+- price: Any price visible in the image or mentioned in text (as a number, no currency symbols)
+- category: What category? (Electronics, Books, Toys, Fashion, Home, Sports, Beauty, Food, Games, Art, or Other)
+- url: Any product URL found in the message
+- notes: Description of the product from the image and any additional context from text
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "recipient_names": ["string"] or [],
+  "gift_name": "string or null",
+  "price": number or null,
+  "category": "string or null",
+  "url": "string or null",
+  "notes": "string or null"
+}
+
+If you can't extract certain information, use null for that field (or empty array for recipient_names).`
+      : `You are a gift tracking assistant. Parse this SMS message and extract gift information.
+
+SMS Message: "${body}"
 
 Extract the following information:
 - recipient_names: Who is this gift for? Extract ALL names mentioned (array of strings). Examples: ["Sarah"], ["Mom", "Dad"], ["the kids"]
@@ -155,8 +196,10 @@ Respond ONLY with valid JSON in this exact format:
 
 If you can't extract certain information, use null for that field (or empty array for recipient_names).`;
 
-    // Use text-only model (vision not available)
-    const modelsToTry = ['claude-3-5-haiku-20241022', 'claude-3-haiku-20240307'];
+    // Use Vision model if images present, otherwise use text-only
+    const modelsToTry = hasImages && imageData.length > 0
+      ? ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229']
+      : ['claude-3-5-haiku-20241022', 'claude-3-haiku-20240307'];
 
     let message;
     let lastError;
@@ -164,13 +207,28 @@ If you can't extract certain information, use null for that field (or empty arra
     for (const model of modelsToTry) {
       try {
         console.log(`Trying model: ${model}`);
+
+        // Build content array with text and images (if present)
+        const contentArray: any[] = [];
+
+        // Add images first if present
+        if (imageData.length > 0) {
+          contentArray.push(...imageData);
+        }
+
+        // Add text prompt
+        contentArray.push({
+          type: 'text',
+          text: parsePrompt,
+        });
+
         message = await anthropic.messages.create({
           model,
           max_tokens: 1024,
           messages: [
             {
               role: 'user',
-              content: parsePrompt,
+              content: contentArray,
             },
           ],
         });
@@ -222,6 +280,48 @@ If you can't extract certain information, use null for that field (or empty arra
         .eq('id', smsRecord.id);
     }
 
+    // Store images in Supabase Storage if present
+    let storedImageUrls: string[] = [];
+
+    if (hasImages && mediaUrls.length > 0) {
+      console.log(`Storing ${mediaUrls.length} image(s) in Supabase Storage...`);
+
+      for (let i = 0; i < mediaUrls.length; i++) {
+        try {
+          // Download the image from Twilio
+          const imageResponse = await fetch(mediaUrls[i]);
+          const imageBuffer = await imageResponse.arrayBuffer();
+
+          // Generate unique filename
+          const timestamp = Date.now();
+          const fileExtension = mediaTypes[i].split('/')[1] || 'jpg';
+          const filename = `sms-gifts/${userId}/${timestamp}-${i}.${fileExtension}`;
+
+          // Upload to Supabase Storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('gift-images')
+            .upload(filename, imageBuffer, {
+              contentType: mediaTypes[i],
+              upsert: false,
+            });
+
+          if (uploadError) {
+            console.error(`Error uploading image ${i}:`, uploadError);
+          } else {
+            // Get public URL
+            const { data: publicUrlData } = supabase.storage
+              .from('gift-images')
+              .getPublicUrl(filename);
+
+            storedImageUrls.push(publicUrlData.publicUrl);
+            console.log(`✓ Stored image ${i}: ${publicUrlData.publicUrl}`);
+          }
+        } catch (error) {
+          console.error(`Error processing image ${i}:`, error);
+        }
+      }
+    }
+
     // If we have a gift name, try to create the gift
     let createdGift = null;
     let recipientIds: string[] = [];
@@ -256,6 +356,7 @@ If you can't extract certain information, use null for that field (or empty arra
           current_price: parsedData.price || null,
           category: parsedData.category || null,
           url: parsedData.url || null,
+          image_url: storedImageUrls.length > 0 ? storedImageUrls[0] : null, // Use first image as main
           status: 'idea',
           source: 'sms',
           source_metadata: {
@@ -265,6 +366,8 @@ If you can't extract certain information, use null for that field (or empty arra
             has_images: mediaUrls.length > 0,
             num_images: mediaUrls.length,
             media_urls: mediaUrls,
+            stored_image_urls: storedImageUrls,
+            analyzed_with_vision: imageData.length > 0,
           },
         })
         .select()
@@ -312,14 +415,17 @@ If you can't extract certain information, use null for that field (or empty arra
 
       const priceText = parsedData.price ? ` ($${parsedData.price})` : '';
       const urlText = parsedData.url ? ' (with link)' : '';
+      const imageText = storedImageUrls.length > 0 ? ` + ${storedImageUrls.length} image(s)` : '';
 
       twiml.message(
-        `✓ Gift saved: "${parsedData.gift_name}"${priceText}${recipientText}${urlText}. View at ${process.env.NEXT_PUBLIC_APP_URL}/gifts`
+        `✓ Gift saved: "${parsedData.gift_name}"${priceText}${recipientText}${urlText}${imageText}. View at ${process.env.NEXT_PUBLIC_APP_URL}/gifts`
       );
     } else {
-      twiml.message(
-        `I received your message but couldn't extract a clear gift idea. Try: "AirPods Pro for Sarah and Jake - $249 https://amazon.com/..."`
-      );
+      const helpText = hasImages
+        ? `I received your image but couldn't identify the gift. Please text a description like: "LEGO set for Mom"`
+        : `I received your message but couldn't extract a clear gift idea. Try: "AirPods Pro for Sarah and Jake - $249 https://amazon.com/..."`;
+
+      twiml.message(helpText);
 
       // Update SMS status to error
       if (smsRecord) {
