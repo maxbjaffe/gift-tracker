@@ -42,6 +42,33 @@ export async function POST(request: NextRequest) {
       hasTwilioToken: !!twilioAuthToken,
     });
 
+    // Check for GiftStash commands (EXPORT, HELP, etc.)
+    const messageText = (body || '').trim().toUpperCase();
+
+    if (messageText === 'EXPORT') {
+      console.log('Processing EXPORT command');
+      const { handleExportCommand } = await import('@/lib/sms/commands');
+      const response = await handleExportCommand(from);
+      const twiml = new MessagingResponse();
+      twiml.message(response);
+      return new NextResponse(twiml.toString(), {
+        status: 200,
+        headers: { 'Content-Type': 'text/xml' },
+      });
+    }
+
+    if (messageText === 'HELP') {
+      console.log('Processing HELP command');
+      const { handleHelpCommand } = await import('@/lib/sms/commands');
+      const response = await handleHelpCommand();
+      const twiml = new MessagingResponse();
+      twiml.message(response);
+      return new NextResponse(twiml.toString(), {
+        status: 200,
+        headers: { 'Content-Type': 'text/xml' },
+      });
+    }
+
     // Route to accountability system if message is about consequences/commitments
     const { detectMessageIntent, routeMessage } = await import('@/lib/sms/message-router');
     const { formatTwiMLResponse } = await import('@/lib/sms/twilio-client');
@@ -401,6 +428,10 @@ If you can't extract certain information, use null for that field (or empty arra
       }
     }
 
+    // Check if user needs onboarding
+    const { checkAndSendOnboarding, getOnboardingMessage } = await import('@/lib/sms/commands');
+    const needsOnboarding = await checkAndSendOnboarding(from, userId);
+
     // Send confirmation SMS via TwiML
     const twiml = new MessagingResponse();
 
@@ -420,6 +451,11 @@ If you can't extract certain information, use null for that field (or empty arra
       twiml.message(
         `✓ Gift saved: "${parsedData.gift_name}"${priceText}${recipientText}${urlText}${imageText}. View at ${process.env.NEXT_PUBLIC_APP_URL}/gifts`
       );
+
+      // Send onboarding as a follow-up message if needed
+      if (needsOnboarding) {
+        twiml.message(getOnboardingMessage());
+      }
     } else {
       const helpText = hasImages
         ? `I received your image but couldn't identify the gift. Please text a description like: "LEGO set for Mom"`
