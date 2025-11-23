@@ -5,6 +5,7 @@ import { useRecipients } from '@/lib/hooks/useRecipients';
 import { useGifts } from '@/lib/hooks/useGifts';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { GiftStashNav } from '@/components/GiftStashNav';
+import { GiftDetailsDialog } from '@/components/GiftDetailsDialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +49,7 @@ export default function UnifiedGiftsPage() {
   const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
   const [selectedGifts, setSelectedGifts] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'recipients' | 'grid'>('recipients');
+  const [selectedGiftForDetails, setSelectedGiftForDetails] = useState<any | null>(null);
 
   const loading = recipientsLoading || giftsLoading;
 
@@ -599,7 +601,10 @@ export default function UnifiedGiftsPage() {
                               {/* Details */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1">
+                                  <div
+                                    className="flex-1 cursor-pointer hover:text-giftstash-orange transition-colors"
+                                    onClick={() => setSelectedGiftForDetails(gift)}
+                                  >
                                     <h4 className="font-medium text-gray-900 line-clamp-1">
                                       {gift.name}
                                     </h4>
@@ -675,7 +680,11 @@ export default function UnifiedGiftsPage() {
           /* Grid View */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredGifts.map((gift) => (
-              <Card key={gift.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
+              <Card
+                key={gift.id}
+                className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => setSelectedGiftForDetails(gift)}
+              >
                 <div className="relative">
                   {(gift.source_metadata?.screenshot || gift.image_url) && (
                     <img
@@ -689,7 +698,7 @@ export default function UnifiedGiftsPage() {
                       <Package className="h-16 w-16 text-giftstash-orange/30" />
                     </div>
                   )}
-                  <div className="absolute top-2 left-2">
+                  <div className="absolute top-2 left-2" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selectedGifts.has(gift.id)}
                       onCheckedChange={() => toggleGiftSelection(gift.id)}
@@ -714,7 +723,12 @@ export default function UnifiedGiftsPage() {
                       </span>
                     )}
                     {gift.url && (
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <a href={gift.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-4 w-4" />
                         </a>
@@ -729,7 +743,7 @@ export default function UnifiedGiftsPage() {
                       </span>
                     </div>
                   )}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => (
                       <button
                         key={status}
@@ -765,6 +779,16 @@ export default function UnifiedGiftsPage() {
           onClose={() => setIsRecipientModalOpen(false)}
           onSuccess={() => {
             refetchRecipients();
+            refetch();
+          }}
+        />
+
+        {/* Gift Details Dialog */}
+        <GiftDetailsDialog
+          gift={selectedGiftForDetails}
+          isOpen={!!selectedGiftForDetails}
+          onClose={() => setSelectedGiftForDetails(null)}
+          onStatusUpdate={(giftId, newStatus) => {
             refetch();
           }}
         />
