@@ -207,6 +207,44 @@ export class GiftService {
     if (error) throw error
   }
 
+  async updateRecipientOccasion(
+    giftId: string,
+    recipientId: string,
+    occasion: string | null,
+    occasionDate: string | null
+  ): Promise<void> {
+    const supabase = this.getSupabase()
+    const { error } = await supabase
+      .from('gift_recipients')
+      .update({
+        occasion,
+        occasion_date: occasionDate
+      })
+      .eq('gift_id', giftId)
+      .eq('recipient_id', recipientId)
+
+    if (error) throw error
+  }
+
+  async assignToRecipientWithOccasion(
+    giftId: string,
+    recipientId: string,
+    occasion?: string,
+    occasionDate?: string
+  ): Promise<void> {
+    const supabase = this.getSupabase()
+    const { error } = await supabase
+      .from('gift_recipients')
+      .insert({
+        gift_id: giftId,
+        recipient_id: recipientId,
+        occasion: occasion || null,
+        occasion_date: occasionDate || null
+      })
+
+    if (error) throw error
+  }
+
   async filterByStatus(status: string): Promise<Gift[]> {
     const supabase = this.getSupabase()
     const { data, error } = await supabase
