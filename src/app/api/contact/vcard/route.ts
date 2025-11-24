@@ -14,16 +14,17 @@ export async function GET() {
 
   // Read and encode the logo as base64 for embedding
   // iOS doesn't reliably load external PHOTO URLs, so we embed it
+  // Using 512x512 high-res version for crisp display on all devices
   let photoData = '';
   try {
-    const logoPath = join(process.cwd(), 'public', 'images', 'GiftStashIconGSv2.png');
+    const logoPath = join(process.cwd(), 'public', 'images', 'GiftStashIcon-512.png');
     const logoBuffer = readFileSync(logoPath);
     const base64Logo = logoBuffer.toString('base64');
     photoData = `PHOTO;ENCODING=b;TYPE=PNG:${base64Logo}`;
   } catch (error) {
     console.error('Error loading logo for vCard:', error);
     // Fallback to URL if file read fails
-    photoData = 'PHOTO;VALUE=URI;TYPE=PNG:https://www.giftstash.app/images/GiftStashIconGSv2.png';
+    photoData = 'PHOTO;VALUE=URI;TYPE=PNG:https://www.giftstash.app/images/GiftStashIcon-512.png';
   }
 
   // vCard 3.0 format (best compatibility with iOS)
