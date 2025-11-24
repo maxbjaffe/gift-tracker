@@ -1,13 +1,17 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ProductTourModal } from '@/components/ProductTourModal'
 import { getCurrentAppConfig } from '@/lib/app-config'
+import { Play } from 'lucide-react'
 
 export function GiftStashLanding() {
   const config = getCurrentAppConfig()
+  const [showTour, setShowTour] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
@@ -27,6 +31,14 @@ export function GiftStashLanding() {
             </span>
           </Link>
           <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              className="text-sm hidden sm:flex"
+              onClick={() => setShowTour(true)}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Take a Tour
+            </Button>
             <Link href="/login">
               <Button variant="ghost" className="text-sm">
                 Log In
@@ -40,6 +52,8 @@ export function GiftStashLanding() {
           </div>
         </div>
       </header>
+
+      <ProductTourModal isOpen={showTour} onClose={() => setShowTour(false)} />
 
       {/* Hero Section */}
       <section className="container px-4 py-16 md:py-24 md:px-6">
@@ -520,14 +534,17 @@ export function GiftStashLanding() {
               © 2025 GiftStash. Never forget a gift idea again.
             </p>
             <div className="flex gap-6 text-sm">
+              <Link href="/about" className="text-gray-600 hover:text-giftstash-orange">
+                About
+              </Link>
+              <Link href="/how-it-works" className="text-gray-600 hover:text-giftstash-orange">
+                How It Works
+              </Link>
               <Link href="/privacy" className="text-gray-600 hover:text-giftstash-orange">
                 Privacy
               </Link>
               <Link href="/terms" className="text-gray-600 hover:text-giftstash-orange">
                 Terms
-              </Link>
-              <Link href="/contact" className="text-gray-600 hover:text-giftstash-orange">
-                Contact
               </Link>
             </div>
           </div>

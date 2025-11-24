@@ -4,6 +4,7 @@ import { useRecipients } from '@/lib/hooks/useRecipients'
 import { useGifts } from '@/lib/hooks/useGifts'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { GiftStashNav } from '@/components/GiftStashNav'
+import { DashboardWelcomeModal } from '@/components/DashboardWelcomeModal'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -94,6 +95,7 @@ export default function DashboardPage() {
   return (
     <>
       <GiftStashNav />
+      <DashboardWelcomeModal autoShow={true} />
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
         <div className="container mx-auto p-4 md:p-6 lg:p-8">
 
