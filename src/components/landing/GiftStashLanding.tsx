@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProductTourModal } from '@/components/ProductTourModal'
+import { DayInLifeCarousel } from '@/components/DayInLifeCarousel'
 import { getCurrentAppConfig } from '@/lib/app-config'
 import { Play } from 'lucide-react'
 
@@ -468,6 +469,34 @@ export function GiftStashLanding() {
                 </p>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Day in the Life Stories */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 via-blue-50/30 to-purple-50/30">
+        <div className="container px-4 md:px-6 max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-block px-4 py-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue text-white rounded-full text-sm font-semibold mb-4">
+              📖 Real Stories, Real People
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              See{' '}
+              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
+                GiftStash in Action
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              From superheroes to busy parents to smart teens - discover how GiftStash fits into everyday life
+            </p>
+          </div>
+
+          <DayInLifeCarousel />
+
+          <div className="text-center mt-8">
+            <p className="text-sm text-gray-600 mb-4">
+              Stories auto-rotate every 8 seconds • Click arrows to browse
+            </p>
           </div>
         </div>
       </section>
