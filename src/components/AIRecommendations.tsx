@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,12 @@ export function AIRecommendations({
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [addingGiftId, setAddingGiftId] = useState<number | null>(null);
+
+  // Clear suggestions when recipient changes
+  useEffect(() => {
+    setSuggestions([]);
+    setIsOpen(false);
+  }, [recipientId]);
 
   const generateSuggestions = async () => {
     setIsOpen(true);
