@@ -17,6 +17,13 @@ const appConfig = getCurrentAppConfig()
 export const metadata: Metadata = {
   title: appConfig.title,
   description: appConfig.description,
+  manifest: '/manifest.json',
+  themeColor: '#f97316',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'GiftStash',
+  },
   openGraph: {
     title: appConfig.title,
     description: appConfig.description,
@@ -35,6 +42,23 @@ export const metadata: Metadata = {
     title: appConfig.title,
     description: appConfig.description,
     images: ['/images/GiftStashOG.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/images/GiftStashIcon-64.png', sizes: '64x64', type: 'image/png' },
+      { url: '/images/GiftStashIcon-128.png', sizes: '128x128', type: 'image/png' },
+      { url: '/images/GiftStashIcon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/images/GiftStashIcon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/images/GiftStashIcon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
   },
 }
 
