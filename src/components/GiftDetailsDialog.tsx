@@ -59,14 +59,28 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
     setUpdatingStatus(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase
+
+      // Update the gift table
+      const { error: giftError } = await supabase
         .from('gifts')
         .update({ status: newStatus })
         .eq('id', gift.id);
 
-      if (error) {
+      if (giftError) {
         toast.error('Failed to update status');
         return;
+      }
+
+      // Also update the gift_recipients table for budget tracking
+      // The purchased_date will be automatically set by the database trigger
+      const { error: recipientError } = await supabase
+        .from('gift_recipients')
+        .update({ status: newStatus })
+        .eq('gift_id', gift.id);
+
+      if (recipientError) {
+        console.error('Error updating gift_recipients status:', recipientError);
+        // Don't fail the whole operation, just log it
       }
 
       toast.success('Status updated');

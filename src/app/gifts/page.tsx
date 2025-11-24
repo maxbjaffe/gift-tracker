@@ -227,14 +227,28 @@ export default function UnifiedGiftsPage() {
 
   const bulkUpdateStatus = async (newStatus: StatusType) => {
     const supabase = createClient();
-    const { error } = await supabase
+    const giftIds = Array.from(selectedGifts);
+
+    // Update the gifts table
+    const { error: giftError } = await supabase
       .from('gifts')
       .update({ status: newStatus })
-      .in('id', Array.from(selectedGifts));
+      .in('id', giftIds);
 
-    if (error) {
+    if (giftError) {
       toast.error('Failed to update gifts');
       return;
+    }
+
+    // Also update gift_recipients table for budget tracking
+    const { error: recipientError } = await supabase
+      .from('gift_recipients')
+      .update({ status: newStatus })
+      .in('gift_id', giftIds);
+
+    if (recipientError) {
+      console.error('Error updating gift_recipients status:', recipientError);
+      // Don't fail the whole operation
     }
 
     toast.success(`Updated ${selectedGifts.size} gifts to ${newStatus}`);
