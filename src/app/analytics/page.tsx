@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useGifts } from '@/lib/hooks/useGifts'
 import { useRecipients } from '@/lib/hooks/useRecipients'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
@@ -18,8 +18,17 @@ const COLORS = ['#F57F20', '#2E7BB4', '#5CB85C', '#FF9A4D', '#4A9FD8', '#f59e0b'
 export default function AnalyticsPage() {
   const { gifts, loading: giftsLoading } = useGifts()
   const { recipients, loading: recipientsLoading } = useRecipients()
+  const [isMobile, setIsMobile] = useState(false)
 
   const loading = giftsLoading || recipientsLoading
+
+  // Detect mobile for responsive charts
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Calculate analytics data
   const analytics = useMemo(() => {
@@ -176,7 +185,7 @@ export default function AnalyticsPage() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
-                    outerRadius={window.innerWidth < 768 ? 60 : 80}
+                    outerRadius={isMobile ? 60 : 80}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -218,15 +227,15 @@ export default function AnalyticsPage() {
             <ResponsiveContainer width="100%" height={300} className="md:h-[400px]">
               <LineChart data={analytics.monthlyChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
-                <YAxis tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
+                <XAxis dataKey="month" tick={{ fontSize: isMobile ? 10 : 12 }} />
+                <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <Tooltip
                   formatter={(value: number, name: string) => {
                     if (name === 'amount') return `$${value.toFixed(2)}`
                     return value
                   }}
                 />
-                <Legend wrapperStyle={{ fontSize: window.innerWidth < 768 ? '12px' : '14px' }} />
+                <Legend wrapperStyle={{ fontSize: isMobile ? '12px' : '14px' }} />
                 <Line type="monotone" dataKey="amount" stroke="#8b5cf6" strokeWidth={2} name="Amount" />
                 <Line type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={2} name="Gifts" />
               </LineChart>
@@ -240,10 +249,10 @@ export default function AnalyticsPage() {
             <ResponsiveContainer width="100%" height={300} className="md:h-[400px]">
               <BarChart data={analytics.statusChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
-                <YAxis tick={{ fontSize: window.innerWidth < 768 ? 10 : 12 }} />
+                <XAxis dataKey="name" tick={{ fontSize: isMobile ? 10 : 12 }} />
+                <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
-                <Legend wrapperStyle={{ fontSize: window.innerWidth < 768 ? '12px' : '14px' }} />
+                <Legend wrapperStyle={{ fontSize: isMobile ? '12px' : '14px' }} />
                 <Bar dataKey="amount" fill="#8b5cf6" name="Amount" />
               </BarChart>
             </ResponsiveContainer>
