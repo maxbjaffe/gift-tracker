@@ -5,7 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Heart, Users, Target, Lightbulb, Code, RefreshCw } from 'lucide-react'
+import { GiftStashNav } from '@/components/GiftStashNav'
+import { Heart, Users, Target, Lightbulb, Code, RefreshCw } from 'lucide-react'
 
 const dayInLifeStories = [
   {
@@ -69,29 +70,8 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/images/GiftStashIconGSv2.png"
-              alt="GiftStash"
-              width={40}
-              height={40}
-              className="h-10 w-10"
-            />
-            <span className="text-xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-              GiftStash
-            </span>
-          </Link>
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-      </header>
+      {/* Main Navigation */}
+      <GiftStashNav />
 
       {/* Sub Navigation */}
       <nav className="sticky top-16 z-40 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -123,15 +103,6 @@ export default function AboutPage() {
             >
               <Users className="h-4 w-4 mr-2" />
               Who We Serve
-            </Button>
-            <Button
-              variant={activeSection === 'day-in-life' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => scrollToSection('day-in-life')}
-              className={activeSection === 'day-in-life' ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue text-white' : ''}
-            >
-              <Lightbulb className="h-4 w-4 mr-2" />
-              Day in the Life
             </Button>
           </div>
         </div>
@@ -205,6 +176,64 @@ export default function AboutPage() {
             </Card>
           </div>
         </div>
+      </section>
+
+      {/* Day in the Life Section */}
+      <section className="container px-4 py-12 md:px-6 max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <Lightbulb className="h-16 w-16 mx-auto mb-4 text-purple-600" />
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            A Day in the Life with{' '}
+            <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
+              GiftStash
+            </span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            See how real people use GiftStash throughout their day
+          </p>
+        </div>
+
+        <Card className="overflow-hidden bg-white border-2 border-gray-200 shadow-2xl">
+          <CardContent className="p-6 md:p-8 bg-gradient-to-r from-giftstash-orange/5 to-giftstash-blue/5">
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                  <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
+                    {currentStory.title}
+                  </h3>
+                  <span className="px-3 py-1 bg-gradient-to-r from-giftstash-orange to-giftstash-blue text-white text-xs font-semibold rounded-full">
+                    {currentStory.persona}
+                  </span>
+                </div>
+                <p className="text-lg md:text-xl text-gray-600 mb-2">
+                  {currentStory.subtitle}
+                </p>
+                <p className="text-gray-700 mb-4">
+                  {currentStory.description}
+                </p>
+              </div>
+
+              <Button
+                onClick={handleNextStory}
+                className="w-full md:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                See Another Day in the Life
+              </Button>
+            </div>
+          </CardContent>
+
+          <div className="relative bg-gradient-to-br from-orange-50 to-blue-50 p-4 md:p-8">
+            <Image
+              src={currentStory.image}
+              alt={`${currentStory.title} - ${currentStory.subtitle}`}
+              width={1600}
+              height={900}
+              className="w-full h-auto rounded-lg"
+              priority
+            />
+          </div>
+        </Card>
       </section>
 
       {/* Tech Stack Section */}
@@ -391,64 +420,6 @@ export default function AboutPage() {
             </CardContent>
           </Card>
         </div>
-      </section>
-
-      {/* Day in the Life Section */}
-      <section id="day-in-life" className="container px-4 py-12 md:px-6 max-w-6xl mx-auto scroll-mt-32">
-        <div className="text-center mb-8">
-          <Lightbulb className="h-16 w-16 mx-auto mb-4 text-purple-600" />
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            A Day in the Life with{' '}
-            <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-              GiftStash
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            See how real people use GiftStash throughout their day
-          </p>
-        </div>
-
-        <Card className="overflow-hidden bg-white border-2 border-gray-200 shadow-2xl">
-          <div className="relative bg-gradient-to-br from-orange-50 to-blue-50 p-4 md:p-8">
-            <Image
-              src={currentStory.image}
-              alt={`${currentStory.title} - ${currentStory.subtitle}`}
-              width={1600}
-              height={900}
-              className="w-full h-auto rounded-lg"
-              priority
-            />
-          </div>
-
-          <CardContent className="p-6 md:p-8 bg-gradient-to-r from-giftstash-orange/5 to-giftstash-blue/5">
-            <div className="flex flex-col gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                    {currentStory.title}
-                  </h3>
-                  <span className="px-3 py-1 bg-gradient-to-r from-giftstash-orange to-giftstash-blue text-white text-xs font-semibold rounded-full">
-                    {currentStory.persona}
-                  </span>
-                </div>
-                <p className="text-lg md:text-xl text-gray-600 mb-2">
-                  {currentStory.subtitle}
-                </p>
-                <p className="text-gray-700">
-                  {currentStory.description}
-                </p>
-              </div>
-
-              <Button
-                onClick={handleNextStory}
-                className="w-full md:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                See Another Day in the Life
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </section>
 
       {/* Values */}
