@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRecipients } from '@/lib/hooks/useRecipients';
 import { useGifts } from '@/lib/hooks/useGifts';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
@@ -683,11 +684,13 @@ export default function UnifiedGiftsPage() {
 
                               {/* Image */}
                               {(gift.source_metadata?.screenshot || gift.image_url) && (
-                                <div className="flex-shrink-0">
-                                  <img
+                                <div className="flex-shrink-0 relative h-20 w-20">
+                                  <Image
                                     src={gift.source_metadata?.screenshot || gift.image_url || ''}
                                     alt={gift.name}
-                                    className="h-20 w-20 object-cover rounded-lg"
+                                    width={80}
+                                    height={80}
+                                    className="object-cover rounded-lg"
                                   />
                                 </div>
                               )}
@@ -797,12 +800,14 @@ export default function UnifiedGiftsPage() {
                 className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => setSelectedGiftForDetails(gift)}
               >
-                <div className="relative">
+                <div className="relative h-48">
                   {(gift.source_metadata?.screenshot || gift.image_url) && (
-                    <img
+                    <Image
                       src={gift.source_metadata?.screenshot || gift.image_url || ''}
                       alt={gift.name}
-                      className="w-full h-48 object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
                     />
                   )}
                   {(!gift.source_metadata?.screenshot && !gift.image_url) && (

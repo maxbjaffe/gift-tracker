@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
@@ -117,10 +118,12 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
           {/* Image */}
           {displayImage && (
             <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
-              <img
+              <Image
                 src={displayImage}
                 alt={gift.name}
-                className="w-full h-full object-contain"
+                fill
+                sizes="(max-width: 768px) 100vw, 600px"
+                className="object-contain"
               />
             </div>
           )}
@@ -214,12 +217,15 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
               <h3 className="font-semibold text-gray-900 mb-2">Additional Images</h3>
               <div className="grid grid-cols-3 gap-2">
                 {gift.source_metadata.stored_image_urls.slice(1).map((url, index) => (
-                  <img
-                    key={index}
-                    src={url}
-                    alt={`${gift.name} - Image ${index + 2}`}
-                    className="w-full h-24 object-cover rounded-lg"
-                  />
+                  <div key={index} className="relative w-full h-24">
+                    <Image
+                      src={url}
+                      alt={`${gift.name} - Image ${index + 2}`}
+                      fill
+                      sizes="(max-width: 768px) 33vw, 150px"
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
                 ))}
               </div>
             </div>

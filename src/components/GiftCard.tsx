@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Heart, ShoppingCart, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,10 +69,12 @@ export default function GiftCard({ gift, recipients = [], onSave }: GiftCardProp
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           {gift.image_url ? (
-            <img
+            <Image
               src={gift.image_thumb || gift.image_url}
               alt={gift.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
