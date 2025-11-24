@@ -3,6 +3,10 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  // Include custom service worker code for update handling
+  additionalManifestEntries: [
+    { url: '/sw-custom.js', revision: Date.now().toString() }
+  ],
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
