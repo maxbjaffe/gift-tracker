@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useGifts } from '@/lib/hooks/useGifts'
 import { useRecipients } from '@/lib/hooks/useRecipients'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
+import { GiftStashNav } from '@/components/GiftStashNav'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
@@ -88,14 +89,19 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4 md:p-6 lg:p-8">
-        <LoadingSpinner type="card" count={4} />
-      </div>
+      <>
+        <GiftStashNav />
+        <div className="container mx-auto p-4 md:p-6 lg:p-8">
+          <LoadingSpinner type="card" count={4} />
+        </div>
+      </>
     )
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8">
+    <>
+      <GiftStashNav />
+      <div className="container mx-auto p-4 md:p-6 lg:p-8">
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold">Analytics & Insights</h1>
         <p className="text-sm md:text-base text-gray-600 mt-2">
@@ -272,6 +278,7 @@ export default function AnalyticsPage() {
           ))}
         </div>
       </Card>
-    </div>
+      </div>
+    </>
   )
 }

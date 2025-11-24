@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { UserMenu } from '@/components/shared/UserMenu';
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { Home, Gift, Users, Info } from 'lucide-react';
+import { Home, Gift, Users, Info, BarChart3 } from 'lucide-react';
 
 export function GiftStashNav() {
   const pathname = usePathname();
@@ -32,6 +32,7 @@ export function GiftStashNav() {
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
+    { href: '/analytics', label: 'Analytics', icon: BarChart3 },
     { href: '/gifts', label: 'Gifts', icon: Gift },
     { href: '/recipients', label: 'Recipients', icon: Users },
     { href: '/about', label: 'About', icon: Info },

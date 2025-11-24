@@ -115,6 +115,7 @@ export class RecipientBudgetService {
       .select(`
         status,
         occasion_date,
+        purchased_date,
         gifts (
           current_price
         )
@@ -129,11 +130,14 @@ export class RecipientBudgetService {
     const spending = giftRecipients
       .filter((gr: any) => {
         if (!budget.start_date && !budget.end_date) return true
-        if (!gr.occasion_date) return false
 
-        const occasionDate = new Date(gr.occasion_date)
-        if (budget.start_date && occasionDate < new Date(budget.start_date)) return false
-        if (budget.end_date && occasionDate > new Date(budget.end_date)) return false
+        // Use purchased_date if available, otherwise fall back to occasion_date
+        const dateToCheck = gr.purchased_date || gr.occasion_date
+        if (!dateToCheck) return false
+
+        const checkDate = new Date(dateToCheck)
+        if (budget.start_date && checkDate < new Date(budget.start_date)) return false
+        if (budget.end_date && checkDate > new Date(budget.end_date)) return false
 
         return true
       })
