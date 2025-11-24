@@ -53,28 +53,33 @@ export default function UnifiedGiftsPage() {
 
   const loading = recipientsLoading || giftsLoading;
 
-  // Budget analytics
+  // Budget analytics - using per-recipient status
   const analytics = useMemo(() => {
-    const totalValue = gifts.reduce((sum, gift) => sum + (gift.current_price || 0), 0);
-    const purchasedValue = gifts
-      .filter((g) => g.status === 'purchased' || g.status === 'wrapped' || g.status === 'given')
-      .reduce((sum, gift) => sum + (gift.current_price || 0), 0);
-    const ideasValue = gifts
-      .filter((g) => g.status === 'idea' || g.status === 'considering')
-      .reduce((sum, gift) => sum + (gift.current_price || 0), 0);
+    // Create gift-recipient pairs with status
+    const giftRecipientPairs = gifts.flatMap(gift =>
+      (gift.recipients || []).map(recipient => ({
+        gift,
+        recipient,
+        status: recipient.status || gift.status || 'idea' // Use recipient status, fallback to gift status
+      }))
+    );
+
+    const totalValue = giftRecipientPairs.reduce((sum, pair) => sum + (pair.gift.current_price || 0), 0);
+    const purchasedValue = giftRecipientPairs
+      .filter((pair) => ['purchased', 'wrapped', 'given'].includes(pair.status))
+      .reduce((sum, pair) => sum + (pair.gift.current_price || 0), 0);
+    const ideasValue = giftRecipientPairs
+      .filter((pair) => ['idea', 'considering'].includes(pair.status))
+      .reduce((sum, pair) => sum + (pair.gift.current_price || 0), 0);
 
     // By recipient
     const byRecipient: Record<string, { count: number; value: number; name: string }> = {};
-    gifts.forEach((gift) => {
-      if (gift.recipients && gift.recipients.length > 0) {
-        gift.recipients.forEach((recipient) => {
-          if (!byRecipient[recipient.id]) {
-            byRecipient[recipient.id] = { count: 0, value: 0, name: recipient.name };
-          }
-          byRecipient[recipient.id].count++;
-          byRecipient[recipient.id].value += gift.current_price || 0;
-        });
+    giftRecipientPairs.forEach((pair) => {
+      if (!byRecipient[pair.recipient.id]) {
+        byRecipient[pair.recipient.id] = { count: 0, value: 0, name: pair.recipient.name };
       }
+      byRecipient[pair.recipient.id].count++;
+      byRecipient[pair.recipient.id].value += pair.gift.current_price || 0;
     });
 
     return {
@@ -82,10 +87,10 @@ export default function UnifiedGiftsPage() {
       purchasedValue,
       ideasValue,
       giftCount: gifts.length,
-      purchasedCount: gifts.filter((g) =>
-        ['purchased', 'wrapped', 'given'].includes(g.status || '')
+      purchasedCount: giftRecipientPairs.filter((pair) =>
+        ['purchased', 'wrapped', 'given'].includes(pair.status)
       ).length,
-      ideasCount: gifts.filter((g) => ['idea', 'considering'].includes(g.status || '')).length,
+      ideasCount: giftRecipientPairs.filter((pair) => ['idea', 'considering'].includes(pair.status)).length,
       byRecipient,
     };
   }, [gifts]);
@@ -120,12 +125,18 @@ export default function UnifiedGiftsPage() {
     return grouped;
   }, [gifts, recipients]);
 
-  // Filter gifts
+  // Filter gifts - checking if ANY recipient matches the status filter
   const filteredGifts = useMemo(() => {
     return gifts.filter((gift) => {
-      // Status filter
-      if (statusFilter !== 'all' && gift.status !== statusFilter) {
-        return false;
+      // Status filter - check if ANY recipient has this status
+      if (statusFilter !== 'all') {
+        const hasMatchingStatus = gift.recipients?.some(recipient => {
+          const status = recipient.status || gift.status || 'idea';
+          return status === statusFilter;
+        });
+        if (!hasMatchingStatus) {
+          return false;
+        }
       }
 
       // Search filter
@@ -145,9 +156,13 @@ export default function UnifiedGiftsPage() {
   const filteredGiftsByRecipient = useMemo(() => {
     return Object.entries(giftsByRecipient).reduce((acc, [recipientId, recipientGifts]) => {
       const filtered = recipientGifts.filter((gift) => {
-        // Status filter
-        if (statusFilter !== 'all' && gift.status !== statusFilter) {
-          return false;
+        // Status filter - check status for THIS specific recipient
+        if (statusFilter !== 'all') {
+          const recipientStatus = gift.recipients?.find(r => r.id === recipientId);
+          const status = recipientStatus?.status || gift.status || 'idea';
+          if (status !== statusFilter) {
+            return false;
+          }
         }
 
         // Search filter
@@ -234,16 +249,38 @@ export default function UnifiedGiftsPage() {
     refetch();
   };
 
-  const updateGiftStatus = async (giftId: string, newStatus: StatusType) => {
+  const updateGiftStatus = async (giftId: string, newStatus: StatusType, recipientId?: string) => {
     const supabase = createClient();
-    const { error } = await supabase
-      .from('gifts')
-      .update({ status: newStatus })
-      .eq('id', giftId);
 
-    if (error) {
-      toast.error('Failed to update status');
-      return;
+    if (recipientId) {
+      // Update status for specific recipient
+      const { error } = await supabase
+        .from('gift_recipients')
+        .update({ status: newStatus })
+        .eq('gift_id', giftId)
+        .eq('recipient_id', recipientId);
+
+      if (error) {
+        toast.error('Failed to update status');
+        return;
+      }
+    } else {
+      // Update status for ALL recipients of this gift
+      const { error } = await supabase
+        .from('gift_recipients')
+        .update({ status: newStatus })
+        .eq('gift_id', giftId);
+
+      if (error) {
+        toast.error('Failed to update status');
+        return;
+      }
+
+      // Also update the gift-level status for backward compatibility
+      await supabase
+        .from('gifts')
+        .update({ status: newStatus })
+        .eq('id', giftId);
     }
 
     toast.success('Status updated');
@@ -649,21 +686,27 @@ export default function UnifiedGiftsPage() {
                                   )}
                                 </div>
 
-                                {/* Status Toggle */}
+                                {/* Status Toggle - Per Recipient */}
                                 <div className="flex gap-2 mt-3">
-                                  {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => (
-                                    <button
-                                      key={status}
-                                      onClick={() => updateGiftStatus(gift.id, status)}
-                                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                                        gift.status === status
-                                          ? getStatusColor(status)
-                                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                      }`}
-                                    >
-                                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                                    </button>
-                                  ))}
+                                  {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => {
+                                    // Get status for THIS specific recipient
+                                    const recipientStatus = gift.recipients?.find(r => r.id === recipientId);
+                                    const currentStatus = recipientStatus?.status || gift.status || 'idea';
+
+                                    return (
+                                      <button
+                                        key={status}
+                                        onClick={() => updateGiftStatus(gift.id, status, recipientId)}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                                          currentStatus === status
+                                            ? getStatusColor(status)
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                      >
+                                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </div>
@@ -744,19 +787,24 @@ export default function UnifiedGiftsPage() {
                     </div>
                   )}
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => updateGiftStatus(gift.id, status)}
-                        className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
-                          gift.status === status
-                            ? getStatusColor(status)
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </button>
-                    ))}
+                    {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => {
+                      // Check if ANY recipient has this status
+                      const hasStatus = gift.recipients?.some(r => (r.status || gift.status || 'idea') === status);
+
+                      return (
+                        <button
+                          key={status}
+                          onClick={() => updateGiftStatus(gift.id, status)}
+                          className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
+                            hasStatus
+                              ? getStatusColor(status)
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </button>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>

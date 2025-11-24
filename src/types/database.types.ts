@@ -176,6 +176,8 @@ export interface Database {
           recipient_id: string
           status: string | null
           notes: string | null
+          occasion: string | null
+          occasion_date: string | null
           created_at: string
         }
         Insert: {
@@ -184,6 +186,8 @@ export interface Database {
           recipient_id: string
           status?: string | null
           notes?: string | null
+          occasion?: string | null
+          occasion_date?: string | null
           created_at?: string
         }
         Update: {
@@ -192,7 +196,50 @@ export interface Database {
           recipient_id?: string
           status?: string | null
           notes?: string | null
+          occasion?: string | null
+          occasion_date?: string | null
           created_at?: string
+        }
+      }
+      recipient_budgets: {
+        Row: {
+          id: string
+          user_id: string
+          recipient_id: string
+          name: string
+          max_budget: number
+          start_date: string | null
+          end_date: string | null
+          occasion_type: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          recipient_id: string
+          name: string
+          max_budget?: number
+          start_date?: string | null
+          end_date?: string | null
+          occasion_type?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          recipient_id?: string
+          name?: string
+          max_budget?: number
+          start_date?: string | null
+          end_date?: string | null
+          occasion_type?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
       recommendation_feedback: {
@@ -257,14 +304,26 @@ export type RecommendationFeedback = Database['public']['Tables']['recommendatio
 export type RecommendationFeedbackInsert = Database['public']['Tables']['recommendation_feedback']['Insert']
 export type RecommendationFeedbackUpdate = Database['public']['Tables']['recommendation_feedback']['Update']
 
+export type RecipientBudget = Database['public']['Tables']['recipient_budgets']['Row']
+export type RecipientBudgetInsert = Database['public']['Tables']['recipient_budgets']['Insert']
+export type RecipientBudgetUpdate = Database['public']['Tables']['recipient_budgets']['Update']
+
 // Extended types for UI usage
 export type RecipientWithGifts = Recipient & {
   gifts?: Gift[]
   gift_count?: number
 }
 
+export type RecipientWithStatus = Recipient & {
+  status?: string | null // Status from gift_recipients junction table
+  gift_recipient_id?: string // ID of the gift_recipients record
+  notes?: string | null // Notes from gift_recipients junction table
+  occasion?: string | null // Occasion from gift_recipients junction table
+  occasion_date?: string | null // Occasion date from gift_recipients junction table
+}
+
 export type GiftWithRecipients = Gift & {
-  recipients?: Recipient[]
+  recipients?: RecipientWithStatus[]
   recipient_count?: number
 }
 

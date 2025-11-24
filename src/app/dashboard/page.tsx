@@ -30,17 +30,28 @@ export default function DashboardPage() {
     )
   }
 
-  // Calculate stats
+  // Calculate stats using per-recipient status
   const totalGifts = gifts.length
-  const giftsByStatus = gifts.reduce((acc, gift) => {
-    acc[gift.status] = (acc[gift.status] || 0) + 1
+
+  // Count gift-recipient pairs by status
+  const giftRecipientPairs = gifts.flatMap(gift =>
+    (gift.recipients || []).map(recipient => ({
+      gift,
+      recipient,
+      status: recipient.status || gift.status || 'idea' // Fallback to gift status if recipient status not set
+    }))
+  )
+
+  const giftsByStatus = giftRecipientPairs.reduce((acc, pair) => {
+    acc[pair.status] = (acc[pair.status] || 0) + 1
     return acc
   }, {} as Record<string, number>)
 
-  const totalValue = gifts
-    .filter((gift) => gift.status === 'purchased')
-    .reduce((sum, gift) => {
-      return sum + (gift.current_price || 0)
+  // Calculate total value of purchased gifts (per recipient)
+  const totalValue = giftRecipientPairs
+    .filter((pair) => pair.status === 'purchased')
+    .reduce((sum, pair) => {
+      return sum + (pair.gift.current_price || 0)
     }, 0)
 
   // Get upcoming birthdays (next 30 days)

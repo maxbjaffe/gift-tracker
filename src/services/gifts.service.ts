@@ -19,7 +19,12 @@ export class GiftService {
       .select(`
         *,
         gift_recipients (
+          id,
           recipient_id,
+          status,
+          notes,
+          occasion,
+          occasion_date,
           recipients (
             id,
             name,
@@ -36,7 +41,14 @@ export class GiftService {
     // Transform the data to match GiftWithRecipients type
     return (data || []).map((gift: any) => ({
       ...gift,
-      recipients: gift.gift_recipients?.map((gr: any) => gr.recipients).filter(Boolean) || [],
+      recipients: gift.gift_recipients?.map((gr: any) => ({
+        ...gr.recipients,
+        status: gr.status, // Per-recipient status from junction table
+        gift_recipient_id: gr.id, // ID of the gift_recipients record
+        notes: gr.notes, // Per-recipient notes from junction table
+        occasion: gr.occasion, // Per-recipient occasion from junction table
+        occasion_date: gr.occasion_date // Per-recipient occasion date from junction table
+      })).filter(Boolean) || [],
       recipient_count: gift.gift_recipients?.length || 0,
       gift_recipients: undefined // Remove the junction table data
     }))
@@ -170,7 +182,28 @@ export class GiftService {
     const { error } = await supabase
       .from('gift_recipients')
       .insert(links)
-    
+
+    if (error) throw error
+  }
+
+  async updateRecipientStatus(giftRecipientId: string, status: string): Promise<void> {
+    const supabase = this.getSupabase()
+    const { error } = await supabase
+      .from('gift_recipients')
+      .update({ status })
+      .eq('id', giftRecipientId)
+
+    if (error) throw error
+  }
+
+  async updateRecipientStatusByIds(giftId: string, recipientId: string, status: string): Promise<void> {
+    const supabase = this.getSupabase()
+    const { error } = await supabase
+      .from('gift_recipients')
+      .update({ status })
+      .eq('gift_id', giftId)
+      .eq('recipient_id', recipientId)
+
     if (error) throw error
   }
 
