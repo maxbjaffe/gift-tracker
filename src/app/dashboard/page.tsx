@@ -5,6 +5,7 @@ import { useGifts } from '@/lib/hooks/useGifts'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { GiftStashNav } from '@/components/GiftStashNav'
 import { DashboardWelcomeSection } from '@/components/DashboardWelcomeSection'
+import { DashboardBudgetOverview } from '@/components/DashboardBudgetOverview'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -538,62 +539,7 @@ export default function DashboardPage() {
                 </Button>
               </Card>
 
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold">Budget Tracker</h2>
-                  <Button asChild variant="ghost" size="sm">
-                    <Link href="/analytics">View Analytics</Link>
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  {recipients
-                    .filter((r) => r.max_purchased_budget && r.max_purchased_budget > 0)
-                    .slice(0, 4)
-                    .map((recipient) => {
-                      const purchasedGifts = gifts.filter(
-                        (g) => g.recipient_id === recipient.id && g.status === 'purchased'
-                      )
-                      const totalPurchased = purchasedGifts.reduce(
-                        (sum, g) => sum + (g.current_price || 0),
-                        0
-                      )
-                      const percentage = ((totalPurchased / (recipient.max_purchased_budget || 1)) * 100)
-                      const isOverBudget = totalPurchased > (recipient.max_purchased_budget || 0)
-
-                      return (
-                        <div key={recipient.id} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-700">{recipient.name}</span>
-                            <span className={`text-sm font-bold ${isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
-                              ${totalPurchased.toFixed(0)} / ${recipient.max_purchased_budget?.toFixed(0)}
-                            </span>
-                          </div>
-                          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full transition-all duration-500 ${
-                                isOverBudget
-                                  ? 'bg-gradient-to-r from-red-500 to-red-600'
-                                  : percentage > 80
-                                    ? 'bg-gradient-to-r from-giftstash-orange to-yellow-500'
-                                    : 'bg-gradient-to-r from-giftstash-green to-green-600'
-                              }`}
-                              style={{ width: `${Math.min(percentage, 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  {recipients.filter((r) => r.max_purchased_budget && r.max_purchased_budget > 0).length === 0 && (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 mb-4">Set budgets to track your spending</p>
-                      <Button asChild variant="outline">
-                        <Link href="/recipients">Manage Recipients</Link>
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </Card>
+              <DashboardBudgetOverview recipients={recipients} />
             </div>
           </>
         )}

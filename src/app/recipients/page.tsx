@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { GiftStashNav } from '@/components/GiftStashNav';
 import Avatar from '@/components/Avatar';
 import { RecipientModal } from '@/components/RecipientModal';
+import { RecipientBudgetSummary } from '@/components/RecipientBudgetSummary';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 
@@ -188,6 +189,9 @@ export default function RecipientsPage() {
                     )}
                   </div>
                 </Link>
+
+                {/* Budget Summary (outside Link to prevent navigation issues) */}
+                <RecipientBudgetSummary recipientId={recipient.id} />
               </div>
             ))}
           </div>
