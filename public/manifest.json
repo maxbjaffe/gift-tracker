@@ -2,7 +2,7 @@
   "name": "GiftStash - Gift Tracker",
   "short_name": "GiftStash",
   "description": "Never forget a gift idea again. Save gifts via SMS, Chrome extension, or web app with AI-powered suggestions.",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#f97316",
