@@ -53,22 +53,26 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2">
           <span className="text-lg">👤</span>
-          <span className="hidden md:inline">{user.email}</span>
+          <span className="hidden md:inline truncate max-w-[150px]">{user.email}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">My Account</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => router.push('/settings')} className="cursor-pointer">
-          Settings
+          ⚙️ Settings
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-          Sign Out
+        <DropdownMenuItem onClick={() => router.push('/settings/password')} className="cursor-pointer">
+          🔒 Change Password
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
+          🚪 Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

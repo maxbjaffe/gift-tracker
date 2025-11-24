@@ -5,23 +5,36 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
-import { Home, Gift, Users, LogOut } from 'lucide-react';
+import { UserMenu } from '@/components/shared/UserMenu';
+import { useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
+import { Home, Gift, Users, Info } from 'lucide-react';
 
 export function GiftStashNav() {
   const pathname = usePathname();
-  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
 
-  const handleSignOut = async () => {
+  useEffect(() => {
     const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/');
-  };
+
+    // Get initial user
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/gifts', label: 'Gifts', icon: Gift },
     { href: '/recipients', label: 'Recipients', icon: Users },
+    { href: '/about', label: 'About', icon: Info },
   ];
 
   return (
@@ -87,11 +100,8 @@ export function GiftStashNav() {
           })}
         </nav>
 
-        {/* Sign Out */}
-        <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-gray-700">
-          <LogOut className="h-4 w-4 md:mr-2" />
-          <span className="hidden md:inline">Sign Out</span>
-        </Button>
+        {/* User Account Menu */}
+        <UserMenu user={user} />
       </div>
     </header>
   );
