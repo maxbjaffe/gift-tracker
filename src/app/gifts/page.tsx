@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { useRecipients } from '@/lib/hooks/useRecipients';
 import { useGifts } from '@/lib/hooks/useGifts';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
@@ -12,6 +13,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Collapsible,
   CollapsibleContent,
@@ -31,6 +39,8 @@ import {
   Tag,
   LayoutGrid,
   List,
+  Plus,
+  X,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -418,7 +428,44 @@ export default function UnifiedGiftsPage() {
         {selectedGifts.size > 0 && (
           <Card className="mb-4 bg-gradient-to-r from-giftstash-orange/5 to-giftstash-blue/5 border-giftstash-orange/30">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-4">
+              {/* Mobile: Vertical layout with dropdown */}
+              <div className="md:hidden space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-giftstash-orange">
+                    {selectedGifts.size} selected
+                  </span>
+                  <Button variant="outline" size="sm" onClick={deselectAll} className="h-11 min-w-[44px]">
+                    Deselect All
+                  </Button>
+                </div>
+                <Select
+                  onValueChange={(value) => {
+                    if (value === 'delete') {
+                      bulkDelete();
+                    } else {
+                      bulkUpdateStatus(value as 'idea' | 'purchased' | 'wrapped');
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full h-11"
+                    aria-label={`Bulk actions for ${selectedGifts.size} selected gift${selectedGifts.size !== 1 ? 's' : ''}`}
+                  >
+                    <SelectValue placeholder="Choose action..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="idea">Mark as Idea</SelectItem>
+                    <SelectItem value="purchased">Mark as Purchased</SelectItem>
+                    <SelectItem value="wrapped">Mark as Wrapped</SelectItem>
+                    <SelectItem value="delete" className="text-red-600 focus:text-red-600">
+                      Delete Selected
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Desktop: Horizontal layout with buttons */}
+              <div className="hidden md:flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="font-semibold text-giftstash-orange">
                     {selectedGifts.size} selected
@@ -471,13 +518,14 @@ export default function UnifiedGiftsPage() {
         <div className="mb-6 space-y-3">
           <div className="flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" aria-hidden="true" />
               <Input
                 type="search"
                 placeholder="Search gifts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                aria-label="Search gifts by name, description, or category"
               />
             </div>
             <div className="flex gap-2">
@@ -506,52 +554,61 @@ export default function UnifiedGiftsPage() {
             </div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <Button
-              variant={statusFilter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('all')}
-              className={
-                statusFilter === 'all' ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue' : ''
-              }
-            >
-              All
-            </Button>
-            <Button
-              variant={statusFilter === 'idea' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('idea')}
-              className={statusFilter === 'idea' ? 'bg-blue-600' : ''}
-            >
-              Ideas
-            </Button>
-            <Button
-              variant={statusFilter === 'purchased' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('purchased')}
-              className={statusFilter === 'purchased' ? 'bg-green-600' : ''}
-            >
-              Purchased
-            </Button>
-            <Button
-              variant={statusFilter === 'wrapped' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('wrapped')}
-              className={statusFilter === 'wrapped' ? 'bg-purple-600' : ''}
-            >
-              Wrapped
-            </Button>
-            {filteredGifts.length > 0 && (
+          <div className="relative">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               <Button
-                variant="outline"
+                variant={statusFilter === 'all' ? 'default' : 'outline'}
                 size="sm"
-                onClick={selectAll}
-                className="ml-auto gap-2"
+                onClick={() => setStatusFilter('all')}
+                className={
+                  statusFilter === 'all' ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue' : ''
+                }
+                aria-label="Show all gifts"
               >
-                <Checkbox checked={selectedGifts.size === filteredGifts.length} />
-                Select All
+                All
               </Button>
-            )}
+              <Button
+                variant={statusFilter === 'idea' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('idea')}
+                className={statusFilter === 'idea' ? 'bg-blue-600' : ''}
+                aria-label="Filter by idea status"
+              >
+                Ideas
+              </Button>
+              <Button
+                variant={statusFilter === 'purchased' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('purchased')}
+                className={statusFilter === 'purchased' ? 'bg-green-600' : ''}
+                aria-label="Filter by purchased status"
+              >
+                Purchased
+              </Button>
+              <Button
+                variant={statusFilter === 'wrapped' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('wrapped')}
+                className={statusFilter === 'wrapped' ? 'bg-purple-600' : ''}
+                aria-label="Filter by wrapped status"
+              >
+                Wrapped
+              </Button>
+              {filteredGifts.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={selectAll}
+                  className="ml-auto gap-2"
+                  aria-label={`Select all ${filteredGifts.length} gifts`}
+                >
+                  <Checkbox checked={selectedGifts.size === filteredGifts.length} aria-hidden="true" />
+                  Select All
+                </Button>
+              )}
+            </div>
+            {/* Scroll indicator gradient */}
+            <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-orange-50 to-transparent pointer-events-none md:hidden" aria-hidden="true" />
           </div>
         </div>
 
@@ -842,10 +899,57 @@ export default function UnifiedGiftsPage() {
         )}
 
         {filteredGifts.length === 0 && (
-          <Card className="p-12 text-center">
-            <p className="text-gray-500">
-              No gifts found. Try adjusting your filters or search.
-            </p>
+          <Card className="p-8 md:p-12 text-center">
+            <div className="flex flex-col items-center max-w-md mx-auto">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-giftstash-orange/10 to-giftstash-blue/10 flex items-center justify-center mb-4">
+                <Package className="w-8 h-8 md:w-10 md:h-10 text-giftstash-orange" aria-hidden="true" />
+              </div>
+
+              {searchQuery || statusFilter !== 'all' ? (
+                <>
+                  <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
+                    No gifts match your {searchQuery && statusFilter !== 'all' ? 'search and filters' : searchQuery ? 'search' : 'filters'}
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-600 mb-6">
+                    Try adjusting your search or clearing filters to see more results
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setStatusFilter('all');
+                    }}
+                    variant="outline"
+                    className="gap-2 h-11 md:h-12"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                    Clear {searchQuery && statusFilter !== 'all' ? 'Search & Filters' : searchQuery ? 'Search' : 'Filters'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
+                    No gifts yet
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-600 mb-6">
+                    Start tracking gift ideas by adding your first gift
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href="/gifts/new">
+                      <Button className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light gap-2 h-11 md:h-12 w-full sm:w-auto">
+                        <Plus className="h-5 w-5" aria-hidden="true" />
+                        Add Your First Gift
+                      </Button>
+                    </Link>
+                    <Link href="/inspiration">
+                      <Button variant="outline" className="gap-2 h-11 md:h-12 w-full sm:w-auto">
+                        <Lightbulb className="h-5 w-5" aria-hidden="true" />
+                        Browse Inspiration
+                      </Button>
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
           </Card>
         )}
       </div>

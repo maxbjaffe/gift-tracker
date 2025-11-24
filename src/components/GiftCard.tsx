@@ -86,25 +86,27 @@ export default function GiftCard({ gift, recipients = [], onSave }: GiftCardProp
             </div>
           )}
 
-          {/* Quick Actions Overlay */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+          {/* Quick Actions Overlay - Always visible on mobile, hover on desktop */}
+          <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <Button
               variant="secondary"
               size="sm"
               onClick={() => setShowSaveDialog(true)}
-              className="bg-white hover:bg-gray-100"
+              className="bg-white hover:bg-gray-100 h-11 min-w-[44px]"
+              aria-label="Save gift to your list"
             >
-              <Heart className="h-4 w-4 mr-1" />
-              Save
+              <Heart className="h-4 w-4 md:mr-1" aria-hidden="true" />
+              <span className="hidden md:inline">Save</span>
             </Button>
             {gift.amazon_link && (
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => window.open(gift.amazon_link, '_blank')}
-                className="bg-white hover:bg-gray-100"
+                className="bg-white hover:bg-gray-100 h-11 w-11"
+                aria-label="View product on Amazon"
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </Button>
             )}
           </div>
