@@ -11,8 +11,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Gift, Plus } from 'lucide-react';
+import { Gift, Plus, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { OccasionSelector } from './OccasionSelector';
 
 interface AssignGiftsDialogProps {
   recipientId: string;
@@ -39,9 +40,12 @@ export default function AssignGiftsDialog({
   const [selectedGiftIds, setSelectedGiftIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState<'select' | 'occasions'>('select');
+  const [giftOccasions, setGiftOccasions] = useState<Record<string, { occasion: string | null; occasionDate: string | null }>>({});
 
   useEffect(() => {
     if (open) {
+      setStep('select');
       loadGifts();
     }
   }, [open, recipientId]);
@@ -59,15 +63,25 @@ export default function AssignGiftsDialog({
 
       if (giftsError) throw giftsError;
 
-      // Get currently assigned gift IDs for this recipient
+      // Get currently assigned gift IDs and occasion data for this recipient
       const { data: assignments, error: assignError } = await supabase
         .from('gift_recipients')
-        .select('gift_id')
+        .select('gift_id, occasion, occasion_date')
         .eq('recipient_id', recipientId);
 
       if (assignError) throw assignError;
 
       const assignedGiftIds = new Set(assignments?.map((a) => a.gift_id) || []);
+
+      // Load existing occasion data
+      const occasionData: Record<string, { occasion: string | null; occasionDate: string | null }> = {};
+      assignments?.forEach((a) => {
+        occasionData[a.gift_id] = {
+          occasion: a.occasion,
+          occasionDate: a.occasion_date
+        };
+      });
+      setGiftOccasions(occasionData);
 
       // Mark which gifts are already assigned
       const giftsWithStatus = (allGifts || []).map((gift) => ({
@@ -93,6 +107,13 @@ export default function AssignGiftsDialog({
     );
   };
 
+  const handleOccasionChange = (giftId: string, occasion: string | null, occasionDate: string | null) => {
+    setGiftOccasions((prev) => ({
+      ...prev,
+      [giftId]: { occasion, occasionDate }
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const supabase = createClient();
@@ -115,11 +136,13 @@ export default function AssignGiftsDialog({
         ?.filter((a) => !newGiftIds.has(a.gift_id))
         .map((a) => a.id) || [];
 
-      // Add new assignments
+      // Add new assignments with occasion data
       if (toAdd.length > 0) {
         const newAssignments = toAdd.map((giftId) => ({
           gift_id: giftId,
           recipient_id: recipientId,
+          occasion: giftOccasions[giftId]?.occasion || null,
+          occasion_date: giftOccasions[giftId]?.occasionDate || null,
         }));
 
         const { error: insertError } = await supabase
@@ -127,6 +150,21 @@ export default function AssignGiftsDialog({
           .insert(newAssignments);
 
         if (insertError) throw insertError;
+      }
+
+      // Update occasion data for existing assignments
+      const toUpdate = selectedGiftIds.filter((id) => currentGiftIds.has(id));
+      for (const giftId of toUpdate) {
+        const { error: updateError } = await supabase
+          .from('gift_recipients')
+          .update({
+            occasion: giftOccasions[giftId]?.occasion || null,
+            occasion_date: giftOccasions[giftId]?.occasionDate || null,
+          })
+          .eq('gift_id', giftId)
+          .eq('recipient_id', recipientId);
+
+        if (updateError) throw updateError;
       }
 
       // Remove unselected assignments
@@ -160,9 +198,13 @@ export default function AssignGiftsDialog({
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Assign Gifts to {recipientName}</DialogTitle>
+          <DialogTitle>
+            {step === 'select' ? `Assign Gifts to ${recipientName}` : `Set Occasions for ${recipientName}`}
+          </DialogTitle>
           <DialogDescription>
-            Select which gifts you want to associate with this recipient
+            {step === 'select'
+              ? 'Select which gifts you want to associate with this recipient'
+              : 'Specify when each gift is intended for (optional)'}
           </DialogDescription>
         </DialogHeader>
 
@@ -178,86 +220,140 @@ export default function AssignGiftsDialog({
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto">
-              <div className="space-y-2">
-                {gifts.map((gift) => (
-                  <button
-                    key={gift.id}
-                    onClick={() => toggleGift(gift.id)}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
-                      selectedGiftIds.includes(gift.id)
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+            {step === 'select' ? (
+              <>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="space-y-2">
+                    {gifts.map((gift) => (
+                      <button
+                        key={gift.id}
+                        onClick={() => toggleGift(gift.id)}
+                        className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                           selectedGiftIds.includes(gift.id)
-                            ? 'border-purple-600 bg-purple-600'
-                            : 'border-gray-300'
+                            ? 'border-purple-600 bg-purple-50'
+                            : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
-                        {selectedGiftIds.includes(gift.id) && (
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{gift.name}</p>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                          {gift.category && (
-                            <span className="px-2 py-0.5 bg-gray-100 rounded text-xs capitalize">
-                              {gift.category}
-                            </span>
-                          )}
-                          {gift.current_price && (
-                            <span className="font-semibold text-green-600">
-                              ${gift.current_price.toFixed(2)}
-                            </span>
-                          )}
-                          <span
-                            className={`px-2 py-0.5 rounded text-xs capitalize ${
-                              gift.status === 'purchased'
-                                ? 'bg-green-100 text-green-700'
-                                : gift.status === 'idea'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-gray-100 text-gray-700'
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                              selectedGiftIds.includes(gift.id)
+                                ? 'border-purple-600 bg-purple-600'
+                                : 'border-gray-300'
                             }`}
                           >
-                            {gift.status}
-                          </span>
+                            {selectedGiftIds.includes(gift.id) && (
+                              <svg
+                                className="w-3 h-3 text-white"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{gift.name}</p>
+                            <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                              {gift.category && (
+                                <span className="px-2 py-0.5 bg-gray-100 rounded text-xs capitalize">
+                                  {gift.category}
+                                </span>
+                              )}
+                              {gift.current_price && (
+                                <span className="font-semibold text-green-600">
+                                  ${gift.current_price.toFixed(2)}
+                                </span>
+                              )}
+                              <span
+                                className={`px-2 py-0.5 rounded text-xs capitalize ${
+                                  gift.status === 'purchased'
+                                    ? 'bg-green-100 text-green-700'
+                                    : gift.status === 'idea'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
+                                {gift.status}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <div className="flex gap-2 pt-4 border-t">
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                {saving ? 'Saving...' : `Save Assignments (${selectedGiftIds.length} selected)`}
-              </Button>
-              <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
-                Cancel
-              </Button>
-            </div>
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    onClick={() => setStep('occasions')}
+                    disabled={selectedGiftIds.length === 0}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    Next: Set Occasions ({selectedGiftIds.length} selected)
+                  </Button>
+                  <Button variant="outline" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="space-y-6">
+                    {selectedGiftIds.map((giftId) => {
+                      const gift = gifts.find((g) => g.id === giftId);
+                      if (!gift) return null;
+
+                      return (
+                        <div key={giftId} className="border rounded-lg p-4 space-y-3">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{gift.name}</h4>
+                            {gift.category && (
+                              <p className="text-sm text-gray-600 capitalize">{gift.category}</p>
+                            )}
+                          </div>
+                          <OccasionSelector
+                            occasion={giftOccasions[giftId]?.occasion}
+                            occasionDate={giftOccasions[giftId]?.occasionDate}
+                            onChange={(occasion, occasionDate) =>
+                              handleOccasionChange(giftId, occasion, occasionDate)
+                            }
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep('select')}
+                    disabled={saving}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    {saving ? 'Saving...' : 'Save Assignments'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            )}
           </>
         )}
       </DialogContent>

@@ -661,6 +661,18 @@ export default function UnifiedGiftsPage() {
                                           {gift.category}
                                         </Badge>
                                       )}
+                                      {(() => {
+                                        const recipientData = gift.recipients?.find(r => r.id === recipientId);
+                                        if (recipientData?.occasion) {
+                                          return (
+                                            <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                              🎁 {recipientData.occasion.replace('_', ' ')}
+                                              {recipientData.occasion_date && ` • ${new Date(recipientData.occasion_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                                            </Badge>
+                                          );
+                                        }
+                                        return null;
+                                      })()}
                                       {gift.source && gift.source !== 'manual' && (
                                         <Badge variant="secondary" className="text-xs">
                                           {gift.source === 'extension' && '🔗'}
@@ -786,6 +798,23 @@ export default function UnifiedGiftsPage() {
                       </span>
                     </div>
                   )}
+                  {(() => {
+                    const occasions = gift.recipients
+                      ?.map(r => r.occasion)
+                      .filter((o, i, arr) => o && arr.indexOf(o) === i);
+                    if (occasions && occasions.length > 0) {
+                      return (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {occasions.map((occasion, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                              🎁 {occasion.replace('_', ' ')}
+                            </Badge>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => {
                       // Check if ANY recipient has this status

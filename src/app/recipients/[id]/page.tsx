@@ -11,6 +11,7 @@ import PersonalitySurveyModal from '@/components/PersonalitySurveyModal';
 import ProfileSuggestionsModal from '@/components/ProfileSuggestionsModal';
 import ChatDialog from '@/components/ChatDialog';
 import AssignGiftsDialog from '@/components/AssignGiftsDialog';
+import { BudgetTracker } from '@/components/BudgetTracker';
 import { createClient } from '@/lib/supabase/client';
 import { formatAgeDisplay } from '@/lib/utils/age';
 
@@ -436,6 +437,11 @@ export default function RecipientDetailPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Budget Tracking Section */}
+        <div className="mb-6 md:mb-8">
+          <BudgetTracker recipient={recipient} />
         </div>
 
         {/* AI Recommendations Section */}
