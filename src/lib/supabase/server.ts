@@ -21,13 +21,6 @@ export function createServiceSupabaseClient() {
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies()
 
-  // In development, use service role key if no auth cookies present
-  const authCookie = cookieStore.get('sb-access-token') || cookieStore.get('sb-xjeemfudbujwqrnkuwvb-auth-token')
-
-  if (!authCookie && process.env.NODE_ENV === 'development') {
-    return createServiceSupabaseClient()
-  }
-
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
