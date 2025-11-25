@@ -5,12 +5,18 @@
 
 -- Fix 1: Add default value and NOT NULL constraint to gift_recipients.status
 -- This ensures every assignment has a clear status (no more null confusion)
-ALTER TABLE gift_recipients
-  ALTER COLUMN status SET DEFAULT 'idea',
-  ALTER COLUMN status SET NOT NULL;
 
--- Backfill any null statuses to 'idea'
+-- IMPORTANT: Backfill FIRST, then add constraint
+-- Step 1: Backfill any null statuses to 'idea'
 UPDATE gift_recipients SET status = 'idea' WHERE status IS NULL;
+
+-- Step 2: Set default for new rows
+ALTER TABLE gift_recipients
+  ALTER COLUMN status SET DEFAULT 'idea';
+
+-- Step 3: Now safe to add NOT NULL constraint
+ALTER TABLE gift_recipients
+  ALTER COLUMN status SET NOT NULL;
 
 -- Fix 2: Add occasion and occasion_date to gift_recipients for per-recipient tracking
 -- (These might already exist from previous migrations, using IF NOT EXISTS pattern)
