@@ -86,9 +86,18 @@ export default function RecipientDetailPage() {
 
   const fetchRecipient = async () => {
     try {
-      const response = await fetch(`/api/recipients/${params.id}`);
-      if (!response.ok) throw new Error('Failed to fetch recipient');
-      const data = await response.json();
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('recipients')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching recipient:', error);
+        throw error;
+      }
+
       setRecipient(data);
     } catch (error) {
       console.error('Error fetching recipient:', error);
