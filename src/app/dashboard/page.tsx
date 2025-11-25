@@ -156,11 +156,6 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            {/* AI Gift Pick of the Day */}
-            <div className="mb-6">
-              <AIGiftRecoOfTheDay />
-            </div>
-
             {/* Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/recipients'}>
@@ -297,6 +292,9 @@ export default function DashboardPage() {
 
               {/* Budget Overview */}
               <DashboardBudgetOverview recipients={recipients} />
+
+              {/* AI Gift Pick */}
+              <AIGiftRecoOfTheDay />
             </div>
 
             {/* Gift Progress */}
