@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
 import { User } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react'
+import { Shield } from 'lucide-react'
 
 interface UserMenuProps {
   user: User | null
@@ -20,6 +22,24 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const router = useRouter()
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    async function checkAdminStatus() {
+      if (!user) return
+
+      const supabase = createClient()
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+
+      setIsAdmin(profile?.is_admin || false)
+    }
+
+    checkAdminStatus()
+  }, [user])
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -70,6 +90,15 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuItem onClick={() => router.push('/settings/password')} className="cursor-pointer">
           🔒 Change Password
         </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => router.push('/admin/users')} className="cursor-pointer">
+              <Shield className="h-4 w-4 mr-2" />
+              Admin: Manage Users
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
           🚪 Sign Out
