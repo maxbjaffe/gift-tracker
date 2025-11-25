@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Package, DollarSign, Tag, Calendar, MessageSquare, Image as ImageIcon } from 'lucide-react';
+import { ExternalLink, Package, DollarSign, Tag, Calendar, MessageSquare, Image as ImageIcon, Pencil } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 type StatusType = 'idea' | 'considering' | 'purchased' | 'wrapped' | 'given';
 
@@ -118,14 +119,29 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{gift.name}</DialogTitle>
-          <DialogDescription>
-            {gift.recipients && gift.recipients.length > 0 && (
-              <span className="text-sm text-gray-600">
-                For: {gift.recipients.map((r) => r.name).join(', ')}
-              </span>
-            )}
-          </DialogDescription>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <DialogTitle className="text-2xl font-bold">{gift.name}</DialogTitle>
+              <DialogDescription>
+                {gift.recipients && gift.recipients.length > 0 && (
+                  <span className="text-sm text-gray-600">
+                    For: {gift.recipients.map((r) => r.name).join(', ')}
+                  </span>
+                )}
+              </DialogDescription>
+            </div>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0"
+            >
+              <Link href={`/gifts/${gift.id}/edit`}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Link>
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
