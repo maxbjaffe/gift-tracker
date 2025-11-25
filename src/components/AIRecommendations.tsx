@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Sparkles, Loader2, Plus, DollarSign } from 'lucide-react';
+import { Sparkles, Loader2, Plus, DollarSign, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -37,10 +37,12 @@ export function AIRecommendations({
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [addingGiftId, setAddingGiftId] = useState<number | null>(null);
+  const [dismissedIds, setDismissedIds] = useState<Set<number>>(new Set());
 
   // Clear suggestions when recipient changes
   useEffect(() => {
     setSuggestions([]);
+    setDismissedIds(new Set());
     setIsOpen(false);
   }, [recipientId]);
 
@@ -129,6 +131,33 @@ export function AIRecommendations({
     }
   };
 
+  const dismissSuggestion = async (suggestion: Suggestion, index: number) => {
+    try {
+      // Record the dismissal feedback
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipient_id: recipientId,
+          recommendation_name: suggestion.name,
+          recommendation_description: suggestion.description,
+          feedback_type: 'dismissed',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to record feedback');
+      }
+
+      // Add to dismissed set to hide from UI
+      setDismissedIds((prev) => new Set(prev).add(index));
+      toast.success('Suggestion dismissed');
+    } catch (error) {
+      console.error('Error dismissing suggestion:', error);
+      toast.error('Failed to dismiss suggestion');
+    }
+  };
+
   return (
     <>
       <Button
@@ -167,8 +196,10 @@ export function AIRecommendations({
                   Click the button above to generate AI suggestions
                 </div>
               ) : (
-                suggestions.map((suggestion, index) => (
-                  <Card key={index} className="p-4">
+                suggestions.map((suggestion, originalIndex) => {
+                  if (dismissedIds.has(originalIndex)) return null;
+                  return (
+                  <Card key={originalIndex} className="p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
@@ -192,28 +223,40 @@ export function AIRecommendations({
                           </p>
                         </div>
 
-                        <Button
-                          onClick={() => addGiftToList(suggestion, index)}
-                          disabled={addingGiftId === index}
-                          className="gap-2"
-                          size="sm"
-                        >
-                          {addingGiftId === index ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Adding...
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="h-4 w-4" />
-                              Add to Gift List
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => addGiftToList(suggestion, originalIndex)}
+                            disabled={addingGiftId === originalIndex}
+                            className="gap-2 flex-1"
+                            size="sm"
+                          >
+                            {addingGiftId === originalIndex ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Adding...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="h-4 w-4" />
+                                Add to Gift List
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            onClick={() => dismissSuggestion(suggestion, originalIndex)}
+                            variant="outline"
+                            className="gap-2"
+                            size="sm"
+                          >
+                            <X className="h-4 w-4" />
+                            Dismiss
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </Card>
-                ))
+                  );
+                })
               )}
             </div>
           )}
