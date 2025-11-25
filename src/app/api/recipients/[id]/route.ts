@@ -11,24 +11,29 @@ export async function GET(
   try {
     const supabase = await createServerSupabaseClient();
 
-    // Get authenticated user (may be null in development with service role)
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
     const { id } = await params;
 
-    // In development with service role, skip user_id filter
-    let query = supabase
+    const { data: recipient, error } = await supabase
       .from('recipients')
       .select('*')
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
 
-    if (user) {
-      query = query.eq('user_id', user.id);
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
     }
-
-    const { data: recipient, error } = await query.single();
-
-    if (error) throw error;
 
     if (!recipient) {
       return NextResponse.json(
@@ -55,8 +60,15 @@ export async function PUT(
   try {
     const supabase = await createServerSupabaseClient();
 
-    // Get authenticated user (may be null in development with service role)
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
     const { id } = await params;
     const body = await request.json();
@@ -81,8 +93,7 @@ export async function PUT(
       notes,
     } = body;
 
-    // In development with service role, skip user_id filter
-    let query = supabase
+    const { data: recipient, error } = await supabase
       .from('recipients')
       .update({
         name,
@@ -104,13 +115,10 @@ export async function PUT(
         notes,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', id);
-
-    if (user) {
-      query = query.eq('user_id', user.id);
-    }
-
-    const { data: recipient, error } = await query.select().single();
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single();
 
     if (error) throw error;
 
@@ -135,22 +143,23 @@ export async function DELETE(
   try {
     const supabase = await createServerSupabaseClient();
 
-    // Get authenticated user (may be null in development with service role)
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
     const { id } = await params;
 
-    // In development with service role, skip user_id filter
-    let query = supabase
+    const { error } = await supabase
       .from('recipients')
       .delete()
-      .eq('id', id);
-
-    if (user) {
-      query = query.eq('user_id', user.id);
-    }
-
-    const { error } = await query;
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     if (error) throw error;
 
