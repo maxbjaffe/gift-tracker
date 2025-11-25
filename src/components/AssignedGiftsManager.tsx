@@ -172,7 +172,30 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                   <p className="text-gray-500">No gift ideas yet</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <>
+                  {/* Ideas Summary */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-sm text-blue-600 font-medium">Total Ideas</div>
+                        <div className="text-2xl font-bold text-blue-900">
+                          {assignedGifts.filter(a => !isPurchased(a.status)).length}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-blue-600 font-medium">Potential Spending</div>
+                        <div className="text-2xl font-bold text-blue-900">
+                          {formatCurrency(
+                            assignedGifts
+                              .filter(a => !isPurchased(a.status) && a.gift)
+                              .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                   {assignedGifts
                     .filter(a => !isPurchased(a.status))
                     .map((assignment) => {
@@ -184,7 +207,7 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                       return (
                         <div
                           key={assignment.id}
-                          className="border-2 rounded-xl p-4 transition-all border-gray-200 hover:border-purple-300"
+                          className="border rounded-lg p-3 transition-all border-gray-200 hover:border-purple-300 bg-white"
                         >
                           <div className="flex items-start gap-3">
                             {/* Purchase Checkbox */}
@@ -250,27 +273,8 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                         </div>
                       )
                     })}
-
-                  {/* Summary for Ideas */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Total Ideas:</span>
-                      <span className="font-bold text-blue-700">
-                        {assignedGifts.filter(a => !isPurchased(a.status)).length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm mt-1">
-                      <span className="text-gray-600">Potential Spending:</span>
-                      <span className="font-bold text-blue-700">
-                        {formatCurrency(
-                          assignedGifts
-                            .filter(a => !isPurchased(a.status) && a.gift)
-                            .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
-                        )}
-                      </span>
-                    </div>
                   </div>
-                </div>
+                </>
               )}
             </TabsContent>
 
@@ -281,7 +285,30 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                   <p className="text-gray-500">No purchased gifts yet</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <>
+                  {/* Purchased Summary */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-sm text-green-600 font-medium">Total Purchased</div>
+                        <div className="text-2xl font-bold text-green-900">
+                          {assignedGifts.filter(a => isPurchased(a.status)).length}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-green-600 font-medium">Total Spending</div>
+                        <div className="text-2xl font-bold text-green-900">
+                          {formatCurrency(
+                            assignedGifts
+                              .filter(a => isPurchased(a.status) && a.gift)
+                              .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                   {assignedGifts
                     .filter(a => isPurchased(a.status))
                     .map((assignment) => {
@@ -293,7 +320,7 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                       return (
                         <div
                           key={assignment.id}
-                          className="border-2 rounded-xl p-4 transition-all border-green-200 bg-green-50"
+                          className="border rounded-lg p-3 transition-all border-green-200 bg-green-50"
                         >
                           <div className="flex items-start gap-3">
                             {/* Purchase Checkbox */}
@@ -367,27 +394,8 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                         </div>
                       )
                     })}
-
-                  {/* Summary for Purchased */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Total Purchased:</span>
-                      <span className="font-bold text-green-700">
-                        {assignedGifts.filter(a => isPurchased(a.status)).length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm mt-1">
-                      <span className="text-gray-600">Total Spending:</span>
-                      <span className="font-bold text-green-700">
-                        {formatCurrency(
-                          assignedGifts
-                            .filter(a => isPurchased(a.status) && a.gift)
-                            .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
-                        )}
-                      </span>
-                    </div>
                   </div>
-                </div>
+                </>
               )}
             </TabsContent>
           </Tabs>
