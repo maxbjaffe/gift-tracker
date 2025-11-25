@@ -66,14 +66,18 @@ export default function UnifiedGiftsPage() {
 
   // Budget analytics - using per-recipient status
   const analytics = useMemo(() => {
-    // Create gift-recipient pairs with status
-    const giftRecipientPairs = gifts.flatMap(gift =>
-      (gift.recipients || []).map(recipient => ({
-        gift,
-        recipient,
-        status: recipient.status || gift.status || 'idea' // Use recipient status, fallback to gift status
-      }))
-    );
+    // Create gift-recipient pairs with status - filter out invalid data
+    const giftRecipientPairs = gifts
+      .filter(gift => gift && gift.id) // Ensure gift exists
+      .flatMap(gift =>
+        (gift.recipients || [])
+          .filter(recipient => recipient && recipient.id) // Ensure recipient exists
+          .map(recipient => ({
+            gift,
+            recipient,
+            status: recipient.status || gift.status || 'idea' // Use recipient status, fallback to gift status
+          }))
+      );
 
     const totalValue = giftRecipientPairs.reduce((sum, pair) => sum + (pair.gift?.current_price || 0), 0);
     const purchasedValue = giftRecipientPairs
