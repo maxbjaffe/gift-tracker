@@ -104,17 +104,30 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
     try {
       const supabase = createClient()
 
-      for (const assignmentId of selectedGiftIds) {
-        const { error } = await supabase
-          .from('gift_recipients')
-          .update({ status: newStatus })
-          .eq('id', assignmentId)
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to update gifts')
+        return
+      }
 
-        if (error) throw error
+      // Use RPC function for transactional bulk update
+      const { data, error } = await supabase.rpc('bulk_update_gift_recipient_status', {
+        assignment_ids: Array.from(selectedGiftIds),
+        new_status: newStatus,
+        requesting_user_id: user.id
+      })
+
+      if (error) throw error
+
+      // Check result
+      const result = data[0]
+      if (!result.success) {
+        throw new Error(result.error_message || 'Bulk update failed')
       }
 
       toast.success(
-        `Marked ${selectedGiftIds.size} gift(s) as ${newStatus} for ${recipientName}`
+        `Marked ${result.updated_count} gift(s) as ${newStatus} for ${recipientName}`
       )
 
       // Clear selection and reload
