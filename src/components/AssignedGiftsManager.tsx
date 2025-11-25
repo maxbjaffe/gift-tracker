@@ -56,7 +56,7 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
           occasion,
           occasion_date,
           purchased_date,
-          gifts (
+          gift:gifts (
             name,
             current_price,
             category,
