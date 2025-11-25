@@ -471,7 +471,6 @@ export default function UnifiedGiftsPage() {
                   <SelectContent>
                     <SelectItem value="idea">Mark as Idea</SelectItem>
                     <SelectItem value="purchased">Mark as Purchased</SelectItem>
-                    <SelectItem value="wrapped">Mark as Wrapped</SelectItem>
                     <SelectItem value="delete" className="text-red-600 focus:text-red-600">
                       Delete Selected
                     </SelectItem>
@@ -505,14 +504,6 @@ export default function UnifiedGiftsPage() {
                     className="bg-green-100 hover:bg-green-200"
                   >
                     Mark as Purchased
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => bulkUpdateStatus('wrapped')}
-                    className="bg-purple-100 hover:bg-purple-200"
-                  >
-                    Mark as Wrapped
                   </Button>
                   <Button
                     variant="destructive"
@@ -611,15 +602,6 @@ export default function UnifiedGiftsPage() {
                 aria-label="Filter by purchased status"
               >
                 Purchased
-              </Button>
-              <Button
-                variant={statusFilter === 'wrapped' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('wrapped')}
-                className={statusFilter === 'wrapped' ? 'bg-purple-600' : ''}
-                aria-label="Filter by wrapped status"
-              >
-                Wrapped
               </Button>
               {filteredGifts.length > 0 && (
                 <Button
@@ -889,7 +871,7 @@ export default function UnifiedGiftsPage() {
 
                                 {/* Status Toggle - Per Recipient */}
                                 <div className="flex gap-2 mt-3">
-                                  {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => {
+                                  {(['idea', 'purchased'] as StatusType[]).map((status) => {
                                     // Get status for THIS specific recipient
                                     const recipientStatus = gift.recipients?.find(r => r.id === recipientId);
                                     const currentStatus = recipientStatus?.status || gift.status || 'idea';
@@ -1007,7 +989,7 @@ export default function UnifiedGiftsPage() {
                     return null;
                   })()}
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    {(['idea', 'purchased', 'wrapped'] as StatusType[]).map((status) => {
+                    {(['idea', 'purchased'] as StatusType[]).map((status) => {
                       // Check if ANY recipient has this status
                       const hasStatus = gift.recipients?.some(r => (r.status || gift.status || 'idea') === status);
 
