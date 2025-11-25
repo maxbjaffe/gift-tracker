@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { GiftRecipientsManager } from '@/components/GiftRecipientsManager';
 
 type Gift = {
   id: string;
@@ -324,57 +325,13 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
             )}
           </div>
 
-          {/* Right Column - Recipients */}
+          {/* Right Column - Recipients with Per-Recipient Purchase Tracking */}
           <div className="space-y-4 md:space-y-6">
-            <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 lg:p-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-4">
-                <h2 className="text-base md:text-lg lg:text-xl font-semibold text-gray-900">
-                  Gift For ({linkedRecipients.length})
-                </h2>
-                <button
-                  onClick={() => setShowLinkModal(true)}
-                  className="w-full sm:w-auto px-4 h-11 md:h-12 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs md:text-sm whitespace-nowrap flex items-center justify-center"
-                  disabled={actionLoading}
-                >
-                  + Add Recipient
-                </button>
-              </div>
-
-              {linkedRecipients.length === 0 ? (
-                <div className="text-center py-6 md:py-8 text-gray-500">
-                  <p className="text-sm md:text-base">No recipients assigned yet.</p>
-                  <p className="text-xs md:text-sm mt-2">Click "Add Recipient" to assign this gift.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {linkedRecipients.map((recipient) => (
-                    <div
-                      key={recipient.id}
-                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 md:p-4 bg-purple-50 rounded-lg"
-                    >
-                      <div className="flex-1">
-                        <Link
-                          href={`/recipients/${recipient.id}`}
-                          className="text-sm md:text-base font-medium text-gray-900 hover:text-purple-600"
-                        >
-                          {recipient.name}
-                        </Link>
-                        {recipient.relationship && (
-                          <div className="text-xs md:text-sm text-gray-500">{recipient.relationship}</div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => unlinkRecipient(recipient.id)}
-                        disabled={actionLoading}
-                        className="w-full sm:w-auto h-11 md:h-auto text-red-600 hover:text-red-700 text-xs md:text-sm font-medium"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <GiftRecipientsManager
+              giftId={params.id}
+              giftName={gift.name}
+              onUpdate={() => fetchGiftData()}
+            />
           </div>
         </div>
       </div>
