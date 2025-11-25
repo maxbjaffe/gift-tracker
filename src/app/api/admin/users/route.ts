@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceSupabaseClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 /**
@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
  */
 export async function GET() {
   try {
+    // Use regular client for auth check
     const supabase = await createClient();
 
     // Check if user is authenticated
@@ -36,20 +37,44 @@ export async function GET() {
       );
     }
 
-    // Fetch all users with their data counts
-    const { data: users, error: usersError } = await supabase
-      .from('admin_users_overview')
-      .select('*');
+    // Use service role client to bypass RLS and fetch all user profiles
+    const adminClient = createServiceSupabaseClient();
 
-    if (usersError) {
-      console.error('Error fetching users:', usersError);
+    const { data: profiles, error: profilesError } = await adminClient
+      .from('user_profiles')
+      .select('id, email, is_admin, created_at');
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
       return NextResponse.json(
-        { error: 'Failed to fetch users' },
+        { error: 'Failed to fetch user profiles' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ users });
+    // Get data counts for each user using service role client
+    const usersWithCounts = await Promise.all(
+      profiles.map(async (profile) => {
+        const [recipients, gifts, conversations] = await Promise.all([
+          adminClient.from('recipients').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
+          adminClient.from('gifts').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
+          adminClient.from('chat_conversations').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
+        ]);
+
+        return {
+          id: profile.id,
+          email: profile.email,
+          is_admin: profile.is_admin,
+          signup_date: profile.created_at,
+          last_login: null, // Can be added later if needed
+          recipient_count: recipients.count || 0,
+          gift_count: gifts.count || 0,
+          conversation_count: conversations.count || 0,
+        };
+      })
+    );
+
+    return NextResponse.json({ users: usersWithCounts });
   } catch (error) {
     console.error('Unexpected error:', error);
     return NextResponse.json(
