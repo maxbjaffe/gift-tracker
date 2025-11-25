@@ -75,13 +75,13 @@ export default function UnifiedGiftsPage() {
       }))
     );
 
-    const totalValue = giftRecipientPairs.reduce((sum, pair) => sum + (pair.gift.current_price || 0), 0);
+    const totalValue = giftRecipientPairs.reduce((sum, pair) => sum + (pair.gift?.current_price || 0), 0);
     const purchasedValue = giftRecipientPairs
       .filter((pair) => ['purchased', 'wrapped', 'given'].includes(pair.status))
-      .reduce((sum, pair) => sum + (pair.gift.current_price || 0), 0);
+      .reduce((sum, pair) => sum + (pair.gift?.current_price || 0), 0);
     const ideasValue = giftRecipientPairs
       .filter((pair) => ['idea', 'considering'].includes(pair.status))
-      .reduce((sum, pair) => sum + (pair.gift.current_price || 0), 0);
+      .reduce((sum, pair) => sum + (pair.gift?.current_price || 0), 0);
 
     // By recipient
     const byRecipient: Record<string, { count: number; value: number; name: string }> = {};
@@ -90,7 +90,7 @@ export default function UnifiedGiftsPage() {
         byRecipient[pair.recipient.id] = { count: 0, value: 0, name: pair.recipient.name };
       }
       byRecipient[pair.recipient.id].count++;
-      byRecipient[pair.recipient.id].value += pair.gift.current_price || 0;
+      byRecipient[pair.recipient.id].value += pair.gift?.current_price || 0;
     });
 
     return {
@@ -647,12 +647,16 @@ export default function UnifiedGiftsPage() {
                           fill
                           sizes="48px"
                           className="object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
+                            if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                          }}
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package className="h-6 w-6 text-gray-400" />
-                        </div>
-                      )}
+                      ) : null}
+                      <div className={`fallback-icon w-full h-full flex items-center justify-center ${(gift.source_metadata?.screenshot || gift.image_url) ? 'hidden' : ''}`}>
+                        <Package className="h-6 w-6 text-gray-400" />
+                      </div>
                     </div>
 
                     {/* Gift Info */}
