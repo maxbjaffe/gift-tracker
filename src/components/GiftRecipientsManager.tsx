@@ -374,6 +374,9 @@ export function GiftRecipientsManager({ giftId, giftName, onUpdate }: GiftRecipi
                 const purchased = isPurchased(assignment.status)
                 const recipient = assignment.recipients as any
 
+                // Skip if recipient data is missing (deleted recipient)
+                if (!recipient || !recipient.name) return null
+
                 return (
                   <div
                     key={assignment.id}
