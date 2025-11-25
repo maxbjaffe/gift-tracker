@@ -674,12 +674,12 @@ export default function UnifiedGiftsPage() {
                     </div>
 
                     {/* Gift Info */}
-                    <div
-                      className="flex-1 min-w-0 cursor-pointer"
-                      onClick={() => setSelectedGiftForDetails(gift)}
+                    <Link
+                      href={`/gifts/${gift.id}`}
+                      className="flex-1 min-w-0"
                     >
                       <div className="flex items-start gap-2">
-                        <h3 className="font-medium text-gray-900 line-clamp-1 flex-1">
+                        <h3 className="font-medium text-gray-900 line-clamp-1 flex-1 hover:text-purple-600 transition-colors">
                           {gift.name}
                         </h3>
                         {gift.current_price && (
@@ -715,7 +715,7 @@ export default function UnifiedGiftsPage() {
                           </Badge>
                         )}
                       </div>
-                    </div>
+                    </Link>
 
                     {/* Status & Actions */}
                     <div className="flex items-center gap-2">
