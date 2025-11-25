@@ -266,8 +266,8 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                 <span className="font-bold text-green-700">
                   {formatCurrency(
                     assignedGifts
-                      .filter(a => isPurchased(a.status))
-                      .reduce((sum, a) => sum + ((a.gift as any).current_price || 0), 0)
+                      .filter(a => isPurchased(a.status) && a.gift)
+                      .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
                   )}
                 </span>
               </div>
