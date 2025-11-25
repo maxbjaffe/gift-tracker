@@ -21,7 +21,7 @@ interface Recipient {
   id?: string;
   name: string;
   relationship?: string;
-  age?: number;
+  age_range?: string;
   birthday?: string;
   interests?: string;
   notes?: string;
@@ -44,7 +44,7 @@ export function RecipientModal({
   const [formData, setFormData] = useState<Recipient>({
     name: '',
     relationship: '',
-    age: undefined,
+    age_range: undefined,
     birthday: '',
     interests: '',
     notes: '',
@@ -58,7 +58,7 @@ export function RecipientModal({
           id: recipient.id,
           name: recipient.name || '',
           relationship: recipient.relationship || '',
-          age: recipient.age,
+          age_range: recipient.age_range,
           birthday: recipient.birthday || '',
           interests: recipient.interests || '',
           notes: recipient.notes || '',
@@ -67,7 +67,7 @@ export function RecipientModal({
         setFormData({
           name: '',
           relationship: '',
-          age: undefined,
+          age_range: undefined,
           birthday: '',
           interests: '',
           notes: '',
@@ -104,7 +104,7 @@ export function RecipientModal({
         user_id: user.id,
         name: formData.name.trim(),
         relationship: formData.relationship?.trim() || null,
-        age: formData.age || null,
+        age_range: formData.age_range || null,
         birthday: formData.birthday || null,
         interests: formData.interests?.trim() || null,
         notes: formData.notes?.trim() || null,
@@ -193,17 +193,15 @@ export function RecipientModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="age">Age</Label>
+              <Label htmlFor="age_range">Age</Label>
               <Input
-                id="age"
-                type="number"
-                value={formData.age || ''}
+                id="age_range"
+                type="text"
+                value={formData.age_range || ''}
                 onChange={(e) =>
-                  handleChange('age', e.target.value ? parseInt(e.target.value) : undefined)
+                  handleChange('age_range', e.target.value)
                 }
-                placeholder="e.g., 25"
-                min="0"
-                max="150"
+                placeholder="e.g., 25 or 18-25"
                 disabled={loading}
               />
             </div>
