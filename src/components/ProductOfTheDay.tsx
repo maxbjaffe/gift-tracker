@@ -15,8 +15,8 @@ const TRENDING_PRODUCTS = [
     price: 79.99,
     category: 'Kitchen & Dining',
     reason: 'Trending among professionals and travelers',
-    imageUrl: '/images/product-placeholder.png',
-    link: 'https://amazon.com'
+    emoji: '☕',
+    link: 'https://www.amazon.com/s?k=portable+espresso+maker'
   },
   {
     name: 'Smart Plant Monitor',
@@ -24,8 +24,8 @@ const TRENDING_PRODUCTS = [
     price: 49.99,
     category: 'Home & Garden',
     reason: 'Popular with plant enthusiasts',
-    imageUrl: '/images/product-placeholder.png',
-    link: 'https://amazon.com'
+    emoji: '🪴',
+    link: 'https://www.amazon.com/s?k=smart+plant+monitor'
   },
   {
     name: 'Wireless Charging Station',
@@ -33,8 +33,8 @@ const TRENDING_PRODUCTS = [
     price: 59.99,
     category: 'Electronics',
     reason: 'Top seller for tech lovers',
-    imageUrl: '/images/product-placeholder.png',
-    link: 'https://amazon.com'
+    emoji: '🔋',
+    link: 'https://www.amazon.com/s?k=3+in+1+wireless+charging+station'
   },
   {
     name: 'Aromatherapy Diffuser Set',
@@ -42,8 +42,8 @@ const TRENDING_PRODUCTS = [
     price: 44.99,
     category: 'Wellness',
     reason: 'Perfect for relaxation and self-care',
-    imageUrl: '/images/product-placeholder.png',
-    link: 'https://amazon.com'
+    emoji: '🕯️',
+    link: 'https://www.amazon.com/s?k=aromatherapy+diffuser+set'
   },
   {
     name: 'Personalized Leather Journal',
@@ -51,8 +51,8 @@ const TRENDING_PRODUCTS = [
     price: 34.99,
     category: 'Stationery',
     reason: 'Great for writers and planners',
-    imageUrl: '/images/product-placeholder.png',
-    link: 'https://amazon.com'
+    emoji: '📓',
+    link: 'https://www.amazon.com/s?k=personalized+leather+journal'
   }
 ]
 
@@ -87,9 +87,9 @@ export function ProductOfTheDay() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Product Image */}
-          <div className="relative aspect-square bg-white rounded-xl overflow-hidden border-2 border-gray-200">
-            <div className="absolute inset-0 flex items-center justify-center text-6xl">
-              🎁
+          <div className="relative aspect-square bg-gradient-to-br from-white to-gray-50 rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm">
+            <div className="absolute inset-0 flex items-center justify-center text-8xl">
+              {product.emoji}
             </div>
           </div>
 

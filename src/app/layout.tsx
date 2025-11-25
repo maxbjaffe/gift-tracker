@@ -101,69 +101,69 @@ export default async function RootLayout({
             </div>
 
             {/* Desktop Navigation - Hidden on mobile */}
-            <nav className="ml-auto hidden md:flex items-center gap-6">
+            <nav className="ml-auto hidden md:flex items-center gap-8">
               {/* GiftStash Section */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <Link
                   href="/dashboard"
-                  className="text-sm font-medium text-giftstash-orange hover:text-giftstash-orange-light transition-colors"
+                  className="text-base font-semibold text-giftstash-orange hover:text-giftstash-orange-light transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/recipients"
-                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
+                  className="text-base font-semibold text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
                 >
                   Recipients
                 </Link>
                 <Link
                   href="/gifts"
-                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
+                  className="text-base font-semibold text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
                 >
                   Gifts
                 </Link>
                 <Link
                   href="/inspiration"
-                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors flex items-center gap-1"
+                  className="text-base font-semibold text-giftstash-blue hover:text-giftstash-blue-light transition-colors flex items-center gap-1.5"
                 >
-                  ✨ Inspiration
+                  <span className="text-lg">✨</span> Inspiration
                 </Link>
                 <Link
                   href="/analytics"
-                  className="text-sm font-medium text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
+                  className="text-base font-semibold text-giftstash-blue hover:text-giftstash-blue-light transition-colors"
                 >
                   Analytics
                 </Link>
               </div>
 
               {/* Divider */}
-              <div className="h-6 w-px bg-border" />
+              <div className="h-8 w-px bg-border" />
 
               {/* Accountability Section */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <Link
                   href="/accountability"
-                  className="text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors flex items-center gap-1"
+                  className="text-base font-semibold text-purple-600 hover:text-purple-700 transition-colors flex items-center gap-1.5"
                 >
-                  🎯 Accountability
+                  <span className="text-lg">🎯</span> Accountability
                 </Link>
                 <Link
                   href="/accountability/analytics"
-                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                  className="text-base font-semibold text-muted-foreground hover:text-primary transition-colors"
                 >
                   Stats
                 </Link>
                 <Link
                   href="/emails"
-                  className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                  className="text-base font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1.5"
                 >
-                  📧 School Emails
+                  <span className="text-lg">📧</span> School Emails
                 </Link>
                 <Link
                   href="/family-info"
-                  className="text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors flex items-center gap-1"
+                  className="text-base font-semibold text-pink-600 hover:text-pink-700 transition-colors flex items-center gap-1.5"
                 >
-                  📋 Family Info
+                  <span className="text-lg">📋</span> Family Info
                 </Link>
               </div>
 

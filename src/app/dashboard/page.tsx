@@ -6,6 +6,7 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { GiftStashNav } from '@/components/GiftStashNav'
 import { DashboardBudgetOverview } from '@/components/DashboardBudgetOverview'
 import { ProductOfTheDay } from '@/components/ProductOfTheDay'
+import { AIGiftRecoOfTheDay } from '@/components/AIGiftRecoOfTheDay'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -234,8 +235,8 @@ export default function DashboardPage() {
               </Card>
             </div>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Main Content Grid - Three Columns */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               {/* Upcoming Events (Birthdays + Holidays) */}
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -250,7 +251,7 @@ export default function DashboardPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  {upcomingEvents.map((event, idx) => (
+                  {upcomingEvents.slice(0, 4).map((event, idx) => (
                     <div
                       key={`${event.type}-${idx}`}
                       className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg hover:shadow-md transition-shadow"
@@ -260,10 +261,10 @@ export default function DashboardPage() {
                           {event.type === 'holiday' ? event.emoji : event.name[0]}
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">
+                          <p className="font-semibold text-gray-900 text-sm">
                             {event.type === 'birthday' ? `${event.name}'s Birthday` : event.name}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs text-gray-600">
                             {event.date.toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',
@@ -297,6 +298,9 @@ export default function DashboardPage() {
 
               {/* Budget Overview */}
               <DashboardBudgetOverview recipients={recipients} />
+
+              {/* AI Gift Recommendation of the Day */}
+              <AIGiftRecoOfTheDay />
             </div>
 
             {/* Gift Progress */}
