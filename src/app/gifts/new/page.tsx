@@ -495,8 +495,6 @@ export default function NewGiftPage() {
                   >
                     <option value="idea">💡 Idea</option>
                     <option value="purchased">🛒 Purchased</option>
-                    <option value="wrapped">🎁 Wrapped</option>
-                    <option value="delivered">✅ Delivered</option>
                   </select>
                 </div>
 

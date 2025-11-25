@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Gift, Plus, DollarSign, Calendar, Package } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -154,125 +155,242 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {assignedGifts.map((assignment) => {
-              const purchased = isPurchased(assignment.status)
-              const gift = assignment.gift as any
+          <Tabs defaultValue="ideas" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="ideas">
+                Ideas ({assignedGifts.filter(a => !isPurchased(a.status)).length})
+              </TabsTrigger>
+              <TabsTrigger value="purchased">
+                Purchased ({assignedGifts.filter(a => isPurchased(a.status)).length})
+              </TabsTrigger>
+            </TabsList>
 
-              // Skip if gift data is missing (deleted gift)
-              if (!gift || !gift.name) return null
+            <TabsContent value="ideas" className="mt-4">
+              {assignedGifts.filter(a => !isPurchased(a.status)).length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                  <p className="text-gray-500">No gift ideas yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {assignedGifts
+                    .filter(a => !isPurchased(a.status))
+                    .map((assignment) => {
+                      const gift = assignment.gift as any
 
-              return (
-                <div
-                  key={assignment.id}
-                  className={`border-2 rounded-xl p-4 transition-all ${
-                    purchased
-                      ? 'border-green-200 bg-green-50'
-                      : 'border-gray-200 hover:border-purple-300'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    {/* Purchase Checkbox */}
-                    <div className="pt-1">
-                      <Checkbox
-                        checked={purchased}
-                        onCheckedChange={() => togglePurchased(assignment.id, assignment.status)}
-                        disabled={updating === assignment.id}
-                        className="h-5 w-5"
-                      />
-                    </div>
+                      // Skip if gift data is missing (deleted gift)
+                      if (!gift || !gift.name) return null
 
-                    {/* Gift Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <Link
-                          href={`/gifts/${assignment.gift_id}`}
-                          className="flex-1"
+                      return (
+                        <div
+                          key={assignment.id}
+                          className="border-2 rounded-xl p-4 transition-all border-gray-200 hover:border-purple-300"
                         >
-                          <h4 className={`font-semibold hover:text-purple-600 transition-colors ${
-                            purchased ? 'text-green-900' : 'text-gray-900'
-                          }`}>
-                            {gift.name}
-                          </h4>
-                        </Link>
+                          <div className="flex items-start gap-3">
+                            {/* Purchase Checkbox */}
+                            <div className="pt-1">
+                              <Checkbox
+                                checked={false}
+                                onCheckedChange={() => togglePurchased(assignment.id, assignment.status)}
+                                disabled={updating === assignment.id}
+                                className="h-5 w-5"
+                              />
+                            </div>
 
-                        {gift.current_price && (
-                          <div className="flex items-center gap-1 text-green-700 font-bold">
-                            <DollarSign className="h-4 w-4" />
-                            {gift.current_price.toFixed(2)}
+                            {/* Gift Details */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <Link
+                                  href={`/gifts/${assignment.gift_id}`}
+                                  className="flex-1"
+                                >
+                                  <h4 className="font-semibold hover:text-purple-600 transition-colors text-gray-900">
+                                    {gift.name}
+                                  </h4>
+                                </Link>
+
+                                {gift.current_price && (
+                                  <div className="flex items-center gap-1 text-green-700 font-bold">
+                                    <DollarSign className="h-4 w-4" />
+                                    {gift.current_price.toFixed(2)}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Metadata */}
+                              <div className="flex flex-wrap items-center gap-2 mt-2">
+                                {gift.category && (
+                                  <Badge variant="outline" className="text-xs capitalize">
+                                    {gift.category}
+                                  </Badge>
+                                )}
+
+                                {assignment.occasion && (
+                                  <Badge variant="secondary" className="text-xs capitalize">
+                                    {assignment.occasion.replace('_', ' ')}
+                                  </Badge>
+                                )}
+
+                                <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
+                                  Idea
+                                </Badge>
+                              </div>
+
+                              {/* Dates */}
+                              {assignment.occasion_date && (
+                                <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-600">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    For: {formatDate(assignment.occasion_date)}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-
-                      {/* Metadata */}
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
-                        {gift.category && (
-                          <Badge variant="outline" className="text-xs capitalize">
-                            {gift.category}
-                          </Badge>
-                        )}
-
-                        {assignment.occasion && (
-                          <Badge variant="secondary" className="text-xs capitalize">
-                            {assignment.occasion.replace('_', ' ')}
-                          </Badge>
-                        )}
-
-                        <Badge
-                          variant={purchased ? 'default' : 'outline'}
-                          className={`text-xs ${
-                            purchased
-                              ? 'bg-green-600'
-                              : 'text-blue-600 border-blue-300'
-                          }`}
-                        >
-                          {purchased ? '✓ Purchased' : 'Idea'}
-                        </Badge>
-                      </div>
-
-                      {/* Dates */}
-                      {(assignment.occasion_date || assignment.purchased_date) && (
-                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-600">
-                          {assignment.occasion_date && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              For: {formatDate(assignment.occasion_date)}
-                            </div>
-                          )}
-                          {assignment.purchased_date && (
-                            <div className="flex items-center gap-1 text-green-700 font-medium">
-                              <Package className="h-3 w-3" />
-                              Purchased: {formatDate(assignment.purchased_date)}
-                            </div>
-                          )}
                         </div>
-                      )}
+                      )
+                    })}
+
+                  {/* Summary for Ideas */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Total Ideas:</span>
+                      <span className="font-bold text-blue-700">
+                        {assignedGifts.filter(a => !isPurchased(a.status)).length}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-gray-600">Potential Spending:</span>
+                      <span className="font-bold text-blue-700">
+                        {formatCurrency(
+                          assignedGifts
+                            .filter(a => !isPurchased(a.status) && a.gift)
+                            .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
+                        )}
+                      </span>
                     </div>
                   </div>
                 </div>
-              )
-            })}
+              )}
+            </TabsContent>
 
-            {/* Summary */}
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Total Purchased:</span>
-                <span className="font-bold text-green-700">
-                  {assignedGifts.filter(a => isPurchased(a.status)).length} of {assignedGifts.length}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm mt-1">
-                <span className="text-gray-600">Total Spending:</span>
-                <span className="font-bold text-green-700">
-                  {formatCurrency(
-                    assignedGifts
-                      .filter(a => isPurchased(a.status) && a.gift)
-                      .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
-                  )}
-                </span>
-              </div>
-            </div>
-          </div>
+            <TabsContent value="purchased" className="mt-4">
+              {assignedGifts.filter(a => isPurchased(a.status)).length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                  <p className="text-gray-500">No purchased gifts yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {assignedGifts
+                    .filter(a => isPurchased(a.status))
+                    .map((assignment) => {
+                      const gift = assignment.gift as any
+
+                      // Skip if gift data is missing (deleted gift)
+                      if (!gift || !gift.name) return null
+
+                      return (
+                        <div
+                          key={assignment.id}
+                          className="border-2 rounded-xl p-4 transition-all border-green-200 bg-green-50"
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Purchase Checkbox */}
+                            <div className="pt-1">
+                              <Checkbox
+                                checked={true}
+                                onCheckedChange={() => togglePurchased(assignment.id, assignment.status)}
+                                disabled={updating === assignment.id}
+                                className="h-5 w-5"
+                              />
+                            </div>
+
+                            {/* Gift Details */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <Link
+                                  href={`/gifts/${assignment.gift_id}`}
+                                  className="flex-1"
+                                >
+                                  <h4 className="font-semibold hover:text-purple-600 transition-colors text-green-900">
+                                    {gift.name}
+                                  </h4>
+                                </Link>
+
+                                {gift.current_price && (
+                                  <div className="flex items-center gap-1 text-green-700 font-bold">
+                                    <DollarSign className="h-4 w-4" />
+                                    {gift.current_price.toFixed(2)}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Metadata */}
+                              <div className="flex flex-wrap items-center gap-2 mt-2">
+                                {gift.category && (
+                                  <Badge variant="outline" className="text-xs capitalize">
+                                    {gift.category}
+                                  </Badge>
+                                )}
+
+                                {assignment.occasion && (
+                                  <Badge variant="secondary" className="text-xs capitalize">
+                                    {assignment.occasion.replace('_', ' ')}
+                                  </Badge>
+                                )}
+
+                                <Badge variant="default" className="text-xs bg-green-600">
+                                  ✓ Purchased
+                                </Badge>
+                              </div>
+
+                              {/* Dates */}
+                              {(assignment.occasion_date || assignment.purchased_date) && (
+                                <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-600">
+                                  {assignment.occasion_date && (
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-3 w-3" />
+                                      For: {formatDate(assignment.occasion_date)}
+                                    </div>
+                                  )}
+                                  {assignment.purchased_date && (
+                                    <div className="flex items-center gap-1 text-green-700 font-medium">
+                                      <Package className="h-3 w-3" />
+                                      Purchased: {formatDate(assignment.purchased_date)}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                  {/* Summary for Purchased */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Total Purchased:</span>
+                      <span className="font-bold text-green-700">
+                        {assignedGifts.filter(a => isPurchased(a.status)).length}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-gray-600">Total Spending:</span>
+                      <span className="font-bold text-green-700">
+                        {formatCurrency(
+                          assignedGifts
+                            .filter(a => isPurchased(a.status) && a.gift)
+                            .reduce((sum, a) => sum + ((a.gift as any)?.current_price || 0), 0)
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </CardContent>
     </Card>

@@ -201,8 +201,6 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
             >
               <option value="idea">Idea</option>
               <option value="purchased">Purchased</option>
-              <option value="wrapped">Wrapped</option>
-              <option value="given">Given</option>
             </select>
           </div>
 
