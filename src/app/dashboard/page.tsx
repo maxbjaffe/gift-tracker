@@ -5,7 +5,6 @@ import { useGifts } from '@/lib/hooks/useGifts'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { GiftStashNav } from '@/components/GiftStashNav'
 import { DashboardBudgetOverview } from '@/components/DashboardBudgetOverview'
-import { ProductOfTheDay } from '@/components/ProductOfTheDay'
 import { AIGiftRecoOfTheDay } from '@/components/AIGiftRecoOfTheDay'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -157,9 +156,9 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            {/* Product of the Day */}
+            {/* AI Gift Pick of the Day */}
             <div className="mb-6">
-              <ProductOfTheDay />
+              <AIGiftRecoOfTheDay />
             </div>
 
             {/* Stats Grid */}
@@ -298,9 +297,6 @@ export default function DashboardPage() {
 
               {/* Budget Overview */}
               <DashboardBudgetOverview recipients={recipients} />
-
-              {/* AI Gift Recommendation of the Day */}
-              <AIGiftRecoOfTheDay />
             </div>
 
             {/* Gift Progress */}

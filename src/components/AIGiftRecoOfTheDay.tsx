@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Sparkles, ExternalLink } from 'lucide-react'
+import { Sparkles, ExternalLink, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 // AI-curated gift recommendations that rotate daily
@@ -81,6 +81,7 @@ const AI_GIFT_RECOMMENDATIONS = [
 
 export function AIGiftRecoOfTheDay() {
   const [recommendation, setRecommendation] = useState(AI_GIFT_RECOMMENDATIONS[0])
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     // Rotate recommendation based on day of year
@@ -89,13 +90,33 @@ export function AIGiftRecoOfTheDay() {
     setRecommendation(AI_GIFT_RECOMMENDATIONS[recoIndex])
   }, [])
 
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    // Get a random recommendation (excluding current one)
+    const otherRecommendations = AI_GIFT_RECOMMENDATIONS.filter(r => r.title !== recommendation.title)
+    const randomIndex = Math.floor(Math.random() * otherRecommendations.length)
+    setTimeout(() => {
+      setRecommendation(otherRecommendations[randomIndex])
+      setIsRefreshing(false)
+    }, 300)
+  }
+
   return (
     <Card className="p-6 h-full bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="flex items-center gap-2 mb-4">
         <div className="h-8 w-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
           <Sparkles className="h-5 w-5 text-white" />
         </div>
-        <h3 className="text-lg font-bold">AI Gift Pick</h3>
+        <h3 className="text-lg font-bold flex-1">AI Gift Pick</h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="h-8 w-8 p-0"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
 
       <div className="space-y-4">
