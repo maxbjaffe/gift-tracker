@@ -12,6 +12,7 @@ import ProfileSuggestionsModal from '@/components/ProfileSuggestionsModal';
 import ChatDialog from '@/components/ChatDialog';
 import AssignGiftsDialog from '@/components/AssignGiftsDialog';
 import { BudgetTracker } from '@/components/BudgetTracker';
+import { AssignedGiftsManager } from '@/components/AssignedGiftsManager';
 import { createClient } from '@/lib/supabase/client';
 import { formatAgeDisplay } from '@/lib/utils/age';
 
@@ -392,60 +393,30 @@ export default function RecipientDetailPage() {
           </div>
         </div>
 
-        {/* Assigned Gifts Section */}
+        {/* Assigned Gifts Section - New Component with Per-Recipient Purchase Tracking */}
         <div className="mb-6 md:mb-8">
-          <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-4 md:mb-6">
-              <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">
-                Assigned Gifts ({assignedGifts.length})
-              </h2>
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <AssignGiftsDialog
-                  recipientId={recipient.id}
-                  recipientName={recipient.name}
-                  onAssignmentComplete={() => {
-                    fetchAssignedGifts();
-                  }}
-                />
-                <Link
-                  href={`/gifts/new?recipient=${recipient.id}`}
-                  className="w-full sm:w-auto px-4 h-11 md:h-12 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-sm md:text-base whitespace-nowrap"
-                >
-                  + Create Gift
-                </Link>
-              </div>
-            </div>
-
-            {assignedGifts.length === 0 ? (
-              <p className="text-sm md:text-base text-gray-500 text-center py-6 md:py-8">
-                No gifts assigned yet. Add one or generate AI recommendations!
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                {assignedGifts.map((gift) => (
-                  <Link
-                    key={gift.id}
-                    href={`/gifts/${gift.id}/edit`}
-                    className="block p-3 md:p-4 border-2 border-gray-200 rounded-xl hover:border-purple-400 hover:shadow-lg transition-all"
-                  >
-                    <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-2">{gift.name}</h3>
-                    <div className="space-y-1 text-xs md:text-sm text-gray-600">
-                      {gift.price && (
-                        <p className="text-base md:text-lg font-bold text-purple-600">
-                          ${gift.price.toFixed(2)}
-                        </p>
-                      )}
-                      {gift.store && <p>🏪 {gift.store}</p>}
-                      {gift.brand && <p>⭐ {gift.brand}</p>}
-                      <p className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                        {gift.status}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+            <AssignGiftsDialog
+              recipientId={recipient.id}
+              recipientName={recipient.name}
+              onAssignmentComplete={() => {
+                fetchAssignedGifts();
+              }}
+            />
+            <Link
+              href={`/gifts/new?recipient=${recipient.id}`}
+              className="w-full sm:w-auto px-4 h-11 md:h-12 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-sm md:text-base whitespace-nowrap"
+            >
+              + Create Gift
+            </Link>
           </div>
+          <AssignedGiftsManager
+            recipientId={recipient.id}
+            recipientName={recipient.name}
+            onUpdate={() => {
+              fetchAssignedGifts();
+            }}
+          />
         </div>
 
         {/* Budget Tracking Section */}
