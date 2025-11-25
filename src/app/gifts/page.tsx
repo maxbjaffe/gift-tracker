@@ -59,7 +59,7 @@ export default function UnifiedGiftsPage() {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
   const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
   const [selectedGifts, setSelectedGifts] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<'recipients' | 'grid'>('recipients');
+  const [viewMode, setViewMode] = useState<'recipients' | 'grid' | 'list'>('list');
   const [selectedGiftForDetails, setSelectedGiftForDetails] = useState<any | null>(null);
 
   const loading = recipientsLoading || giftsLoading;
@@ -545,16 +545,16 @@ export default function UnifiedGiftsPage() {
             </div>
             <div className="flex gap-2">
               <Button
-                variant={viewMode === 'recipients' ? 'default' : 'outline'}
-                onClick={() => setViewMode('recipients')}
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                onClick={() => setViewMode('list')}
                 className={
-                  viewMode === 'recipients'
+                  viewMode === 'list'
                     ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue'
                     : ''
                 }
               >
                 <List className="h-4 w-4 mr-2" />
-                By Recipient
+                List
               </Button>
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
@@ -564,7 +564,19 @@ export default function UnifiedGiftsPage() {
                 }
               >
                 <LayoutGrid className="h-4 w-4 mr-2" />
-                All Gifts
+                Grid
+              </Button>
+              <Button
+                variant={viewMode === 'recipients' ? 'default' : 'outline'}
+                onClick={() => setViewMode('recipients')}
+                className={
+                  viewMode === 'recipients'
+                    ? 'bg-gradient-to-r from-giftstash-orange to-giftstash-blue'
+                    : ''
+                }
+              >
+                <User className="h-4 w-4 mr-2" />
+                By Recipient
               </Button>
             </div>
           </div>
@@ -628,7 +640,110 @@ export default function UnifiedGiftsPage() {
         </div>
 
         {/* View Content */}
-        {viewMode === 'recipients' ? (
+        {viewMode === 'list' ? (
+          /* Compact List View - Gift First */
+          <Card>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {filteredGifts.map((gift) => (
+                  <div
+                    key={gift.id}
+                    className="p-3 hover:bg-gray-50 transition-colors flex items-center gap-3"
+                  >
+                    {/* Checkbox */}
+                    <Checkbox
+                      checked={selectedGifts.has(gift.id)}
+                      onCheckedChange={() => toggleGiftSelection(gift.id)}
+                    />
+
+                    {/* Thumbnail */}
+                    <div className="flex-shrink-0 w-12 h-12 relative rounded overflow-hidden bg-gray-100">
+                      {(gift.source_metadata?.screenshot || gift.image_url) ? (
+                        <Image
+                          src={gift.source_metadata?.screenshot || gift.image_url || ''}
+                          alt={gift.name}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Gift Info */}
+                    <div
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => setSelectedGiftForDetails(gift)}
+                    >
+                      <div className="flex items-start gap-2">
+                        <h3 className="font-medium text-gray-900 line-clamp-1 flex-1">
+                          {gift.name}
+                        </h3>
+                        {gift.current_price && (
+                          <span className="text-sm font-semibold text-green-600 whitespace-nowrap">
+                            ${gift.current_price.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        {/* Recipients */}
+                        {gift.recipients && gift.recipients.length > 0 && (
+                          <div className="flex gap-1">
+                            {gift.recipients.map((recipient) => (
+                              <Link
+                                key={recipient.id}
+                                href={`/recipients/${recipient.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs hover:bg-purple-50 transition-colors"
+                                >
+                                  {recipient.name}
+                                </Badge>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                        {/* Category */}
+                        {gift.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {gift.category}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status & Actions */}
+                    <div className="flex items-center gap-2">
+                      {/* Status Badge */}
+                      <Badge className={`${getStatusColor(gift.status || 'idea')} text-xs`}>
+                        {gift.status || 'idea'}
+                      </Badge>
+
+                      {/* Link Icon */}
+                      {gift.url && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="h-8 w-8 p-0"
+                        >
+                          <a href={gift.url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : viewMode === 'recipients' ? (
           /* Recipient-Grouped View */
           <div className="space-y-4">
             {Object.entries(filteredGiftsByRecipient).map(([recipientId, recipientGifts]) => {
