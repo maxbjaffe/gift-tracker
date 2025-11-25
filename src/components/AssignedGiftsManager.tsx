@@ -37,6 +37,7 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
   const [assignedGifts, setAssignedGifts] = useState<AssignedGift[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [selectedGiftIds, setSelectedGiftIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     loadAssignedGifts()
@@ -76,31 +77,48 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
     }
   }
 
-  const togglePurchased = async (assignmentId: string, currentStatus: string | null) => {
-    setUpdating(assignmentId)
+  const toggleSelection = (assignmentId: string) => {
+    setSelectedGiftIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(assignmentId)) {
+        newSet.delete(assignmentId)
+      } else {
+        newSet.add(assignmentId)
+      }
+      return newSet
+    })
+  }
+
+  const selectAll = (gifts: AssignedGift[]) => {
+    setSelectedGiftIds(new Set(gifts.map(g => g.id)))
+  }
+
+  const clearSelection = () => {
+    setSelectedGiftIds(new Set())
+  }
+
+  const bulkUpdateStatus = async (newStatus: 'idea' | 'purchased') => {
+    if (selectedGiftIds.size === 0) return
+
+    setUpdating('bulk')
     try {
       const supabase = createClient()
 
-      // Toggle between 'idea' and 'purchased'
-      const newStatus = currentStatus === 'purchased' ? 'idea' : 'purchased'
+      for (const assignmentId of selectedGiftIds) {
+        const { error } = await supabase
+          .from('gift_recipients')
+          .update({ status: newStatus })
+          .eq('id', assignmentId)
 
-      const { error } = await supabase
-        .from('gift_recipients')
-        .update({
-          status: newStatus,
-          // purchased_date will be auto-set by trigger
-        })
-        .eq('id', assignmentId)
-
-      if (error) throw error
+        if (error) throw error
+      }
 
       toast.success(
-        newStatus === 'purchased'
-          ? `Marked as purchased for ${recipientName}`
-          : `Marked as idea for ${recipientName}`
+        `Marked ${selectedGiftIds.size} gift(s) as ${newStatus} for ${recipientName}`
       )
 
-      // Reload to get updated data and trigger budget recalculation
+      // Clear selection and reload
+      setSelectedGiftIds(new Set())
       await loadAssignedGifts()
       onUpdate?.()
     } catch (error) {
@@ -173,14 +191,50 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                 </div>
               ) : (
                 <>
+                  {/* Bulk Actions Bar */}
+                  {selectedGiftIds.size > 0 && (
+                    <div className="bg-purple-100 border border-purple-300 rounded-lg p-3 mb-4 flex items-center justify-between">
+                      <div className="text-sm font-medium text-purple-900">
+                        {selectedGiftIds.size} selected
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => bulkUpdateStatus('purchased')}
+                          disabled={updating === 'bulk'}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Mark as Purchased
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={clearSelection}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Ideas Summary */}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                     <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-sm text-blue-600 font-medium">Total Ideas</div>
-                        <div className="text-2xl font-bold text-blue-900">
-                          {assignedGifts.filter(a => !isPurchased(a.status)).length}
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <div className="text-sm text-blue-600 font-medium">Total Ideas</div>
+                          <div className="text-2xl font-bold text-blue-900">
+                            {assignedGifts.filter(a => !isPurchased(a.status)).length}
+                          </div>
                         </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => selectAll(assignedGifts.filter(a => !isPurchased(a.status)))}
+                          className="text-xs"
+                        >
+                          Select All
+                        </Button>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-blue-600 font-medium">Potential Spending</div>
@@ -210,12 +264,11 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                           className="border rounded-lg p-3 transition-all border-gray-200 hover:border-purple-300 bg-white"
                         >
                           <div className="flex items-start gap-3">
-                            {/* Purchase Checkbox */}
+                            {/* Selection Checkbox */}
                             <div className="pt-1">
                               <Checkbox
-                                checked={false}
-                                onCheckedChange={() => togglePurchased(assignment.id, assignment.status)}
-                                disabled={updating === assignment.id}
+                                checked={selectedGiftIds.has(assignment.id)}
+                                onCheckedChange={() => toggleSelection(assignment.id)}
                                 className="h-5 w-5"
                               />
                             </div>
@@ -286,14 +339,50 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                 </div>
               ) : (
                 <>
+                  {/* Bulk Actions Bar */}
+                  {selectedGiftIds.size > 0 && (
+                    <div className="bg-purple-100 border border-purple-300 rounded-lg p-3 mb-4 flex items-center justify-between">
+                      <div className="text-sm font-medium text-purple-900">
+                        {selectedGiftIds.size} selected
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => bulkUpdateStatus('idea')}
+                          disabled={updating === 'bulk'}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Mark as Idea
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={clearSelection}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Purchased Summary */}
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
                     <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-sm text-green-600 font-medium">Total Purchased</div>
-                        <div className="text-2xl font-bold text-green-900">
-                          {assignedGifts.filter(a => isPurchased(a.status)).length}
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <div className="text-sm text-green-600 font-medium">Total Purchased</div>
+                          <div className="text-2xl font-bold text-green-900">
+                            {assignedGifts.filter(a => isPurchased(a.status)).length}
+                          </div>
                         </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => selectAll(assignedGifts.filter(a => isPurchased(a.status)))}
+                          className="text-xs"
+                        >
+                          Select All
+                        </Button>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-green-600 font-medium">Total Spending</div>
@@ -323,12 +412,11 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                           className="border rounded-lg p-3 transition-all border-green-200 bg-green-50"
                         >
                           <div className="flex items-start gap-3">
-                            {/* Purchase Checkbox */}
+                            {/* Selection Checkbox */}
                             <div className="pt-1">
                               <Checkbox
-                                checked={true}
-                                onCheckedChange={() => togglePurchased(assignment.id, assignment.status)}
-                                disabled={updating === assignment.id}
+                                checked={selectedGiftIds.has(assignment.id)}
+                                onCheckedChange={() => toggleSelection(assignment.id)}
                                 className="h-5 w-5"
                               />
                             </div>
