@@ -48,6 +48,7 @@ import { toast } from 'sonner';
 import Avatar from '@/components/Avatar';
 import { AIRecommendations } from '@/components/AIRecommendations';
 import { RecipientModal } from '@/components/RecipientModal';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 type StatusType = 'idea' | 'considering' | 'purchased' | 'wrapped' | 'given';
 
@@ -61,6 +62,7 @@ export default function UnifiedGiftsPage() {
   const [selectedGifts, setSelectedGifts] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'recipients' | 'grid' | 'list'>('list');
   const [selectedGiftForDetails, setSelectedGiftForDetails] = useState<any | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loading = recipientsLoading || giftsLoading;
 
@@ -231,40 +233,71 @@ export default function UnifiedGiftsPage() {
 
   const bulkUpdateStatus = async (newStatus: StatusType) => {
     const supabase = createClient();
-    const giftIds = Array.from(selectedGifts);
 
-    // Update the gifts table
-    const { error: giftError } = await supabase
-      .from('gifts')
-      .update({ status: newStatus })
-      .in('id', giftIds);
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error('Please sign in to update gifts');
+      return;
+    }
 
-    if (giftError) {
+    // Collect all gift-recipient assignment IDs
+    const assignmentIds: string[] = [];
+    gifts.forEach(gift => {
+      if (selectedGifts.has(gift.id) && gift.recipients) {
+        gift.recipients.forEach(recipient => {
+          // Each recipient object contains gift_recipient_id from the junction table
+          if ('gift_recipient_id' in recipient && recipient.gift_recipient_id) {
+            assignmentIds.push(recipient.gift_recipient_id as string);
+          }
+        });
+      }
+    });
+
+    if (assignmentIds.length === 0) {
+      // No assignments found - update gift-level status only
+      const giftIds = Array.from(selectedGifts);
+      const { error } = await supabase
+        .from('gifts')
+        .update({ status: newStatus })
+        .in('id', giftIds);
+
+      if (error) {
+        toast.error('Failed to update gifts');
+        return;
+      }
+
+      toast.success(`Updated ${selectedGifts.size} gifts to ${newStatus}`);
+      setSelectedGifts(new Set());
+      refetch();
+      return;
+    }
+
+    // Use RPC function for transactional bulk update of assignments
+    const { data, error } = await supabase.rpc('bulk_update_gift_recipient_status', {
+      assignment_ids: assignmentIds,
+      new_status: newStatus,
+      requesting_user_id: user.id
+    });
+
+    if (error) {
+      console.error('Bulk update error:', error);
       toast.error('Failed to update gifts');
       return;
     }
 
-    // Also update gift_recipients table for budget tracking
-    const { error: recipientError } = await supabase
-      .from('gift_recipients')
-      .update({ status: newStatus })
-      .in('gift_id', giftIds);
-
-    if (recipientError) {
-      console.error('Error updating gift_recipients status:', recipientError);
-      // Don't fail the whole operation
+    const result = data?.[0];
+    if (!result?.success) {
+      toast.error(result?.error_message || 'Failed to update gifts');
+      return;
     }
 
-    toast.success(`Updated ${selectedGifts.size} gifts to ${newStatus}`);
+    toast.success(`Updated ${result.updated_count} gift assignment(s) to ${newStatus}`);
     setSelectedGifts(new Set());
     refetch();
   };
 
   const bulkDelete = async () => {
-    if (!confirm(`Delete ${selectedGifts.size} gifts? This cannot be undone.`)) {
-      return;
-    }
-
     const supabase = createClient();
     const { error } = await supabase.from('gifts').delete().in('id', Array.from(selectedGifts));
 
@@ -460,7 +493,7 @@ export default function UnifiedGiftsPage() {
                 <Select
                   onValueChange={(value) => {
                     if (value === 'delete') {
-                      bulkDelete();
+                      setShowDeleteConfirm(true);
                     } else {
                       bulkUpdateStatus(value as 'idea' | 'purchased' | 'wrapped');
                     }
@@ -512,7 +545,7 @@ export default function UnifiedGiftsPage() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={bulkDelete}
+                    onClick={() => setShowDeleteConfirm(true)}
                     className="gap-1"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -1096,6 +1129,18 @@ export default function UnifiedGiftsPage() {
           onStatusUpdate={(giftId, newStatus) => {
             refetch();
           }}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          open={showDeleteConfirm}
+          onOpenChange={setShowDeleteConfirm}
+          onConfirm={bulkDelete}
+          title="Delete Selected Gifts?"
+          description={`Are you sure you want to delete ${selectedGifts.size} gift${selectedGifts.size !== 1 ? 's' : ''}? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="destructive"
         />
       </div>
     </>
