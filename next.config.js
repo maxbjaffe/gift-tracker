@@ -121,6 +121,14 @@ const withPWA = require('next-pwa')({
       }
     },
     {
+      // Auth-related routes - never cache
+      urlPattern: /\/api\/(auth|user)\/.*$/i,
+      handler: 'NetworkOnly',
+      options: {
+        cacheName: 'auth-apis',
+      }
+    },
+    {
       urlPattern: /\/api\/.*$/i,
       handler: 'NetworkFirst',
       method: 'GET',
