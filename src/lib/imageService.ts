@@ -115,17 +115,21 @@ function getEnhancedPlaceholder(keywords: string, productName?: string): ImageRe
   }
 
   // Create enhanced placeholder with gradient background
-  // Using a better service that supports gradients and custom fonts
+  // Using placehold.co which supports gradients and custom fonts
   const displayText = productName
-    ? encodeURIComponent(productName.substring(0, 30)) // Truncate long names
+    ? productName.substring(0, 30) // Truncate long names
     : categoryInfo.name;
 
-  // Option 1: Gradient placeholder with icon
-  const url = `https://dummyimage.com/600x600/${categoryInfo.gradient}/000000.png&text=${categoryInfo.icon}+${displayText}`;
+  // Use placehold.co for reliable placeholder images
+  // Format: https://placehold.co/600x400/gradient-color/text-color?text=Your+Text
+  const gradientColors = categoryInfo.gradient.replace('-', '/');
+  const textEncoded = encodeURIComponent(`${categoryInfo.icon} ${displayText}`);
+  const url = `https://placehold.co/600x400/${gradientColors}/000?text=${textEncoded}&font=raleway`;
+  const thumbnail = `https://placehold.co/300x200/${gradientColors}/000?text=${textEncoded}&font=raleway`;
 
   return {
     url,
-    thumbnail: url,
+    thumbnail,
     source: 'placeholder',
     isPlaceholder: true,
   };
@@ -143,24 +147,12 @@ export async function fetchProductImage(
   productName?: string,
   productUrl?: string
 ): Promise<ImageResult> {
-  // If we have a product URL, try to extract the image via OpenGraph
-  if (productUrl) {
-    try {
-      const ogImage = await extractOpenGraphImage(productUrl);
-      if (ogImage) {
-        return {
-          url: ogImage,
-          thumbnail: ogImage,
-          source: 'opengraph',
-          isPlaceholder: false,
-        };
-      }
-    } catch (error) {
-      console.error('OpenGraph extraction failed, using placeholder:', error);
-    }
-  }
+  // NOTE: OpenGraph extraction disabled in production due to CORS/timeout issues
+  // Chrome extension will provide real images when users add products
+  // For AI recommendations, we use high-quality placeholders
 
-  // Fall back to enhanced placeholder
+  // Always use enhanced placeholder for now
+  // Real images come from Chrome extension when users add gifts manually
   return getEnhancedPlaceholder(keywords, productName);
 }
 
