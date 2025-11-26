@@ -49,6 +49,7 @@ import Avatar from '@/components/Avatar';
 import { AIRecommendations } from '@/components/AIRecommendations';
 import { RecipientModal } from '@/components/RecipientModal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { BudgetWarning } from '@/components/BudgetWarning';
 
 type StatusType = 'idea' | 'considering' | 'purchased' | 'wrapped' | 'given';
 
@@ -89,14 +90,18 @@ export default function UnifiedGiftsPage() {
       .filter((pair) => ['idea', 'considering'].includes(pair.status))
       .reduce((sum, pair) => sum + (pair.gift?.current_price || 0), 0);
 
-    // By recipient
-    const byRecipient: Record<string, { count: number; value: number; name: string }> = {};
+    // By recipient - total value and purchased spending
+    const byRecipient: Record<string, { count: number; value: number; purchasedSpending: number; name: string }> = {};
     giftRecipientPairs.forEach((pair) => {
       if (!byRecipient[pair.recipient.id]) {
-        byRecipient[pair.recipient.id] = { count: 0, value: 0, name: pair.recipient.name };
+        byRecipient[pair.recipient.id] = { count: 0, value: 0, purchasedSpending: 0, name: pair.recipient.name };
       }
       byRecipient[pair.recipient.id].count++;
       byRecipient[pair.recipient.id].value += pair.gift?.current_price || 0;
+      // Track purchased spending for budget warnings
+      if (['purchased', 'wrapped', 'given'].includes(pair.status)) {
+        byRecipient[pair.recipient.id].purchasedSpending += pair.gift?.current_price || 0;
+      }
     });
 
     return {
@@ -822,6 +827,17 @@ export default function UnifiedGiftsPage() {
                     </CollapsibleTrigger>
 
                     <CollapsibleContent>
+                      {/* Budget Warning */}
+                      {recipient && analytics.byRecipient[recipientId] && (
+                        <div className="p-4 border-t bg-gray-50/50">
+                          <BudgetWarning
+                            recipient={recipient}
+                            currentSpending={analytics.byRecipient[recipientId].purchasedSpending}
+                            compact
+                          />
+                        </div>
+                      )}
+
                       <div className="border-t divide-y">
                         {recipientGifts.map((gift) => (
                           <div key={gift.id} className="p-4 hover:bg-gray-50 transition-colors">
