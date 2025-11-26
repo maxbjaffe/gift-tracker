@@ -403,7 +403,7 @@ export default function RecipientDetailPage() {
                       <Sparkles className="h-4 w-4 mr-2" />
                       Take Personality Survey
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} asChild>
                       <div className="flex items-center cursor-pointer">
                         <ShareButton
                           recipient={recipient as any}
@@ -419,7 +419,7 @@ export default function RecipientDetailPage() {
                         />
                       </div>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} asChild>
                       <div className="flex items-center cursor-pointer">
                         <ChatDialog recipientId={recipient.id} recipientName={recipient.name} />
                       </div>
