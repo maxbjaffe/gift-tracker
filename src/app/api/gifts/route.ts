@@ -76,8 +76,15 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
 
-    // Get authenticated user (may be null in development with service role)
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get authenticated user - REQUIRED for creating gifts
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Please sign in to create gifts' },
+        { status: 401 }
+      );
+    }
 
     const body = await request.json();
 
@@ -108,14 +115,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use authenticated user's ID, or fallback to provided user_id, or null for dev
-    const effectiveUserId = user?.id || user_id || null;
-
-    // Create the gift with user_id
+    // Create the gift with authenticated user's ID
     const { data: gift, error: giftError } = await supabase
       .from('gifts')
       .insert({
-        user_id: effectiveUserId,
+        user_id: user.id,
         name,
         url,
         current_price,

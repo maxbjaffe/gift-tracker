@@ -16,6 +16,6 @@ export const config = {
      * - api routes (handled by API route auth)
      * - share routes (public pages)
      */
-    '/((?!api/|share/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|share|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
