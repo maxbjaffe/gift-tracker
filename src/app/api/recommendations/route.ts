@@ -34,8 +34,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get recommendation context (trending, successful gifts, etc.)
+    const { recommendationAnalyticsService } = await import('@/lib/recommendation-analytics.service');
+    const context = await recommendationAnalyticsService.getRecommendationContext(
+      recipientId,
+      recipient.age_range,
+      recipient.interests,
+      recipient.relationship,
+      category // Use category as occasion if provided
+    );
+
     // Build a detailed prompt based on recipient information and filters
-    const prompt = buildRecommendationPrompt(recipient, category, minPrice, maxPrice);
+    const prompt = buildRecommendationPrompt(recipient, context, category, minPrice, maxPrice);
 
     // Call Claude API
     // Use Claude 3 Haiku (fast and cost-effective)
@@ -158,6 +168,7 @@ export async function POST(request: NextRequest) {
 
 function buildRecommendationPrompt(
   recipient: any,
+  context: any,
   category?: string | null,
   minPrice?: number | null,
   maxPrice?: number | null
@@ -177,9 +188,44 @@ function buildRecommendationPrompt(
     ? `$${maxPrice} or less`
     : null;
 
-  return `You are a gift recommendation expert. Generate 8-10 personalized gift ideas for this person:
+  // Format trending gifts for context
+  const trendingText = context.trendingGifts.length > 0
+    ? context.trendingGifts
+        .slice(0, 8)
+        .map((g: any) => `- ${g.gift_name}${g.gift_brand ? ` by ${g.gift_brand}` : ''}${g.gift_store ? ` (${g.gift_store})` : ''} - Added ${g.add_count} times`)
+        .join('\n')
+    : 'No trending data available yet';
 
-RECIPIENT PROFILE:
+  // Format successful gifts for similar people
+  const successfulText = context.successfulGiftsForSimilar.length > 0
+    ? context.successfulGiftsForSimilar
+        .slice(0, 8)
+        .map((g: any) => `- ${g.gift_name}${g.gift_brand ? ` by ${g.gift_brand}` : ''}${g.current_price ? ` ($${g.current_price})` : ''}`)
+        .join('\n')
+    : 'No data for similar recipients yet';
+
+  // Format dismissed recommendations
+  const dismissedText = context.dismissedRecommendations.length > 0
+    ? context.dismissedRecommendations
+        .map((d: any) => `- ${d.recommendation_name}`)
+        .join('\n')
+    : 'None';
+
+  // Format popular brands
+  const brandsText = context.popularBrands.length > 0
+    ? context.popularBrands.join(', ')
+    : 'No brand data yet';
+
+  // Format popular stores
+  const storesText = context.popularStores.length > 0
+    ? context.popularStores.join(', ')
+    : 'Amazon, Target, Best Buy, Walmart';
+
+  return `You are an expert gift recommendation AI. Generate 8-10 personalized, SPECIFIC gift ideas using real-world data and trends.
+
+====================
+RECIPIENT PROFILE
+====================
 - Name: ${recipient.name}
 - Relationship: ${recipient.relationship}
 - Age: ${age}
@@ -188,30 +234,61 @@ RECIPIENT PROFILE:
 - Gift Preferences: ${preferences}
 - Restrictions: ${restrictions}
 
-${category || priceRangeText ? '**MANDATORY FILTERS:**' : ''}
+====================
+TRENDING GIFTS (What's popular right now)
+====================
+${trendingText}
+
+====================
+SUCCESSFUL GIFTS FOR SIMILAR PEOPLE
+====================
+These gifts worked well for people with similar profiles:
+${successfulText}
+
+====================
+AVOID THESE (Previously dismissed)
+====================
+${dismissedText}
+
+====================
+POPULAR BRANDS & STORES
+====================
+- Popular Brands: ${brandsText}
+- Popular Stores: ${storesText}
+
+${category || priceRangeText ? '\n====================\n**MANDATORY FILTERS**\n====================' : ''}
 ${category ? `- CATEGORY: ONLY suggest gifts in the "${category}" category. All suggestions MUST fit within this category.` : ''}
 ${priceRangeText ? `- PRICE RANGE: ONLY suggest gifts that cost ${priceRangeText}. All price ranges MUST fall within this constraint.` : ''}
 ${category || priceRangeText ? '- These filters are MANDATORY. Do not suggest anything outside these parameters.\n' : ''}
 
-REQUIREMENTS:
-1. Each gift should match their interests and age
-2. Stay within the budget (or close to it)
-${!priceRangeText ? '3. Provide variety in price ranges (some cheaper, some more expensive)' : '3. ALL gifts must be within the specified price range'}
-4. Be specific and detailed in descriptions
-5. Include practical information
+====================
+REQUIREMENTS
+====================
+1. Be SPECIFIC - Include real brand names and product names (e.g., "Sony WH-1000XM5 Headphones" not "wireless headphones")
+2. Use trending data above - Prioritize items that are popular or worked for similar people
+3. Match interests and age precisely
+4. Stay within budget
+5. Include specific store names where each item can be purchased
+6. Provide variety in categories and price points (unless constrained by filters)
+7. NEVER suggest items from the "AVOID THESE" list
+8. Include popular brands when relevant
 
-CRITICAL: Return ONLY a valid JSON array with this exact structure. Do not include any markdown formatting, code blocks, or text outside the JSON:
+====================
+OUTPUT FORMAT
+====================
+Return ONLY a valid JSON array. No markdown, no code blocks, no other text:
 
 [
   {
-    "title": "Gift name",
-    "description": "Detailed 2-3 sentence description",
+    "title": "Specific Product Name with Brand",
+    "brand": "Brand Name",
+    "description": "Detailed 2-3 sentence description explaining features and benefits",
     "price_range": "$XX-$YY or $XX",
-    "reasoning": "Why this gift fits this person",
-    "where_to_buy": "Store names (e.g., Amazon, Target, Walmart)",
+    "reasoning": "Why this gift fits based on their interests and the data above",
+    "where_to_buy": "Specific store names (e.g., Amazon, Target, Best Buy)",
     "category": "Category name",
-    "search_query": "Specific product search term for Google/Amazon (e.g., 'LEGO Architecture Statue of Liberty 21042')",
-    "image_keywords": "HIGHLY SPECIFIC keywords for image search - include brand, color, distinctive features (e.g., 'lego architecture statue liberty', 'sony wireless noise cancelling headphones', 'red kitchenaid stand mixer'). Be SPECIFIC, not generic!"
+    "search_query": "Exact product search term for Amazon (e.g., 'Sony WH-1000XM5 Wireless Headphones')",
+    "image_keywords": "HIGHLY SPECIFIC keywords including brand, model, color (e.g., 'sony wh1000xm5 black wireless headphones', 'lego architecture statue liberty 21042')"
   }
 ]
 

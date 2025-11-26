@@ -47,13 +47,33 @@ function extractAmazonProduct() {
     description = bullets;
   }
 
+  // Extract brand
+  let brand = null;
+  const brandElement = document.querySelector('#bylineInfo, a#brand, [data-feature-name="bylineInfo"] a, .po-brand .po-break-word');
+  if (brandElement) {
+    brand = brandElement.textContent.replace(/^(Brand:|Visit the|Store:)\s*/i, '').trim();
+  }
+
+  // Extract category
+  let category = null;
+  const breadcrumb = document.querySelector('#wayfinding-breadcrumbs_container');
+  if (breadcrumb) {
+    const links = Array.from(breadcrumb.querySelectorAll('a'));
+    if (links.length > 0) {
+      category = links[links.length - 1].textContent.trim();
+    }
+  }
+
   return {
     url: window.location.href.split('?')[0], // Clean URL
     title: productTitle.textContent.trim(),
     price,
     image,
     description,
+    brand,
+    category,
     site: 'amazon',
+    store: 'Amazon',
     metadata: {
       asin: extractASIN(),
     },
@@ -94,13 +114,30 @@ function extractTargetProduct() {
     description = descElement.textContent.trim().substring(0, 200);
   }
 
+  // Extract brand
+  let brand = null;
+  const brandElement = document.querySelector('[data-test="product-brand"], h2 a, .ProductDetailsStyles__BrandName');
+  if (brandElement) {
+    brand = brandElement.textContent.trim();
+  }
+
+  // Extract category from breadcrumbs
+  let category = null;
+  const breadcrumbs = document.querySelectorAll('[data-test="breadcrumb-item"]');
+  if (breadcrumbs.length > 0) {
+    category = breadcrumbs[breadcrumbs.length - 1].textContent.trim();
+  }
+
   return {
     url: window.location.href.split('?')[0],
     title: productTitle.textContent.trim(),
     price,
     image,
     description,
+    brand,
+    category,
     site: 'target',
+    store: 'Target',
   };
 }
 
@@ -202,13 +239,30 @@ function extractBestBuyProduct() {
     description = descElement.textContent.trim().substring(0, 200);
   }
 
+  // Extract brand
+  let brand = null;
+  const brandLink = document.querySelector('.product-data a[href*="/brands/"]');
+  if (brandLink) {
+    brand = brandLink.textContent.trim();
+  }
+
+  // Extract category
+  let category = null;
+  const breadcrumbs = document.querySelectorAll('.breadcrumb a');
+  if (breadcrumbs.length > 1) {
+    category = breadcrumbs[breadcrumbs.length - 2].textContent.trim();
+  }
+
   return {
     url: window.location.href.split('?')[0],
     title: productTitle.textContent.trim(),
     price,
     image,
     description,
+    brand,
+    category,
     site: 'bestbuy',
+    store: 'Best Buy',
   };
 }
 
