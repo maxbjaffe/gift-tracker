@@ -736,6 +736,12 @@ export default function UnifiedGiftsPage() {
                             ))}
                           </div>
                         )}
+                        {/* Reserved Badge */}
+                        {gift.recipients && gift.recipients.some(r => r.claimed_by_name) && (
+                          <Badge className="bg-orange-500 text-white text-xs">
+                            RESERVED
+                          </Badge>
+                        )}
                         {/* Category */}
                         {gift.category && (
                           <Badge variant="secondary" className="text-xs">
@@ -884,6 +890,17 @@ export default function UnifiedGiftsPage() {
                                           ${gift.current_price.toFixed(2)}
                                         </span>
                                       )}
+                                      {(() => {
+                                        const recipientData = gift.recipients?.find(r => r.id === recipientId);
+                                        if (recipientData?.claimed_by_name) {
+                                          return (
+                                            <Badge className="bg-orange-500 text-white text-xs">
+                                              RESERVED{recipientData.claimed_by_name ? ` by ${recipientData.claimed_by_name}` : ''}
+                                            </Badge>
+                                          );
+                                        }
+                                        return null;
+                                      })()}
                                       {gift.category && (
                                         <Badge variant="outline" className="text-xs">
                                           {gift.category}
@@ -1028,23 +1045,30 @@ export default function UnifiedGiftsPage() {
                       </span>
                     </div>
                   )}
-                  {(() => {
-                    const occasions = gift.recipients
-                      ?.map(r => r.occasion)
-                      .filter((o, i, arr) => o && arr.indexOf(o) === i);
-                    if (occasions && occasions.length > 0) {
-                      return (
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {occasions.map((occasion, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                              🎁 {occasion.replace('_', ' ')}
-                            </Badge>
-                          ))}
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {gift.recipients && gift.recipients.some(r => r.claimed_by_name) && (
+                      <Badge className="bg-orange-500 text-white text-xs">
+                        RESERVED
+                      </Badge>
+                    )}
+                    {(() => {
+                      const occasions = gift.recipients
+                        ?.map(r => r.occasion)
+                        .filter((o, i, arr) => o && arr.indexOf(o) === i);
+                      if (occasions && occasions.length > 0) {
+                        return (
+                          <>
+                            {occasions.map((occasion, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                🎁 {occasion.replace('_', ' ')}
+                              </Badge>
+                            ))}
+                          </>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     {(['idea', 'purchased'] as StatusType[]).map((status) => {
                       // Check if ANY recipient has this status

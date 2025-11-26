@@ -382,6 +382,9 @@ export type RecipientWithStatus = Recipient & {
   notes?: string | null // Notes from gift_recipients junction table
   occasion?: string | null // Occasion from gift_recipients junction table
   occasion_date?: string | null // Occasion date from gift_recipients junction table
+  claimed_by_name?: string | null // Name of person who claimed this gift
+  claimed_by_email?: string | null // Email of person who claimed this gift
+  claimed_at?: string | null // When the gift was claimed
 }
 
 export type GiftWithRecipients = Gift & {

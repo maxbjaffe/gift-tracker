@@ -25,6 +25,9 @@ export class GiftService {
           notes,
           occasion,
           occasion_date,
+          claimed_by_name,
+          claimed_by_email,
+          claimed_at,
           recipients (
             id,
             name,
@@ -47,7 +50,10 @@ export class GiftService {
         gift_recipient_id: gr.id, // ID of the gift_recipients record
         notes: gr.notes, // Per-recipient notes from junction table
         occasion: gr.occasion, // Per-recipient occasion from junction table
-        occasion_date: gr.occasion_date // Per-recipient occasion date from junction table
+        occasion_date: gr.occasion_date, // Per-recipient occasion date from junction table
+        claimed_by_name: gr.claimed_by_name, // Name of person who claimed
+        claimed_by_email: gr.claimed_by_email, // Email of person who claimed
+        claimed_at: gr.claimed_at // When the gift was claimed
       })).filter(Boolean) || [],
       recipient_count: gift.gift_recipients?.length || 0,
       gift_recipients: undefined // Remove the junction table data

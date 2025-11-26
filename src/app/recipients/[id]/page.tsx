@@ -13,6 +13,8 @@ import ChatDialog from '@/components/ChatDialog';
 import AssignGiftsDialog from '@/components/AssignGiftsDialog';
 import { BudgetTracker } from '@/components/BudgetTracker';
 import { AssignedGiftsManager } from '@/components/AssignedGiftsManager';
+import { ShareButton } from '@/components/ShareButton';
+import { ExportPDFButton } from '@/components/ExportPDFButton';
 import { createClient } from '@/lib/supabase/client';
 import { formatAgeDisplay } from '@/lib/utils/age';
 
@@ -33,6 +35,11 @@ interface Recipient {
   avatar_type?: 'ai' | 'emoji' | 'initials' | 'photo' | null;
   avatar_data?: string | null;
   avatar_background?: string | null;
+  share_token?: string | null;
+  share_privacy?: string | null;
+  share_enabled?: boolean | null;
+  share_expires_at?: string | null;
+  share_view_count?: number | null;
 }
 
 interface Gift {
@@ -357,6 +364,14 @@ export default function RecipientDetailPage() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <ShareButton
+                  recipient={recipient as any}
+                  onShareUpdated={() => fetchRecipient()}
+                />
+                <ExportPDFButton
+                  recipientId={recipient.id}
+                  recipientName={recipient.name}
+                />
                 <button
                   onClick={() => setShowSurveyModal(true)}
                   className="px-4 h-11 md:h-12 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg flex items-center justify-center gap-2 text-sm md:text-base font-medium"
