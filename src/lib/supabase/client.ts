@@ -5,20 +5,8 @@ import type { Database } from '@/types/database.types'
 export function createClient() {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        // Use localStorage for session persistence in PWA mode
-        // This ensures the session persists when the PWA is closed and reopened
-        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-        storageKey: 'giftstash-auth',
-        // Persist session across PWA restarts
-        persistSession: true,
-        // Detect session in URL (for magic links, etc.)
-        detectSessionInUrl: true,
-        // Auto-refresh token before expiry
-        autoRefreshToken: true,
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    // Let @supabase/ssr handle cookie storage automatically for SSR compatibility
+    // This ensures sessions work both client-side and server-side
   )
 }
