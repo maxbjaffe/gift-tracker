@@ -93,6 +93,7 @@ export default function RecipientDetailPage() {
   const [surveyAnalyzing, setSurveyAnalyzing] = useState(false);
   const [profileSuggestions, setProfileSuggestions] = useState<any>(null);
   const [applyingSuggestions, setApplyingSuggestions] = useState(false);
+  const [showChatDialog, setShowChatDialog] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -419,10 +420,9 @@ export default function RecipientDetailPage() {
                         />
                       </div>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} asChild>
-                      <div className="flex items-center cursor-pointer">
-                        <ChatDialog recipientId={recipient.id} recipientName={recipient.name} />
-                      </div>
+                    <DropdownMenuItem onClick={() => setShowChatDialog(true)}>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Chat for Gift Ideas
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -703,6 +703,16 @@ export default function RecipientDetailPage() {
           suggestions={profileSuggestions}
           onApply={handleApplySuggestions}
           isApplying={applyingSuggestions}
+        />
+      )}
+
+      {/* Chat Dialog */}
+      {recipient && (
+        <ChatDialog
+          recipientId={recipient.id}
+          recipientName={recipient.name}
+          open={showChatDialog}
+          onOpenChange={setShowChatDialog}
         />
       )}
 

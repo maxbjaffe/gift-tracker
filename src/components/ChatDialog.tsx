@@ -16,19 +16,34 @@ import ChatInterface from '@/components/ChatInterface';
 interface ChatDialogProps {
   recipientId: string;
   recipientName: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
-export default function ChatDialog({ recipientId, recipientName }: ChatDialogProps) {
-  const [open, setOpen] = useState(false);
+export default function ChatDialog({
+  recipientId,
+  recipientName,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  trigger
+}: ChatDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <MessageCircle className="h-4 w-4" />
-          Chat for Gift Ideas
-        </Button>
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {!trigger && (
+        <DialogTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <MessageCircle className="h-4 w-4" />
+            Chat for Gift Ideas
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="flex items-center gap-2">
