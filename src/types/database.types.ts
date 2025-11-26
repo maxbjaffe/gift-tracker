@@ -38,6 +38,11 @@ export interface Database {
           max_budget: number | null
           max_purchased_budget: number | null
           notes: string | null
+          share_token: string | null
+          share_privacy: string | null
+          share_enabled: boolean | null
+          share_expires_at: string | null
+          share_view_count: number | null
           created_at: string
           updated_at: string
         }
@@ -66,6 +71,11 @@ export interface Database {
           max_budget?: number | null
           max_purchased_budget?: number | null
           notes?: string | null
+          share_token?: string | null
+          share_privacy?: string | null
+          share_enabled?: boolean | null
+          share_expires_at?: string | null
+          share_view_count?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -94,6 +104,11 @@ export interface Database {
           max_budget?: number | null
           max_purchased_budget?: number | null
           notes?: string | null
+          share_token?: string | null
+          share_privacy?: string | null
+          share_enabled?: boolean | null
+          share_expires_at?: string | null
+          share_view_count?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -178,6 +193,11 @@ export interface Database {
           notes: string | null
           occasion: string | null
           occasion_date: string | null
+          claimed_by_name: string | null
+          claimed_by_email: string | null
+          claimed_at: string | null
+          claim_expires_at: string | null
+          claim_notes: string | null
           created_at: string
         }
         Insert: {
@@ -188,6 +208,11 @@ export interface Database {
           notes?: string | null
           occasion?: string | null
           occasion_date?: string | null
+          claimed_by_name?: string | null
+          claimed_by_email?: string | null
+          claimed_at?: string | null
+          claim_expires_at?: string | null
+          claim_notes?: string | null
           created_at?: string
         }
         Update: {
@@ -198,6 +223,11 @@ export interface Database {
           notes?: string | null
           occasion?: string | null
           occasion_date?: string | null
+          claimed_by_name?: string | null
+          claimed_by_email?: string | null
+          claimed_at?: string | null
+          claim_expires_at?: string | null
+          claim_notes?: string | null
           created_at?: string
         }
       }
@@ -271,6 +301,38 @@ export interface Database {
           recommendation_data?: Json | null
           feedback_type?: string
           reason?: string | null
+          created_at?: string
+        }
+      }
+      share_views: {
+        Row: {
+          id: string
+          recipient_id: string
+          visitor_fingerprint: string | null
+          viewed_at: string
+          referrer: string | null
+          user_agent: string | null
+          country_code: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recipient_id: string
+          visitor_fingerprint?: string | null
+          viewed_at?: string
+          referrer?: string | null
+          user_agent?: string | null
+          country_code?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          recipient_id?: string
+          visitor_fingerprint?: string | null
+          viewed_at?: string
+          referrer?: string | null
+          user_agent?: string | null
+          country_code?: string | null
           created_at?: string
         }
       }
