@@ -1,12 +1,33 @@
--- Migration: Enhanced AI Recommendation Feedback System
+-- Migration: Enhanced AI Recommendation Feedback System (Clean Version)
 -- Date: November 26, 2024
 -- Purpose: Track recommendation feedback and build learning system
+
+-- ============================================================================
+-- CLEAN UP ANY EXISTING OBJECTS
+-- ============================================================================
+
+-- Drop existing policies
+DROP POLICY IF EXISTS recommendation_feedback_select_own ON recommendation_feedback;
+DROP POLICY IF EXISTS recommendation_feedback_insert_own ON recommendation_feedback;
+DROP POLICY IF EXISTS trending_gifts_select_all ON trending_gifts;
+DROP POLICY IF EXISTS trending_gifts_insert_system ON trending_gifts;
+DROP POLICY IF EXISTS trending_gifts_update_system ON trending_gifts;
+
+-- Drop existing tables
+DROP TABLE IF EXISTS recommendation_feedback CASCADE;
+DROP TABLE IF EXISTS trending_gifts CASCADE;
+
+-- Drop existing functions
+DROP FUNCTION IF EXISTS get_trending_gifts_for_profile(TEXT, TEXT, TEXT, INTEGER);
+DROP FUNCTION IF EXISTS get_dismissed_recommendations(UUID);
+DROP FUNCTION IF EXISTS get_successful_gifts_for_similar_recipients(TEXT, TEXT, TEXT, INTEGER);
+DROP FUNCTION IF EXISTS update_trending_gifts();
 
 -- ============================================================================
 -- RECOMMENDATION FEEDBACK TABLE
 -- ============================================================================
 
-CREATE TABLE IF NOT EXISTS recommendation_feedback (
+CREATE TABLE recommendation_feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
   recipient_id UUID NOT NULL REFERENCES recipients(id) ON DELETE CASCADE,
@@ -30,7 +51,7 @@ CREATE TABLE IF NOT EXISTS recommendation_feedback (
 
   -- Metadata
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  session_id TEXT -- Track recommendations shown together
+  session_id TEXT
 );
 
 -- Indexes for performance
@@ -45,7 +66,7 @@ CREATE INDEX idx_recommendation_feedback_store ON recommendation_feedback(recomm
 -- TRENDING GIFTS TRACKING
 -- ============================================================================
 
-CREATE TABLE IF NOT EXISTS trending_gifts (
+CREATE TABLE trending_gifts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Gift identification
@@ -53,7 +74,7 @@ CREATE TABLE IF NOT EXISTS trending_gifts (
   gift_category TEXT,
   gift_brand TEXT,
   gift_store TEXT,
-  normalized_name TEXT, -- Lowercase, trimmed for deduplication
+  normalized_name TEXT NOT NULL,
 
   -- Metrics
   add_count INTEGER DEFAULT 0,
@@ -62,16 +83,16 @@ CREATE TABLE IF NOT EXISTS trending_gifts (
   avg_price DECIMAL(10,2),
 
   -- Demographics
-  popular_with_age_ranges TEXT[], -- e.g., ['18-25', '26-35']
-  popular_for_relationships TEXT[], -- e.g., ['spouse', 'parent']
-  popular_occasions TEXT[], -- e.g., ['birthday', 'christmas']
+  popular_with_age_ranges TEXT[],
+  popular_for_relationships TEXT[],
+  popular_occasions TEXT[],
 
   -- Time tracking
   last_added_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
 
-  -- Unique constraint on normalized name
+  -- Unique constraint
   UNIQUE(normalized_name)
 );
 
@@ -123,14 +144,14 @@ BEGIN
     ) AS relevance_score
   FROM trending_gifts tg
   WHERE
-    tg.add_count >= 2 -- Minimum threshold
-    AND tg.updated_at > NOW() - INTERVAL '90 days' -- Recent activity
+    tg.add_count >= 2
+    AND tg.updated_at > NOW() - INTERVAL '90 days'
   ORDER BY relevance_score DESC, tg.add_count DESC
   LIMIT p_limit;
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to get dismissed recommendations for a recipient (to avoid suggesting again)
+-- Function to get dismissed recommendations for a recipient
 CREATE OR REPLACE FUNCTION get_dismissed_recommendations(
   p_recipient_id UUID
 )
@@ -147,12 +168,12 @@ BEGIN
   WHERE
     rf.recipient_id = p_recipient_id
     AND rf.feedback_type = 'dismissed'
-    AND rf.created_at > NOW() - INTERVAL '30 days' -- Only recent dismissals
+    AND rf.created_at > NOW() - INTERVAL '30 days'
   ORDER BY rf.created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to get successful gift patterns for similar recipients
+-- Function to get successful gifts for similar recipients
 CREATE OR REPLACE FUNCTION get_successful_gifts_for_similar_recipients(
   p_age_range TEXT,
   p_interests TEXT,
@@ -182,25 +203,24 @@ BEGIN
   INNER JOIN gift_recipients gr ON g.id = gr.gift_id
   INNER JOIN recipients r ON gr.recipient_id = r.id
   WHERE
-    gr.status IN ('purchased', 'wrapped', 'given') -- Successful gifts
+    gr.status IN ('purchased', 'wrapped', 'given')
     AND (
       r.age_range = p_age_range
       OR r.relationship = p_relationship
-      OR (p_interests IS NOT NULL AND r.interests ILIKE '%' || p_interests || '%')
+      OR (p_interests IS NOT NULL AND p_interests != '' AND r.interests ILIKE '%' || p_interests || '%')
     )
-    AND g.created_at > NOW() - INTERVAL '180 days' -- Recent gifts
+    AND g.created_at > NOW() - INTERVAL '180 days'
   GROUP BY g.id, g.name, g.description, g.category, g.brand, g.store, g.current_price
-  HAVING COUNT(*) >= 2 -- Gift must appear multiple times
+  HAVING COUNT(*) >= 2
   ORDER BY success_count DESC, g.current_price ASC
   LIMIT p_limit;
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to update trending gifts (call this periodically or on feedback)
+-- Function to update trending gifts
 CREATE OR REPLACE FUNCTION update_trending_gifts()
 RETURNS void AS $$
 BEGIN
-  -- Insert or update trending gifts based on feedback
   INSERT INTO trending_gifts (
     gift_name,
     gift_category,
@@ -233,7 +253,7 @@ BEGIN
     MAX(rf.created_at) FILTER (WHERE rf.feedback_type = 'added') AS last_added_at,
     NOW() AS updated_at
   FROM recommendation_feedback rf
-  WHERE rf.created_at > NOW() - INTERVAL '90 days' -- Only recent feedback
+  WHERE rf.created_at > NOW() - INTERVAL '90 days'
   GROUP BY
     rf.recommendation_name,
     rf.recommendation_category,
@@ -267,18 +287,14 @@ CREATE POLICY recommendation_feedback_select_own
   ON recommendation_feedback
   FOR SELECT
   TO authenticated
-  USING (
-    user_id = auth.uid()
-  );
+  USING (user_id = auth.uid());
 
 -- Users can insert their own feedback
 CREATE POLICY recommendation_feedback_insert_own
   ON recommendation_feedback
   FOR INSERT
   TO authenticated
-  WITH CHECK (
-    user_id = auth.uid()
-  );
+  WITH CHECK (user_id = auth.uid());
 
 -- Trending gifts are readable by all authenticated users
 CREATE POLICY trending_gifts_select_all
@@ -287,12 +303,12 @@ CREATE POLICY trending_gifts_select_all
   TO authenticated
   USING (true);
 
--- Only system/admin can update trending gifts
+-- Only system can update trending gifts (via function)
 CREATE POLICY trending_gifts_insert_system
   ON trending_gifts
   FOR INSERT
   TO authenticated
-  WITH CHECK (true); -- Will be updated by function
+  WITH CHECK (true);
 
 CREATE POLICY trending_gifts_update_system
   ON trending_gifts
