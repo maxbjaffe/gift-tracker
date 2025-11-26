@@ -14,6 +14,18 @@ const config: Config = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+  		height: {
+  			'button-sm': '2.5rem',   // 40px
+  			'button-md': '2.75rem',  // 44px - iOS tap target minimum
+  			'button-lg': '3rem',     // 48px
+  		},
+  		spacing: {
+  			'xs': '0.5rem',  // 8px
+  			'sm': '1rem',    // 16px
+  			'md': '1.5rem',  // 24px
+  			'lg': '2rem',    // 32px
+  			'xl': '3rem',    // 48px
+  		},
   		colors: {
   			// GiftStash Brand Colors
   			giftstash: {

@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
 import Image from 'next/image';
+import { ClaimGiftModal } from '@/components/ClaimGiftModal';
+import { Button } from '@/components/ui/button';
 
 type Recipient = Database['public']['Tables']['recipients']['Row'];
 type Gift = Database['public']['Tables']['gifts']['Row'];
@@ -28,9 +30,7 @@ export default function SharePage() {
   const [error, setError] = useState<string | null>(null);
   const [recipient, setRecipient] = useState<Recipient | null>(null);
   const [gifts, setGifts] = useState<GiftWithDetails[]>([]);
-  const [claimingId, setClaimingId] = useState<string | null>(null);
-  const [claimName, setClaimName] = useState('');
-  const [claimEmail, setClaimEmail] = useState('');
+  const [claimingGift, setClaimingGift] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     loadSharedList();
@@ -105,40 +105,25 @@ export default function SharePage() {
     }
   }
 
-  async function handleClaim(giftRecipientId: string) {
-    if (!claimName.trim()) {
-      alert('Please enter your name to claim this item');
-      return;
+  async function handleClaim(giftRecipientId: string, name: string, email: string) {
+    const response = await fetch('/api/claims', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        giftRecipientId,
+        claimedByName: name,
+        claimedByEmail: email || null,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to reserve gift');
     }
 
-    try {
-      const response = await fetch('/api/claims', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          giftRecipientId,
-          claimedByName: claimName.trim(),
-          claimedByEmail: claimEmail.trim() || null,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.error || 'Failed to claim item');
-        return;
-      }
-
-      // Refresh the list
-      await loadSharedList();
-      setClaimingId(null);
-      setClaimName('');
-      setClaimEmail('');
-      alert('Item claimed successfully!');
-    } catch (err) {
-      console.error('Error claiming item:', err);
-      alert('An error occurred while claiming the item');
-    }
+    // Refresh the list
+    await loadSharedList();
   }
 
   async function handleUnclaim(giftRecipientId: string, claimedByEmail: string | null) {
@@ -272,45 +257,12 @@ export default function SharePage() {
                     </a>
                   )}
 
-                  {claimingId === giftRecipient.id ? (
-                    <div className="space-y-2">
-                      <input
-                        type="text"
-                        placeholder="Your name"
-                        value={claimName}
-                        onChange={(e) => setClaimName(e.target.value)}
-                        className="w-full px-3 py-2 border rounded"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Your email (optional)"
-                        value={claimEmail}
-                        onChange={(e) => setClaimEmail(e.target.value)}
-                        className="w-full px-3 py-2 border rounded"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleClaim(giftRecipient.id)}
-                          className="flex-1 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          onClick={() => setClaimingId(null)}
-                          className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setClaimingId(giftRecipient.id)}
-                      className="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 font-semibold"
-                    >
-                      Reserve This Gift
-                    </button>
-                  )}
+                  <Button
+                    onClick={() => setClaimingGift({ id: giftRecipient.id, name: giftRecipient.gift.name })}
+                    className="w-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:shadow-lg h-button-md font-semibold"
+                  >
+                    Reserve This Gift
+                  </Button>
                 </div>
               ))}
             </div>
@@ -365,6 +317,17 @@ export default function SharePage() {
             </a>
           </p>
         </div>
+
+        {/* Claim Modal */}
+        {claimingGift && (
+          <ClaimGiftModal
+            isOpen={true}
+            onClose={() => setClaimingGift(null)}
+            giftName={claimingGift.name}
+            giftRecipientId={claimingGift.id}
+            onClaim={handleClaim}
+          />
+        )}
       </div>
     </div>
   );
