@@ -168,9 +168,9 @@ export default function AnalyticsPage() {
       {/* Charts */}
       <Tabs defaultValue="category" className="space-y-4 md:space-y-6">
         <TabsList className="grid w-full grid-cols-3 h-auto">
-          <TabsTrigger value="category" className="text-xs md:text-sm h-11 md:h-12">Category</TabsTrigger>
-          <TabsTrigger value="trends" className="text-xs md:text-sm h-11 md:h-12">Trends</TabsTrigger>
-          <TabsTrigger value="status" className="text-xs md:text-sm h-11 md:h-12">Status</TabsTrigger>
+          <TabsTrigger value="category" className="text-xs md:text-sm h-button-md">Category</TabsTrigger>
+          <TabsTrigger value="trends" className="text-xs md:text-sm h-button-md">Trends</TabsTrigger>
+          <TabsTrigger value="status" className="text-xs md:text-sm h-button-md">Status</TabsTrigger>
         </TabsList>
 
         <TabsContent value="category" className="space-y-4 md:space-y-6">

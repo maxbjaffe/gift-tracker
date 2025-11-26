@@ -105,30 +105,69 @@ export default function RecipientsPage() {
               setSelectedRecipient(null);
               setIsModalOpen(true);
             }}
-            className="w-full md:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap h-11 md:h-12 px-4 md:px-6"
+            className="w-full md:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap h-button-md px-4 md:px-6 font-semibold"
           >
             + Add Recipient
           </Button>
         </div>
 
         {recipients.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 lg:p-12 text-center">
-            <div className="text-4xl md:text-5xl lg:text-6xl mb-4">🎁</div>
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-              No recipients yet
-            </h2>
-            <p className="text-sm md:text-base text-gray-600 mb-6">
-              Start by adding someone you'd like to track gifts for
-            </p>
-            <Button
-              onClick={() => {
-                setSelectedRecipient(null);
-                setIsModalOpen(true);
-              }}
-              className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light text-sm md:text-base h-11 md:h-12 px-4 md:px-6"
-            >
-              Add Your First Recipient
-            </Button>
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 lg:p-12">
+            <div className="text-center mb-8">
+              <div className="text-5xl md:text-6xl lg:text-7xl mb-4">🎁</div>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                Let's Get Started!
+              </h2>
+              <p className="text-sm md:text-base text-gray-600 mb-8 max-w-md mx-auto">
+                Add someone special to start tracking the perfect gifts for them. The more details you add, the better our AI can help you find amazing gift ideas.
+              </p>
+              <Button
+                onClick={() => {
+                  setSelectedRecipient(null);
+                  setIsModalOpen(true);
+                }}
+                className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light text-sm md:text-base h-button-md px-6 md:px-8 font-semibold"
+              >
+                Add Your First Recipient
+              </Button>
+            </div>
+
+            <div className="border-t border-gray-200 pt-8">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-4 text-center">
+                💡 Quick Tips
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4">
+                  <div className="text-2xl mb-2">🎯</div>
+                  <h4 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">
+                    Add Interests
+                  </h4>
+                  <p className="text-xs md:text-sm text-gray-700">
+                    Share their hobbies, favorite brands, and what they love. This helps our AI generate personalized gift ideas.
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+                  <div className="text-2xl mb-2">💰</div>
+                  <h4 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">
+                    Set a Budget
+                  </h4>
+                  <p className="text-xs md:text-sm text-gray-700">
+                    Define your spending range to get gift suggestions that match your budget perfectly.
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
+                  <div className="text-2xl mb-2">🤖</div>
+                  <h4 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">
+                    Use AI Recommendations
+                  </h4>
+                  <p className="text-xs md:text-sm text-gray-700">
+                    Once you add a recipient, our AI will suggest thoughtful gifts based on their unique profile.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">

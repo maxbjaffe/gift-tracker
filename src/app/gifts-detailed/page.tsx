@@ -92,7 +92,7 @@ export default function GiftsPage() {
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <ExportButtons data={gifts} type="gifts" />
-          <Button asChild className="h-11 md:h-12">
+          <Button asChild className="h-button-md">
             <Link href="/gifts/new">
               <Plus className="h-4 w-4 mr-2" />
               Add Gift
@@ -138,9 +138,9 @@ export default function GiftsPage() {
       <Card className="p-4 md:p-5 lg:p-6 mb-4 md:mb-6">
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="mb-4">
           <TabsList className="grid w-full grid-cols-3 h-auto">
-            <TabsTrigger value="all" className="text-xs md:text-sm h-11 md:h-12">All ({gifts.length})</TabsTrigger>
-            <TabsTrigger value="ideas" className="text-xs md:text-sm h-11 md:h-12">Ideas ({stats.ideaCount})</TabsTrigger>
-            <TabsTrigger value="confirmed" className="text-xs md:text-sm h-11 md:h-12">Confirmed ({stats.confirmedCount})</TabsTrigger>
+            <TabsTrigger value="all" className="text-xs md:text-sm h-button-md">All ({gifts.length})</TabsTrigger>
+            <TabsTrigger value="ideas" className="text-xs md:text-sm h-button-md">Ideas ({stats.ideaCount})</TabsTrigger>
+            <TabsTrigger value="confirmed" className="text-xs md:text-sm h-button-md">Confirmed ({stats.confirmedCount})</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -177,7 +177,6 @@ export default function GiftsPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-11 md:h-auto"
               onClick={() => {
                 setCategoryFilter('all')
                 setStatusFilter('all')
@@ -202,7 +201,7 @@ export default function GiftsPage() {
           <p className="text-sm md:text-base text-gray-500 mb-4">No gifts match your filters</p>
           <Button
             variant="outline"
-            className="h-11 md:h-12"
+            className="h-button-md"
             onClick={() => {
               setCategoryFilter('all')
               setStatusFilter('all')
@@ -306,7 +305,7 @@ export default function GiftsPage() {
                       asChild
                       variant="outline"
                       size="sm"
-                      className="w-full h-11 md:h-12"
+                      className="w-full h-button-sm"
                       onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     >
                       <a href={gift.url} target="_blank" rel="noopener noreferrer">

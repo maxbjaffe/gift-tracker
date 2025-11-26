@@ -17,6 +17,15 @@ import { ShareButton } from '@/components/ShareButton';
 import { ExportPDFButton } from '@/components/ExportPDFButton';
 import { createClient } from '@/lib/supabase/client';
 import { formatAgeDisplay } from '@/lib/utils/age';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreVertical, Edit, Share2, FileDown, MessageSquare, Sparkles } from 'lucide-react';
 
 interface Recipient {
   id: string;
@@ -328,14 +337,18 @@ export default function RecipientDetailPage() {
       <GiftStashNav />
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          items={[
+            { label: 'Dashboard', href: '/dashboard' },
+            { label: 'Recipients', href: '/recipients' },
+            { label: recipient.name, current: true },
+          ]}
+          className="mb-4"
+        />
+
         {/* Header */}
         <div className="mb-6 md:mb-8 space-y-4 md:space-y-6">
-          <Link
-            href="/recipients"
-            className="text-sm md:text-base text-purple-600 hover:text-purple-700 font-medium inline-block"
-          >
-            ← Back to Recipients
-          </Link>
 
           <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8">
             <div className="flex flex-col md:flex-row justify-between items-start gap-4 md:gap-6">
@@ -363,28 +376,56 @@ export default function RecipientDetailPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <ShareButton
-                  recipient={recipient as any}
-                  onShareUpdated={() => fetchRecipient()}
-                />
-                <ExportPDFButton
-                  recipientId={recipient.id}
-                  recipientName={recipient.name}
-                />
-                <button
-                  onClick={() => setShowSurveyModal(true)}
-                  className="px-4 h-11 md:h-12 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg flex items-center justify-center gap-2 text-sm md:text-base font-medium"
-                >
-                  ✨ Take Personality Survey
-                </button>
-                <ChatDialog recipientId={recipient.id} recipientName={recipient.name} />
-                <Link
-                  href={`/recipients/${recipient.id}/edit`}
-                  className="px-4 h-11 md:h-12 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center text-sm md:text-base"
-                >
-                  ✏️ Edit Profile
+              <div className="flex flex-row gap-2 w-full sm:w-auto">
+                <Link href={`/recipients/${recipient.id}/edit`} className="flex-1 sm:flex-none">
+                  <Button
+                    variant="outline"
+                    className="w-full h-button-md"
+                    aria-label="Edit recipient profile"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </Button>
                 </Link>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="h-button-md px-3"
+                      aria-label="More actions"
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onClick={() => setShowSurveyModal(true)}>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Take Personality Survey
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <div className="flex items-center cursor-pointer">
+                        <ShareButton
+                          recipient={recipient as any}
+                          onShareUpdated={() => fetchRecipient()}
+                        />
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <div className="flex items-center cursor-pointer">
+                        <ExportPDFButton
+                          recipientId={recipient.id}
+                          recipientName={recipient.name}
+                        />
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <div className="flex items-center cursor-pointer">
+                        <ChatDialog recipientId={recipient.id} recipientName={recipient.name} />
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
@@ -600,45 +641,39 @@ export default function RecipientDetailPage() {
                     </div>
                   </div>
 
-                  {/* Feedback Buttons */}
-                  <div className="flex flex-col sm:flex-row flex-wrap gap-2 pt-3 md:pt-4 border-t border-gray-200">
-                    <button
-                      onClick={() => handleFeedback(rec, 'added')}
-                      disabled={processingFeedback === rec.title}
-                      className="flex-1 sm:flex-none px-3 md:px-4 h-11 md:h-12 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
-                    >
-                      {processingFeedback === rec.title ? (
-                        <>
-                          <span className="inline-block animate-spin">⏳</span>
-                          Processing...
-                        </>
-                      ) : (
-                        <>👍 Add to Gifts</>
-                      )}
-                    </button>
+                  {/* Feedback Buttons - Simplified to 3 actions */}
+                  <div className="pt-3 md:pt-4 border-t border-gray-200 space-y-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <button
+                        onClick={() => handleFeedback(rec, 'added')}
+                        disabled={processingFeedback === rec.title}
+                        className="flex-1 px-3 md:px-4 h-button-md bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base font-medium"
+                      >
+                        {processingFeedback === rec.title ? (
+                          <>
+                            <span className="inline-block animate-spin">⏳</span>
+                            Processing...
+                          </>
+                        ) : (
+                          <>➕ Add to List</>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => handleFeedback(rec, 'rejected')}
+                        disabled={processingFeedback === rec.title}
+                        className="flex-1 px-3 md:px-4 h-button-md bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base font-medium"
+                      >
+                        ✕ Dismiss
+                      </button>
+                    </div>
 
                     <button
                       onClick={() => handleFeedback(rec, 'liked')}
                       disabled={processingFeedback === rec.title}
-                      className="flex-1 sm:flex-none px-3 md:px-4 h-11 md:h-12 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                      className="w-full px-3 h-button-sm bg-transparent text-purple-600 hover:text-purple-700 hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-sm font-medium rounded-lg"
                     >
-                      ❤️ Love It
-                    </button>
-
-                    <button
-                      onClick={() => handleFeedback(rec, 'rejected')}
-                      disabled={processingFeedback === rec.title}
-                      className="flex-1 sm:flex-none px-3 md:px-4 h-11 md:h-12 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                    >
-                      😐 Not Interested
-                    </button>
-
-                    <button
-                      onClick={() => handleFeedback(rec, 'already_have')}
-                      disabled={processingFeedback === rec.title}
-                      className="flex-1 sm:flex-none px-3 md:px-4 h-11 md:h-12 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                    >
-                      ✅ Already Have
+                      ❤️ Remember for Later
                     </button>
                   </div>
                 </div>
