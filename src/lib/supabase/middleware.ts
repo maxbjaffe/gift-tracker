@@ -42,10 +42,13 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Protected routes - redirect to login if not authenticated
+  // BUT: Don't redirect API routes - let them handle auth themselves
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/signup') &&
+    !request.nextUrl.pathname.startsWith('/api') && // Allow API routes to handle their own auth
+    !request.nextUrl.pathname.startsWith('/share') && // Allow public share pages
     request.nextUrl.pathname !== '/'
   ) {
     const url = request.nextUrl.clone()

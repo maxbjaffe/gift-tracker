@@ -10,6 +10,17 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication first
+    const supabase = await createServerSupabaseClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Please sign in to generate recommendations' },
+        { status: 401 }
+      );
+    }
+
     const { recipientId, category, minPrice, maxPrice } = await request.json();
 
     if (!recipientId) {
@@ -20,16 +31,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch recipient data from database
-    const supabase = await createServerSupabaseClient();
+    // Also verify user owns this recipient
     const { data: recipient, error: recipientError } = await supabase
       .from('recipients')
       .select('*')
       .eq('id', recipientId)
+      .eq('user_id', user.id) // Ensure user owns this recipient
       .single();
 
     if (recipientError || !recipient) {
       return NextResponse.json(
-        { error: 'Recipient not found' },
+        { error: 'Recipient not found or you do not have permission to access it' },
         { status: 404 }
       );
     }
