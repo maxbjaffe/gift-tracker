@@ -2,7 +2,7 @@ const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: true, // TEMPORARILY DISABLED - PWA breaking auth sessions
   // Include custom service worker code for update handling
   additionalManifestEntries: [
     { url: '/sw-custom.js', revision: Date.now().toString() }
