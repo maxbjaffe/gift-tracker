@@ -121,24 +121,19 @@ const withPWA = require('next-pwa')({
       }
     },
     {
-      // Auth-related routes - never cache
-      urlPattern: /\/api\/(auth|user)\/.*$/i,
+      // Auth-related routes and dynamic APIs - never cache
+      urlPattern: /\/api\/(auth|user|recommendations|recipients\/.*\/export-pdf|recipients\/.*\/share|feedback|gifts|ai|claims)\/.*$/i,
       handler: 'NetworkOnly',
       options: {
         cacheName: 'auth-apis',
       }
     },
     {
+      // All other API routes - NetworkOnly for POST/PUT/DELETE, NetworkFirst for GET
       urlPattern: /\/api\/.*$/i,
-      handler: 'NetworkFirst',
-      method: 'GET',
+      handler: 'NetworkOnly', // Changed from NetworkFirst to prevent stale auth issues
       options: {
         cacheName: 'apis',
-        expiration: {
-          maxEntries: 16,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        },
-        networkTimeoutSeconds: 10 // fall back to cache if api does not response within 10 seconds
       }
     },
     {
