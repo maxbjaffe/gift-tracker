@@ -3,25 +3,18 @@
 -- Purpose: Track recommendation feedback and build learning system
 
 -- ============================================================================
--- CLEAN UP ANY EXISTING OBJECTS
+-- CLEAN UP ANY EXISTING OBJECTS (ignore errors if they don't exist)
 -- ============================================================================
 
--- Drop existing policies
-DROP POLICY IF EXISTS recommendation_feedback_select_own ON recommendation_feedback;
-DROP POLICY IF EXISTS recommendation_feedback_insert_own ON recommendation_feedback;
-DROP POLICY IF EXISTS trending_gifts_select_all ON trending_gifts;
-DROP POLICY IF EXISTS trending_gifts_insert_system ON trending_gifts;
-DROP POLICY IF EXISTS trending_gifts_update_system ON trending_gifts;
+-- Drop existing functions first (no dependencies)
+DROP FUNCTION IF EXISTS get_trending_gifts_for_profile(TEXT, TEXT, TEXT, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS get_dismissed_recommendations(UUID) CASCADE;
+DROP FUNCTION IF EXISTS get_successful_gifts_for_similar_recipients(TEXT, TEXT, TEXT, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS update_trending_gifts() CASCADE;
 
--- Drop existing tables
+-- Drop existing tables (this will cascade to policies)
 DROP TABLE IF EXISTS recommendation_feedback CASCADE;
 DROP TABLE IF EXISTS trending_gifts CASCADE;
-
--- Drop existing functions
-DROP FUNCTION IF EXISTS get_trending_gifts_for_profile(TEXT, TEXT, TEXT, INTEGER);
-DROP FUNCTION IF EXISTS get_dismissed_recommendations(UUID);
-DROP FUNCTION IF EXISTS get_successful_gifts_for_similar_recipients(TEXT, TEXT, TEXT, INTEGER);
-DROP FUNCTION IF EXISTS update_trending_gifts();
 
 -- ============================================================================
 -- RECOMMENDATION FEEDBACK TABLE
