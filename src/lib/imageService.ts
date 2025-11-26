@@ -1,74 +1,112 @@
-// Image Service - Fetches real product images or uses category placeholders
+// Enhanced Image Service - Fetches real product images via OpenGraph or uses premium placeholders
 
 interface ImageResult {
   url: string;
   thumbnail: string;
-  source: 'product' | 'placeholder';
+  source: 'opengraph' | 'placeholder';
   isPlaceholder: boolean;
 }
 
 /**
- * Fetch a product image - returns category-based placeholder
- * Stock photo APIs don't provide accurate product images, so we use
- * clean, honest placeholders that match the product category
- *
- * @param keywords - Category or product type
- * @param productName - Full product name for placeholder text
+ * Extract OpenGraph image from a URL
+ * This fetches the actual product page and extracts the og:image meta tag
  */
-export async function fetchProductImage(
-  keywords: string,
-  productName?: string
-): Promise<ImageResult> {
-  // For now, we only use category placeholders
-  // Stock photo services can't provide accurate product images
-  return getCategoryPlaceholder(keywords, productName);
+async function extractOpenGraphImage(url: string): Promise<string | null> {
+  try {
+    // Use a CORS proxy or server-side fetch to avoid CORS issues
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const html = await response.text();
+
+    // Try multiple meta tag patterns
+    const patterns = [
+      /<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i,
+      /<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i,
+      /<meta\s+name=["']twitter:image["']\s+content=["']([^"']+)["']/i,
+      /<meta\s+itemprop=["']image["']\s+content=["']([^"']+)["']/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        let imageUrl = match[1];
+
+        // Handle relative URLs
+        if (imageUrl.startsWith('//')) {
+          imageUrl = 'https:' + imageUrl;
+        } else if (imageUrl.startsWith('/')) {
+          const urlObj = new URL(url);
+          imageUrl = urlObj.origin + imageUrl;
+        }
+
+        return imageUrl;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error extracting OpenGraph image:', error);
+    return null;
+  }
 }
 
 /**
- * Get a clean category-based placeholder image
- * These are honest placeholders, not pretending to be product photos
+ * Get an enhanced placeholder image with better visuals
+ * Uses gradient backgrounds and clean typography instead of emojis
  */
-function getCategoryPlaceholder(keywords: string, productName?: string): ImageResult {
+function getEnhancedPlaceholder(keywords: string, productName?: string): ImageResult {
   const lowerKeywords = keywords.toLowerCase();
 
-  // Map keywords to category info
-  const categoryMap: { [key: string]: { emoji: string; color: string; bgColor: string; label: string } } = {
-    'book': { emoji: '📚', color: '8B4513', bgColor: 'FFF8DC', label: 'Books' },
-    'electronics': { emoji: '💻', color: '4169E1', bgColor: 'E6F3FF', label: 'Electronics' },
-    'phone': { emoji: '📱', color: '000000', bgColor: 'F0F0F0', label: 'Phone' },
-    'headphone': { emoji: '🎧', color: '9333EA', bgColor: 'F3E8FF', label: 'Audio' },
-    'speaker': { emoji: '🔊', color: '2563EB', bgColor: 'DBEAFE', label: 'Audio' },
-    'camera': { emoji: '📷', color: '1F2937', bgColor: 'F3F4F6', label: 'Camera' },
-    'game': { emoji: '🎮', color: 'DC2626', bgColor: 'FEE2E2', label: 'Gaming' },
-    'toy': { emoji: '🧸', color: 'F59E0B', bgColor: 'FEF3C7', label: 'Toys' },
-    'clothes': { emoji: '👕', color: '7C3AED', bgColor: 'EDE9FE', label: 'Clothing' },
-    'fashion': { emoji: '👗', color: 'EC4899', bgColor: 'FCE7F3', label: 'Fashion' },
-    'shoe': { emoji: '👟', color: '059669', bgColor: 'D1FAE5', label: 'Shoes' },
-    'watch': { emoji: '⌚', color: '374151', bgColor: 'F9FAFB', label: 'Watch' },
-    'jewelry': { emoji: '💎', color: '7C3AED', bgColor: 'F5F3FF', label: 'Jewelry' },
-    'food': { emoji: '🍽️', color: 'EF4444', bgColor: 'FEE2E2', label: 'Food' },
-    'coffee': { emoji: '☕', color: '92400E', bgColor: 'FEF3C7', label: 'Coffee' },
-    'drink': { emoji: '🥤', color: 'DC2626', bgColor: 'FECACA', label: 'Drinks' },
-    'kitchen': { emoji: '🍳', color: 'B45309', bgColor: 'FED7AA', label: 'Kitchen' },
-    'home': { emoji: '🏠', color: '0891B2', bgColor: 'CFFAFE', label: 'Home' },
-    'furniture': { emoji: '🛋️', color: '78350F', bgColor: 'FED7AA', label: 'Furniture' },
-    'art': { emoji: '🎨', color: 'EC4899', bgColor: 'FBCFE8', label: 'Art' },
-    'music': { emoji: '🎵', color: '7C3AED', bgColor: 'EDE9FE', label: 'Music' },
-    'sport': { emoji: '⚽', color: '059669', bgColor: 'D1FAE5', label: 'Sports' },
-    'fitness': { emoji: '💪', color: 'DC2626', bgColor: 'FEE2E2', label: 'Fitness' },
-    'bike': { emoji: '🚴', color: '2563EB', bgColor: 'DBEAFE', label: 'Cycling' },
-    'car': { emoji: '🚗', color: '1F2937', bgColor: 'E5E7EB', label: 'Automotive' },
-    'travel': { emoji: '✈️', color: '0891B2', bgColor: 'CFFAFE', label: 'Travel' },
-    'bag': { emoji: '👜', color: '92400E', bgColor: 'FDE68A', label: 'Bags' },
-    'backpack': { emoji: '🎒', color: '0F766E', bgColor: 'CCFBF1', label: 'Backpacks' },
-    'beauty': { emoji: '💄', color: 'EC4899', bgColor: 'FCE7F3', label: 'Beauty' },
-    'pet': { emoji: '🐾', color: 'F59E0B', bgColor: 'FEF3C7', label: 'Pets' },
-    'garden': { emoji: '🌱', color: '16A34A', bgColor: 'DCFCE7', label: 'Garden' },
-    'tool': { emoji: '🔧', color: '6B7280', bgColor: 'F3F4F6', label: 'Tools' },
+  // Map keywords to category with modern color schemes
+  const categoryMap: { [key: string]: { icon: string; gradient: string; name: string } } = {
+    'book': { icon: '📖', gradient: 'e0c3fc-8ec5fc', name: 'Books' },
+    'electronics': { icon: '⚡', gradient: 'a8edea-fed6e3', name: 'Electronics' },
+    'phone': { icon: '📱', gradient: 'd299c2-fef9d7', name: 'Phone' },
+    'headphone': { icon: '🎧', gradient: 'f5f7fa-c3cfe2', name: 'Audio' },
+    'speaker': { icon: '🔊', gradient: 'fbc2eb-a6c1ee', name: 'Speaker' },
+    'camera': { icon: '📷', gradient: 'ffecd2-fcb69f', name: 'Camera' },
+    'game': { icon: '🎮', gradient: 'ff9a9e-fecfef', name: 'Gaming' },
+    'gaming': { icon: '🎮', gradient: 'ff9a9e-fecfef', name: 'Gaming' },
+    'toy': { icon: '🧸', gradient: 'ffeaa7-fdcb6e', name: 'Toys' },
+    'clothes': { icon: '👕', gradient: 'e0c3fc-8ec5fc', name: 'Clothing' },
+    'clothing': { icon: '👕', gradient: 'e0c3fc-8ec5fc', name: 'Clothing' },
+    'fashion': { icon: '✨', gradient: 'fccb90-d57eeb', name: 'Fashion' },
+    'shoe': { icon: '👟', gradient: 'a8edea-fed6e3', name: 'Shoes' },
+    'watch': { icon: '⌚', gradient: 'cfd9df-e2ebf0', name: 'Watches' },
+    'jewelry': { icon: '💎', gradient: 'fbc2eb-a6c1ee', name: 'Jewelry' },
+    'food': { icon: '🍽️', gradient: 'ffecd2-fcb69f', name: 'Food' },
+    'coffee': { icon: '☕', gradient: 'f5e3ce-d7b899', name: 'Coffee' },
+    'drink': { icon: '🥤', gradient: 'fbc2eb-a6c1ee', name: 'Drinks' },
+    'kitchen': { icon: '🍳', gradient: 'ffeaa7-fdcb6e', name: 'Kitchen' },
+    'home': { icon: '🏠', gradient: 'd299c2-fef9d7', name: 'Home' },
+    'furniture': { icon: '🛋️', gradient: 'f5e3ce-d7b899', name: 'Furniture' },
+    'art': { icon: '🎨', gradient: 'fccb90-d57eeb', name: 'Art' },
+    'music': { icon: '🎵', gradient: 'a8edea-fed6e3', name: 'Music' },
+    'sport': { icon: '⚽', gradient: 'a8edea-fed6e3', name: 'Sports' },
+    'sports': { icon: '⚽', gradient: 'a8edea-fed6e3', name: 'Sports' },
+    'fitness': { icon: '💪', gradient: 'ff9a9e-fecfef', name: 'Fitness' },
+    'bike': { icon: '🚴', gradient: 'a8edea-fed6e3', name: 'Cycling' },
+    'car': { icon: '🚗', gradient: 'cfd9df-e2ebf0', name: 'Auto' },
+    'automotive': { icon: '🚗', gradient: 'cfd9df-e2ebf0', name: 'Auto' },
+    'travel': { icon: '✈️', gradient: 'a8edea-fed6e3', name: 'Travel' },
+    'bag': { icon: '👜', gradient: 'fccb90-d57eeb', name: 'Bags' },
+    'backpack': { icon: '🎒', gradient: 'e0c3fc-8ec5fc', name: 'Backpacks' },
+    'beauty': { icon: '💄', gradient: 'fbc2eb-a6c1ee', name: 'Beauty' },
+    'pet': { icon: '🐾', gradient: 'ffeaa7-fdcb6e', name: 'Pets' },
+    'garden': { icon: '🌱', gradient: 'd4fc79-96e6a1', name: 'Garden' },
+    'tool': { icon: '🔧', gradient: 'cfd9df-e2ebf0', name: 'Tools' },
   };
 
   // Find matching category
-  let categoryInfo = { emoji: '🎁', color: '9333EA', bgColor: 'F3E8FF', label: 'Gift' };
+  let categoryInfo = { icon: '🎁', gradient: 'fccb90-d57eeb', name: 'Gift' };
   for (const [key, value] of Object.entries(categoryMap)) {
     if (lowerKeywords.includes(key)) {
       categoryInfo = value;
@@ -76,9 +114,14 @@ function getCategoryPlaceholder(keywords: string, productName?: string): ImageRe
     }
   }
 
-  // Create a clean, minimal placeholder
-  // Format: emoji + category label (no product name to avoid confusion)
-  const url = `https://placehold.co/400x400/${categoryInfo.bgColor}/${categoryInfo.color}?text=${categoryInfo.emoji}%0A${encodeURIComponent(categoryInfo.label)}&font=montserrat`;
+  // Create enhanced placeholder with gradient background
+  // Using a better service that supports gradients and custom fonts
+  const displayText = productName
+    ? encodeURIComponent(productName.substring(0, 30)) // Truncate long names
+    : categoryInfo.name;
+
+  // Option 1: Gradient placeholder with icon
+  const url = `https://dummyimage.com/600x600/${categoryInfo.gradient}/000000.png&text=${categoryInfo.icon}+${displayText}`;
 
   return {
     url,
@@ -89,11 +132,48 @@ function getCategoryPlaceholder(keywords: string, productName?: string): ImageRe
 }
 
 /**
+ * Fetch a product image - tries OpenGraph first, falls back to enhanced placeholder
+ *
+ * @param keywords - Category or product type for placeholder fallback
+ * @param productName - Full product name for placeholder text
+ * @param productUrl - Optional URL to extract OpenGraph image from
+ */
+export async function fetchProductImage(
+  keywords: string,
+  productName?: string,
+  productUrl?: string
+): Promise<ImageResult> {
+  // If we have a product URL, try to extract the image via OpenGraph
+  if (productUrl) {
+    try {
+      const ogImage = await extractOpenGraphImage(productUrl);
+      if (ogImage) {
+        return {
+          url: ogImage,
+          thumbnail: ogImage,
+          source: 'opengraph',
+          isPlaceholder: false,
+        };
+      }
+    } catch (error) {
+      console.error('OpenGraph extraction failed, using placeholder:', error);
+    }
+  }
+
+  // Fall back to enhanced placeholder
+  return getEnhancedPlaceholder(keywords, productName);
+}
+
+/**
  * Batch fetch images for multiple items
- * Since we only use placeholders now, this is instant
+ * Processes in parallel for better performance
  */
 export async function fetchProductImages(
-  items: Array<{ keywords: string; productName?: string }>
+  items: Array<{ keywords: string; productName?: string; productUrl?: string }>
 ): Promise<ImageResult[]> {
-  return items.map((item) => getCategoryPlaceholder(item.keywords, item.productName));
+  return Promise.all(
+    items.map((item) =>
+      fetchProductImage(item.keywords, item.productName, item.productUrl)
+    )
+  );
 }

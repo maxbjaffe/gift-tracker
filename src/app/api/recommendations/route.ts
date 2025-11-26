@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Enhance recommendations with images and shopping links using category placeholders
+    // Enhance recommendations with images and shopping links
     const { fetchProductImage } = await import('@/lib/imageService');
 
     recommendations = await Promise.all(recommendations.map(async (rec: any) => {
@@ -103,18 +103,28 @@ export async function POST(request: NextRequest) {
       rec.amazon_link = `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}`;
       rec.google_shopping_link = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(searchQuery)}`;
 
-      // Fetch product image placeholder
+      // Fetch product image - try OpenGraph from Amazon link, fall back to enhanced placeholder
       try {
         const imageKeywords = rec.image_keywords || rec.category || rec.title;
-        const imageResult = await fetchProductImage(imageKeywords, rec.title);
+        const imageResult = await fetchProductImage(
+          imageKeywords,
+          rec.title,
+          rec.amazon_link // Pass Amazon link to try OpenGraph extraction
+        );
 
         rec.image_url = imageResult.url;
         rec.image_thumb = imageResult.thumbnail;
+        rec.image_source = imageResult.source; // Track if it's real or placeholder
       } catch (imageError) {
         console.error('Error fetching image:', imageError);
-        // Fallback to default placeholder
-        rec.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁%0AGift&font=montserrat`;
-        rec.image_thumb = rec.image_url;
+        // Fallback to enhanced placeholder
+        const imageResult = await fetchProductImage(
+          rec.category || 'gift',
+          rec.title
+        );
+        rec.image_url = imageResult.url;
+        rec.image_thumb = imageResult.thumbnail;
+        rec.image_source = 'placeholder';
       }
 
       return rec;
