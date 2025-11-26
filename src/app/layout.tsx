@@ -7,7 +7,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { UserMenu } from '@/components/shared/UserMenu'
 import { MobileNav } from '@/components/shared/MobileNav'
-import { PWAUpdatePrompt } from '@/components/PWAUpdatePrompt'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { isGiftStashApp, getCurrentAppConfig } from '@/lib/app-config'
 
@@ -201,7 +200,6 @@ export default async function RootLayout({
         )}
 
         <Toaster />
-        <PWAUpdatePrompt />
       </body>
     </html>
   )
