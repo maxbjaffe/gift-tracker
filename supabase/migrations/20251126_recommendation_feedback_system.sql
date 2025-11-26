@@ -8,8 +8,8 @@
 
 CREATE TABLE IF NOT EXISTS recommendation_feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  recipient_id UUID REFERENCES recipients(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
+  recipient_id UUID NOT NULL REFERENCES recipients(id) ON DELETE CASCADE,
 
   -- Recommendation Details
   recommendation_name TEXT NOT NULL,
@@ -30,11 +30,7 @@ CREATE TABLE IF NOT EXISTS recommendation_feedback (
 
   -- Metadata
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  session_id TEXT, -- Track recommendations shown together
-
-  -- Indexes for fast queries
-  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
-  CONSTRAINT fk_recipient FOREIGN KEY (recipient_id) REFERENCES recipients(id) ON DELETE CASCADE
+  session_id TEXT -- Track recommendations shown together
 );
 
 -- Indexes for performance
@@ -270,13 +266,19 @@ ALTER TABLE trending_gifts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY recommendation_feedback_select_own
   ON recommendation_feedback
   FOR SELECT
-  USING (auth.uid() = user_id);
+  TO authenticated
+  USING (
+    user_id = auth.uid()
+  );
 
 -- Users can insert their own feedback
 CREATE POLICY recommendation_feedback_insert_own
   ON recommendation_feedback
   FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  TO authenticated
+  WITH CHECK (
+    user_id = auth.uid()
+  );
 
 -- Trending gifts are readable by all authenticated users
 CREATE POLICY trending_gifts_select_all
