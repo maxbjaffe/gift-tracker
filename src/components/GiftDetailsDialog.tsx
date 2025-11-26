@@ -11,12 +11,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Package, DollarSign, Tag, Calendar, MessageSquare, Image as ImageIcon, Pencil } from 'lucide-react';
+import { ExternalLink, DollarSign, Tag, Pencil } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
-type StatusType = 'idea' | 'considering' | 'purchased' | 'wrapped' | 'given';
+type StatusType = 'idea' | 'purchased';
 
 interface Gift {
   id: string;
@@ -100,14 +100,8 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
     switch (status) {
       case 'idea':
         return 'bg-blue-100 text-blue-700';
-      case 'considering':
-        return 'bg-yellow-100 text-yellow-700';
       case 'purchased':
         return 'bg-green-100 text-green-700';
-      case 'wrapped':
-        return 'bg-purple-100 text-purple-700';
-      case 'given':
-        return 'bg-gray-100 text-gray-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
@@ -192,7 +186,6 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
           {/* Product Link */}
           {gift.url && (
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Where to Buy</h3>
               <Button
                 asChild
                 className="w-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light"
@@ -205,67 +198,11 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
             </div>
           )}
 
-          {/* Source Info */}
-          {gift.source && gift.source !== 'manual' && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              {gift.source === 'extension' && (
-                <>
-                  <Package className="h-4 w-4" />
-                  <span>Saved from Chrome Extension</span>
-                </>
-              )}
-              {gift.source === 'sms' && (
-                <>
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Saved via SMS</span>
-                </>
-              )}
-              {gift.source_metadata?.analyzed_with_vision && (
-                <Badge variant="secondary" className="text-xs">
-                  <ImageIcon className="h-3 w-3 mr-1" />
-                  AI Analyzed
-                </Badge>
-              )}
-            </div>
-          )}
-
-          {/* Original SMS Message */}
-          {gift.source_metadata?.original_sms && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Original Message</h3>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-700 italic">
-                  "{gift.source_metadata.original_sms}"
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Additional Images */}
-          {gift.source_metadata?.stored_image_urls && gift.source_metadata.stored_image_urls.length > 1 && (
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Additional Images</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {gift.source_metadata.stored_image_urls.slice(1).map((url, index) => (
-                  <div key={index} className="relative w-full h-24">
-                    <Image
-                      src={url}
-                      alt={`${gift.name} - Image ${index + 2}`}
-                      fill
-                      sizes="(max-width: 768px) 33vw, 150px"
-                      className="object-cover rounded-lg"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Status Update */}
           <div>
             <h3 className="font-semibold text-gray-900 mb-3">Update Status</h3>
             <div className="flex gap-2 flex-wrap">
-              {(['idea', 'considering', 'purchased', 'wrapped', 'given'] as StatusType[]).map((status) => (
+              {(['idea', 'purchased'] as StatusType[]).map((status) => (
                 <Button
                   key={status}
                   variant={gift.status === status ? 'default' : 'outline'}
@@ -283,20 +220,6 @@ export function GiftDetailsDialog({ gift, isOpen, onClose, onStatusUpdate }: Gif
               ))}
             </div>
           </div>
-
-          {/* Created Date */}
-          {gift.created_at && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 pt-4 border-t">
-              <Calendar className="h-3 w-3" />
-              <span>
-                Added {new Date(gift.created_at).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </span>
-            </div>
-          )}
         </div>
       </DialogContent>
     </Dialog>

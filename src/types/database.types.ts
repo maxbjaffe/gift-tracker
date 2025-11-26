@@ -367,17 +367,26 @@ export type GiftFormData = {
 export const GIFT_STATUSES = ['idea', 'purchased', 'wrapped', 'delivered'] as const
 export const GIFT_PRIORITIES = ['low', 'medium', 'high'] as const
 export const GIFT_CATEGORIES = [
-  'toys',
-  'books',
-  'clothing',
-  'electronics',
-  'home',
-  'beauty',
-  'sports',
-  'food',
-  'jewelry',
-  'experiences',
-  'other'
+  'Books & Media',
+  'Clothing & Accessories',
+  'Electronics & Tech',
+  'Home & Kitchen',
+  'Beauty & Personal Care',
+  'Sports & Outdoors',
+  'Toys & Games',
+  'Food & Beverages',
+  'Jewelry & Watches',
+  'Arts & Crafts',
+  'Health & Wellness',
+  'Pets',
+  'Office & School Supplies',
+  'Baby & Kids',
+  'Automotive',
+  'Garden & Outdoor',
+  'Musical Instruments',
+  'Experiences & Events',
+  'Gift Cards',
+  'Other'
 ] as const
 export const OCCASION_TYPES = [
   'birthday',
