@@ -295,13 +295,9 @@ async function saveGift() {
       category: category || null,
       url: currentProduct.url,
       image_url: currentProduct.image,
-      status: 'idea',
-      source: 'extension',
-      source_metadata: {
-        site: currentProduct.site,
-        screenshot: screenshot || null,
-        extracted_data: currentProduct
-      }
+      store: currentProduct.site || currentProduct.store,
+      brand: currentProduct.brand,
+      status: 'idea'
     };
 
     // Create gift
