@@ -329,7 +329,14 @@ async function saveGift() {
     showView('success');
   } catch (error) {
     console.error('Error saving gift:', error);
-    alert('Failed to save gift. Please try again.');
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      stack: error.stack
+    });
+    alert('Failed to save gift: ' + (error.message || 'Unknown error. Check console for details.'));
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save Gift Idea';
   }
