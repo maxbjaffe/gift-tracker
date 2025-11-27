@@ -42,7 +42,32 @@ export default function Avatar({
     if (!type || type === 'preset') {
       const presetId = data || AVATAR_PRESETS[0].id;
       const preset = getPresetById(presetId);
-      const avatarUrl = preset?.url || AVATAR_PRESETS[0].url;
+      const baseUrl = preset?.url || AVATAR_PRESETS[0].url;
+
+      // Generate responsive image URLs based on size
+      // baseUrl is like '/avatars/woman-1-256.png', convert to different sizes
+      const getResponsiveUrls = (url: string) => {
+        const base = url.replace('-256.png', '');
+        return {
+          url64: `${base}-64.png`,
+          url128: `${base}-128.png`,
+          url256: `${base}-256.png`,
+          url512: `${base}-512.png`,
+        };
+      };
+
+      const { url64, url128, url256, url512 } = getResponsiveUrls(baseUrl);
+
+      // Select appropriate size based on avatar size prop
+      const sizeMap = {
+        xs: url64,   // 64px for xs
+        sm: url128,  // 128px for sm
+        md: url256,  // 256px for md
+        lg: url512,  // 512px for lg
+        xl: url512,  // 512px for xl
+      };
+
+      const avatarUrl = sizeMap[size];
 
       return (
         <div className="w-full h-full relative bg-gradient-to-br from-gray-100 to-gray-200">
@@ -53,9 +78,11 @@ export default function Avatar({
             </div>
           )}
 
-          {/* Avatar image */}
+          {/* Avatar image with responsive srcset */}
           <img
             src={avatarUrl}
+            srcSet={`${url64} 64w, ${url128} 128w, ${url256} 256w, ${url512} 512w`}
+            sizes="(max-width: 48px) 64px, (max-width: 96px) 128px, (max-width: 192px) 256px, 512px"
             alt={preset?.name || name}
             className={`w-full h-full object-cover transition-opacity duration-300 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
