@@ -193,15 +193,66 @@ def process_avatars():
         # Create each size
         for size in SIZES:
             output_file = DEST_DIR / f"{avatar_id}-{size}.png"
+            temp_file = DEST_DIR / f"{avatar_id}-{size}-temp.png"
 
             try:
-                # Use sips to resize and optimize
+                # First, get the original image dimensions
                 result = subprocess.run(
-                    ["sips", "-z", str(size), str(size), str(source_file), "--out", str(output_file)],
+                    ["sips", "-g", "pixelWidth", "-g", "pixelHeight", str(source_file)],
                     capture_output=True,
                     text=True,
                     check=True
                 )
+
+                # Parse dimensions from output
+                lines = result.stdout.strip().split('\n')
+                width = int([l for l in lines if 'pixelWidth' in l][0].split(':')[1].strip())
+                height = int([l for l in lines if 'pixelHeight' in l][0].split(':')[1].strip())
+
+                # Calculate crop dimensions to maintain aspect ratio
+                # For wide images (width > height), we need to crop width
+                # For tall images (height > width), we need to crop height
+                min_dimension = min(width, height)
+
+                # Step 1: Crop to square (center crop)
+                if width > height:
+                    # Wide image - crop width
+                    crop_x = (width - height) // 2
+                    subprocess.run(
+                        ["sips", "--cropToHeightWidth", str(height), str(height),
+                         "--cropOffset", "0", str(crop_x), str(source_file),
+                         "--out", str(temp_file)],
+                        capture_output=True,
+                        check=True
+                    )
+                elif height > width:
+                    # Tall image - crop height
+                    crop_y = (height - width) // 2
+                    subprocess.run(
+                        ["sips", "--cropToHeightWidth", str(width), str(width),
+                         "--cropOffset", str(crop_y), "0", str(source_file),
+                         "--out", str(temp_file)],
+                        capture_output=True,
+                        check=True
+                    )
+                else:
+                    # Already square - just copy
+                    subprocess.run(
+                        ["cp", str(source_file), str(temp_file)],
+                        capture_output=True,
+                        check=True
+                    )
+
+                # Step 2: Resize the square image to target size
+                subprocess.run(
+                    ["sips", "-z", str(size), str(size), str(temp_file),
+                     "--out", str(output_file)],
+                    capture_output=True,
+                    check=True
+                )
+
+                # Clean up temp file
+                temp_file.unlink(missing_ok=True)
 
                 # Get file size
                 file_size = output_file.stat().st_size / 1024  # KB
@@ -209,6 +260,7 @@ def process_avatars():
 
             except subprocess.CalledProcessError as e:
                 print(f"  ❌ Failed to create {size}px version: {e}")
+                temp_file.unlink(missing_ok=True)
 
         processed_count += 1
 
