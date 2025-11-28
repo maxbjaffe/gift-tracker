@@ -82,13 +82,11 @@ export async function GET(
 function generatePDFHTML(recipient: any, giftRecipients: any[]): string {
   const today = new Date().toLocaleDateString();
 
-  // Group gifts by status
+  // Only include gift ideas (not purchased items - they should remain a surprise!)
   const ideas = giftRecipients.filter(gr => ['idea', 'considering'].includes(gr.status || 'idea'));
-  const purchased = giftRecipients.filter(gr => ['purchased', 'wrapped', 'given'].includes(gr.status || ''));
 
-  // Calculate totals
-  const totalValue = giftRecipients.reduce((sum, gr) => sum + (gr.gift?.current_price || 0), 0);
-  const purchasedValue = purchased.reduce((sum, gr) => sum + (gr.gift?.current_price || 0), 0);
+  // Calculate totals for ideas only
+  const totalValue = ideas.reduce((sum, gr) => sum + (gr.gift?.current_price || 0), 0);
 
   return `
 <!DOCTYPE html>
@@ -229,11 +227,6 @@ function generatePDFHTML(recipient: any, giftRecipients: any[]): string {
       color: #1e40af;
     }
 
-    .badge-purchased {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
     .badge-reserved {
       background: #fed7aa;
       color: #92400e;
@@ -327,48 +320,15 @@ function generatePDFHTML(recipient: any, giftRecipients: any[]): string {
       </div>
     `).join('')}
   </div>
-  ` : ''}
-
-  ${purchased.length > 0 ? `
-  <div class="section">
-    <h2 class="section-title">✅ Purchased Gifts (${purchased.length})</h2>
-    ${purchased.map(gr => `
-      <div class="gift-item">
-        <div class="gift-header">
-          <div class="gift-name">${gr.gift?.name || 'Unnamed Gift'}</div>
-          ${gr.gift?.current_price ? `<div class="gift-price">$${gr.gift.current_price.toFixed(2)}</div>` : ''}
-        </div>
-        <span class="badge badge-purchased">${gr.status || 'Purchased'}</span>
-        ${gr.gift?.description ? `<div class="gift-details"><div class="gift-detail">${gr.gift.description}</div></div>` : ''}
-        <div class="gift-details">
-          ${gr.gift?.store ? `<div class="gift-detail"><strong>Store:</strong> ${gr.gift.store}</div>` : ''}
-          ${gr.gift?.brand ? `<div class="gift-detail"><strong>Brand:</strong> ${gr.gift.brand}</div>` : ''}
-          ${gr.occasion ? `<div class="gift-detail"><strong>Occasion:</strong> ${gr.occasion}</div>` : ''}
-        </div>
-      </div>
-    `).join('')}
-  </div>
-  ` : ''}
+  ` : '<div class="section"><p style="text-align: center; color: #9ca3af;">No gift ideas yet. Add some ideas to share!</p></div>'}
 
   <div class="totals-box">
     <div class="totals-row">
       <span>Total Gift Ideas:</span>
-      <span>${ideas.length} items</span>
-    </div>
-    <div class="totals-row">
-      <span>Purchased Gifts:</span>
-      <span>${purchased.length} items</span>
-    </div>
-    <div class="totals-row">
-      <span>Ideas Total Value:</span>
-      <span>$${(totalValue - purchasedValue).toFixed(2)}</span>
-    </div>
-    <div class="totals-row">
-      <span>Purchased Total:</span>
-      <span>$${purchasedValue.toFixed(2)}</span>
+      <span>${ideas.length} ${ideas.length === 1 ? 'item' : 'items'}</span>
     </div>
     <div class="totals-row grand-total">
-      <span>Grand Total:</span>
+      <span>Estimated Total Value:</span>
       <span>$${totalValue.toFixed(2)}</span>
     </div>
   </div>
