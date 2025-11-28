@@ -135,46 +135,14 @@ function getEnhancedPlaceholder(keywords: string, productName?: string): ImageRe
     : categoryInfo.name;
 
   // Generate inline SVG with gradient and text
-  // This is 100% reliable - no external dependencies
-  const svg = `
-    <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${categoryInfo.color1};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${categoryInfo.color2};stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <rect width="600" height="400" fill="url(#grad)" />
-      <text x="50%" y="40%" font-family="Arial, sans-serif" font-size="80" text-anchor="middle" fill="#000" opacity="0.2">
-        ${categoryInfo.icon}
-      </text>
-      <text x="50%" y="65%" font-family="Arial, sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#000" opacity="0.7">
-        ${displayText.replace(/[<>&'"]/g, '')}
-      </text>
-    </svg>
-  `.trim();
+  // Use URL encoding instead of base64 to avoid emoji encoding issues
+  const svg = `<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${categoryInfo.color1};stop-opacity:1"/><stop offset="100%" style="stop-color:${categoryInfo.color2};stop-opacity:1"/></linearGradient></defs><rect width="600" height="400" fill="url(#grad)"/><text x="50%" y="40%" font-family="Arial,sans-serif" font-size="80" text-anchor="middle" fill="#000" opacity="0.2">${categoryInfo.icon}</text><text x="50%" y="65%" font-family="Arial,sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#000" opacity="0.7">${displayText.replace(/[<>&'"]/g, '')}</text></svg>`;
 
-  const svgThumb = `
-    <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${categoryInfo.color1};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${categoryInfo.color2};stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <rect width="300" height="200" fill="url(#grad)" />
-      <text x="50%" y="40%" font-family="Arial, sans-serif" font-size="50" text-anchor="middle" fill="#000" opacity="0.2">
-        ${categoryInfo.icon}
-      </text>
-      <text x="50%" y="70%" font-family="Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#000" opacity="0.7">
-        ${displayText.substring(0, 20).replace(/[<>&'"]/g, '')}
-      </text>
-    </svg>
-  `.trim();
+  const svgThumb = `<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${categoryInfo.color1};stop-opacity:1"/><stop offset="100%" style="stop-color:${categoryInfo.color2};stop-opacity:1"/></linearGradient></defs><rect width="300" height="200" fill="url(#grad)"/><text x="50%" y="40%" font-family="Arial,sans-serif" font-size="50" text-anchor="middle" fill="#000" opacity="0.2">${categoryInfo.icon}</text><text x="50%" y="70%" font-family="Arial,sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#000" opacity="0.7">${displayText.substring(0, 20).replace(/[<>&'"]/g, '')}</text></svg>`;
 
-  // Convert SVG to data URL (inline, no external dependency)
-  const url = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-  const thumbnail = `data:image/svg+xml;base64,${Buffer.from(svgThumb).toString('base64')}`;
+  // Use URL encoding instead of base64 for better emoji support
+  const url = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  const thumbnail = `data:image/svg+xml,${encodeURIComponent(svgThumb)}`;
 
   return {
     url,

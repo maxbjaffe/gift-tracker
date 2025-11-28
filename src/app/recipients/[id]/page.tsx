@@ -566,7 +566,7 @@ export default function RecipientDetailPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-              {recommendations.map((rec, index) => (
+              {(recommendations || []).map((rec, index) => (
                 <div
                   key={index}
                   className="border-2 border-gray-200 rounded-xl p-3 hover:border-purple-300 transition-all flex flex-col h-full"
