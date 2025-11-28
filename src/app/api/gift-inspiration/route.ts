@@ -125,8 +125,9 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.
         gift.image_thumb = imageResult.thumbnail;
       } catch (imageError) {
         console.error('Error fetching image:', imageError);
-        // Fallback to default placeholder
-        gift.image_url = `https://placehold.co/400x400/f3e8ff/9333ea?text=🎁%0AGift&font=montserrat`;
+        // Fallback to inline SVG placeholder
+        const svg = `<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#fccb90;stop-opacity:1"/><stop offset="100%" style="stop-color:#d57eeb;stop-opacity:1"/></linearGradient></defs><rect width="600" height="400" fill="url(#grad)"/><text x="50%" y="40%" font-family="Arial,sans-serif" font-size="80" text-anchor="middle" fill="#000" opacity="0.2">🎁</text><text x="50%" y="65%" font-family="Arial,sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#000" opacity="0.7">Gift</text></svg>`;
+        gift.image_url = `data:image/svg+xml,${encodeURIComponent(svg)}`;
         gift.image_thumb = gift.image_url;
       }
 
