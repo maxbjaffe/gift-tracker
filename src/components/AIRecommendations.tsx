@@ -191,12 +191,12 @@ export function AIRecommendations({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-              {suggestions.length === 0 ? (
+              {(!suggestions || suggestions.length === 0) ? (
                 <div className="col-span-full text-center py-8 text-gray-500">
                   Click the button above to generate AI suggestions
                 </div>
               ) : (
-                suggestions.map((suggestion, originalIndex) => {
+                (suggestions || []).map((suggestion, originalIndex) => {
                   if (dismissedIds.has(originalIndex)) return null;
                   return (
                   <Card key={originalIndex} className="p-3 flex flex-col h-full">

@@ -232,12 +232,12 @@ export function EnhancedAIRecommendations({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {recommendations.length === 0 ? (
+              {(!recommendations || recommendations.length === 0) ? (
                 <div className="col-span-2 text-center py-12 text-gray-500">
                   Click the button above to generate AI-powered gift suggestions
                 </div>
               ) : (
-                recommendations.map((rec, index) => {
+                (recommendations || []).map((rec, index) => {
                   if (dismissedIds.has(index)) return null;
 
                   const storeInfo = getStoreInfo(rec.where_to_buy);
