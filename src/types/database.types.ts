@@ -2869,3 +2869,25 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+// Type helpers for commonly used tables
+export type Gift = Database['public']['Tables']['gifts']['Row']
+export type GiftInsert = Database['public']['Tables']['gifts']['Insert']
+export type GiftUpdate = Database['public']['Tables']['gifts']['Update']
+
+export type Recipient = Database['public']['Tables']['recipients']['Row']
+export type RecipientInsert = Database['public']['Tables']['recipients']['Insert']
+export type RecipientUpdate = Database['public']['Tables']['recipients']['Update']
+
+export type RecipientBudget = Database['public']['Tables']['recipient_budgets']['Row']
+export type RecipientBudgetInsert = Database['public']['Tables']['recipient_budgets']['Insert']
+export type RecipientBudgetUpdate = Database['public']['Tables']['recipient_budgets']['Update']
+
+// Extended types with relations
+export type GiftWithRecipients = Gift & {
+  recipients?: Recipient[]
+}
+
+export type RecipientWithGifts = Recipient & {
+  gifts?: Gift[]
+}
