@@ -1,7 +1,8 @@
 // src/app/api/feedback/route.ts - FIXED VERSION
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/client';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 // Helper function to extract price from price_range text like "$120-$160"
 function extractPriceFromRange(priceRange: string | undefined | null): number | null {
@@ -37,7 +38,18 @@ function extractStoreFromText(whereText: string | undefined | null): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const {
@@ -72,6 +84,7 @@ export async function POST(request: NextRequest) {
       const { data: giftCreated, error: giftError } = await supabase
         .from('gifts')
         .insert({
+          user_id: user.id,  // Add user_id for proper ownership
           name: recommendation_name,
           description: recommendation_description,
           current_price: extractedPrice,
@@ -88,7 +101,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (giftError) {
-        console.error('Error creating gift:', giftError);
+        logger.error('Error creating gift:', giftError);
         throw giftError;
       }
 
@@ -101,7 +114,7 @@ export async function POST(request: NextRequest) {
         } as any);
 
       if (linkError) {
-        console.error('Error linking gift to recipient:', linkError);
+        logger.error('Error linking gift to recipient:', linkError);
         throw linkError;
       }
 
@@ -116,7 +129,7 @@ export async function POST(request: NextRequest) {
         } as any);
 
       if (feedbackError) {
-        console.error('Error storing feedback:', feedbackError);
+        logger.error('Error storing feedback:', feedbackError);
         // Don't throw - feedback is nice to have but not critical
       }
 
@@ -154,7 +167,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Error recording feedback:', error);
+    logger.error('Error recording feedback:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to record feedback' },
       { status: 500 }
@@ -165,7 +178,18 @@ export async function POST(request: NextRequest) {
 // GET endpoint to retrieve feedback for a recipient
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createServerSupabaseClient();
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const recipient_id = searchParams.get('recipient_id');
 
@@ -187,7 +211,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ feedback: data });
 
   } catch (error: any) {
-    console.error('Error fetching feedback:', error);
+    logger.error('Error fetching feedback:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch feedback' },
       { status: 500 }
