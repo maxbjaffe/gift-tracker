@@ -190,69 +190,68 @@ export function AIRecommendations({
               </p>
             </div>
           ) : (
-            <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
               {suggestions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="col-span-full text-center py-8 text-gray-500">
                   Click the button above to generate AI suggestions
                 </div>
               ) : (
                 suggestions.map((suggestion, originalIndex) => {
                   if (dismissedIds.has(originalIndex)) return null;
                   return (
-                  <Card key={originalIndex} className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-semibold text-lg">{suggestion.name}</h4>
-                          <Badge className="flex items-center gap-1 bg-green-100 text-green-700">
-                            <DollarSign className="h-3 w-3" />
-                            {suggestion.price.toFixed(2)}
-                          </Badge>
-                        </div>
+                  <Card key={originalIndex} className="p-3 flex flex-col h-full">
+                    {/* Title & Price */}
+                    <div className="flex items-start justify-between mb-2 gap-2">
+                      <h4 className="font-semibold text-sm line-clamp-2 flex-1">{suggestion.name}</h4>
+                      <Badge className="flex items-center gap-1 bg-green-100 text-green-700 shrink-0 text-xs">
+                        <DollarSign className="h-3 w-3" />
+                        {suggestion.price.toFixed(2)}
+                      </Badge>
+                    </div>
 
-                        <p className="text-sm text-gray-700 mb-3">
-                          {suggestion.description}
-                        </p>
+                    {/* Description */}
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-3">
+                      {suggestion.description}
+                    </p>
 
-                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
-                          <p className="text-xs font-semibold text-purple-900 mb-1">
-                            Why this gift?
-                          </p>
-                          <p className="text-sm text-purple-800">
-                            {suggestion.reasoning}
-                          </p>
-                        </div>
+                    {/* AI Reasoning - Collapsible */}
+                    <details className="mb-3 text-xs">
+                      <summary className="cursor-pointer text-purple-600 font-medium hover:text-purple-700">
+                        💡 Why this gift?
+                      </summary>
+                      <p className="mt-2 text-gray-600 italic pl-4 text-xs">
+                        {suggestion.reasoning}
+                      </p>
+                    </details>
 
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => addGiftToList(suggestion, originalIndex)}
-                            disabled={addingGiftId === originalIndex}
-                            className="gap-2 flex-1"
-                            size="sm"
-                          >
-                            {addingGiftId === originalIndex ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Adding...
-                              </>
-                            ) : (
-                              <>
-                                <Plus className="h-4 w-4" />
-                                Add to Gift List
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            onClick={() => dismissSuggestion(suggestion, originalIndex)}
-                            variant="outline"
-                            className="gap-2"
-                            size="sm"
-                          >
-                            <X className="h-4 w-4" />
-                            Dismiss
-                          </Button>
-                        </div>
-                      </div>
+                    {/* Actions - Push to bottom */}
+                    <div className="mt-auto flex gap-2">
+                      <Button
+                        onClick={() => addGiftToList(suggestion, originalIndex)}
+                        disabled={addingGiftId === originalIndex}
+                        className="gap-1 flex-1 h-9 text-xs"
+                        size="sm"
+                      >
+                        {addingGiftId === originalIndex ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Adding...
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-3 w-3" />
+                            Add
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() => dismissSuggestion(suggestion, originalIndex)}
+                        variant="outline"
+                        className="gap-1 h-9 px-3 text-xs"
+                        size="sm"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
                   </Card>
                   );

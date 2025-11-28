@@ -565,105 +565,112 @@ export default function RecipientDetailPage() {
               <p className="text-xs md:text-sm">Click "Generate Ideas" to get AI-powered gift suggestions!</p>
             </div>
           ) : (
-            <div className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {recommendations.map((rec, index) => (
                 <div
                   key={index}
-                  className="border-2 border-gray-200 rounded-xl p-4 md:p-5 lg:p-6 hover:border-purple-300 transition-all"
+                  className="border-2 border-gray-200 rounded-xl p-3 hover:border-purple-300 transition-all flex flex-col h-full"
                 >
-                  <h3 className="text-base md:text-lg lg:text-xl font-bold text-gray-900 mb-3 md:mb-4">
-                    {rec.title}
-                  </h3>
-
+                  {/* Image */}
                   {rec.image_url && (
-                    <div className="mb-3 md:mb-4 rounded-lg overflow-hidden bg-gray-100">
+                    <div className="mb-3 rounded-lg overflow-hidden bg-gray-100">
                       <img
                         src={rec.image_url}
                         alt={rec.title}
-                        className="w-full h-48 md:h-64 object-cover"
+                        className="w-full h-32 object-cover"
                       />
                     </div>
                   )}
 
-                  {(rec.amazon_link || rec.google_shopping_link) && (
-                    <div className="flex flex-col sm:flex-row gap-2 mb-3 md:mb-4">
-                      {rec.amazon_link && (
-                        <a
-                          href={rec.amazon_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 px-4 h-11 md:h-12 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-center font-medium flex items-center justify-center text-sm md:text-base"
-                        >
-                          🛒 Shop on Amazon
-                        </a>
-                      )}
-                      {rec.google_shopping_link && (
-                        <a
-                          href={rec.google_shopping_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 px-4 h-11 md:h-12 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center font-medium flex items-center justify-center text-sm md:text-base"
-                        >
-                          🔍 Google Shopping
-                        </a>
-                      )}
+                  {/* Title & Price */}
+                  <h3 className="text-sm md:text-base font-bold text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem]">
+                    {rec.title}
+                  </h3>
+
+                  <div className="mb-2">
+                    <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
+                      {rec.price_range}
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xs text-gray-600 mb-2 line-clamp-3">
+                    {rec.description}
+                  </p>
+
+                  {/* Compact Info */}
+                  <div className="space-y-1 mb-3 text-xs text-gray-600">
+                    <div className="flex items-start gap-1">
+                      <span>📍</span>
+                      <span className="line-clamp-1">{rec.where_to_buy}</span>
                     </div>
-                  )}
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-                    <div>
-                      <p className="text-sm md:text-base text-gray-700 mb-3">{rec.description}</p>
-                      <p className="text-xs md:text-sm text-gray-600 italic">
-                        💡 {rec.reasoning}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <p className="text-xs md:text-sm text-gray-600 mb-1">Price Range</p>
-                        <p className="text-lg md:text-xl lg:text-2xl font-bold text-green-600">
-                          {rec.price_range}
-                        </p>
-                      </div>
-
-                      <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-xs md:text-sm text-gray-600 mb-1">Where to Buy</p>
-                        <p className="text-xs md:text-sm font-medium text-blue-700">
-                          {rec.where_to_buy}
-                        </p>
-                      </div>
-
-                      <div className="bg-purple-50 p-3 rounded-lg">
-                        <p className="text-xs md:text-sm text-gray-600 mb-1">Category</p>
-                        <p className="text-xs md:text-sm font-medium text-purple-700">
-                          {rec.category}
-                        </p>
-                      </div>
+                    <div className="flex items-start gap-1">
+                      <span>🏷️</span>
+                      <span className="line-clamp-1">{rec.category}</span>
                     </div>
                   </div>
 
-                  {/* Feedback Buttons - Simplified to 3 actions */}
-                  <div className="pt-3 md:pt-4 border-t border-gray-200 space-y-2">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <button
-                        onClick={() => handleFeedback(rec, 'added')}
-                        disabled={processingFeedback === rec.title}
-                        className="flex-1 px-3 md:px-4 h-button-md bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base font-medium"
-                      >
-                        {processingFeedback === rec.title ? (
-                          <>
-                            <span className="inline-block animate-spin">⏳</span>
-                            Processing...
-                          </>
-                        ) : (
-                          <>➕ Add to List</>
-                        )}
-                      </button>
+                  {/* AI Reasoning - Collapsible */}
+                  <details className="mb-3 text-xs">
+                    <summary className="cursor-pointer text-purple-600 font-medium hover:text-purple-700">
+                      💡 Why this gift?
+                    </summary>
+                    <p className="mt-2 text-gray-600 italic pl-4">
+                      {rec.reasoning}
+                    </p>
+                  </details>
 
-                      <button
-                        onClick={() => handleFeedback(rec, 'rejected')}
-                        disabled={processingFeedback === rec.title}
-                        className="flex-1 px-3 md:px-4 h-button-md bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base font-medium"
+                  {/* Actions - Push to bottom */}
+                  <div className="mt-auto space-y-2">
+                    {/* Shopping Links */}
+                    {(rec.amazon_link || rec.google_shopping_link) && (
+                      <div className="flex gap-1">
+                        {rec.amazon_link && (
+                          <a
+                            href={rec.amazon_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 px-2 py-1.5 bg-orange-500 text-white rounded text-xs hover:bg-orange-600 transition-colors text-center font-medium"
+                            title="Shop on Amazon"
+                          >
+                            🛒 Amazon
+                          </a>
+                        )}
+                        {rec.google_shopping_link && (
+                          <a
+                            href={rec.google_shopping_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 px-2 py-1.5 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors text-center font-medium"
+                            title="Google Shopping"
+                          >
+                            🔍 Google
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Primary Action */}
+                    <button
+                      onClick={() => handleFeedback(rec, 'added')}
+                      disabled={processingFeedback === rec.title}
+                      className="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm font-medium"
+                    >
+                      {processingFeedback === rec.title ? (
+                        <>
+                          <span className="inline-block animate-spin">⏳</span>
+                          Adding...
+                        </>
+                      ) : (
+                        <>➕ Add to List</>
+                      )}
+                    </button>
+
+                    {/* Secondary Action */}
+                    <button
+                      onClick={() => handleFeedback(rec, 'rejected')}
+                      disabled={processingFeedback === rec.title}
+                      className="w-full px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
                       >
                         ✕ Dismiss
                       </button>
