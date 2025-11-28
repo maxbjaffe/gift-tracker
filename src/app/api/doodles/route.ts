@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // GET - Fetch all drawings for the current user
 export async function GET(request: NextRequest) {
@@ -21,13 +22,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching drawings:', error);
+      logger.error('Error fetching drawings:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ drawings });
   } catch (error) {
-    console.error('Unexpected error in GET /api/doodles:', error);
+    logger.error('Unexpected error in GET /api/doodles:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -70,13 +71,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error saving drawing:', error);
+      logger.error('Error saving drawing:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ drawing: data }, { status: 201 });
   } catch (error) {
-    console.error('Unexpected error in POST /api/doodles:', error);
+    logger.error('Unexpected error in POST /api/doodles:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -111,13 +112,13 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Error deleting drawing:', error);
+      logger.error('Error deleting drawing:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Unexpected error in DELETE /api/doodles:', error);
+    logger.error('Unexpected error in DELETE /api/doodles:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -9,6 +9,7 @@ import { RecipientModal } from '@/components/RecipientModal';
 import { RecipientBudgetSummary } from '@/components/RecipientBudgetSummary';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 type Recipient = {
   id: string;
@@ -41,12 +42,12 @@ export default function RecipientsPage() {
         .order('name');
 
       if (error) {
-        console.error('Error fetching recipients:', error);
+        logger.error('Error fetching recipients:', error);
       } else {
         setRecipients(data || []);
       }
     } catch (err) {
-      console.error('Unexpected error:', err);
+      logger.error('Unexpected error:', err);
     } finally {
       setLoading(false);
     }

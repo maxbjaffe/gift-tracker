@@ -50,6 +50,7 @@ import { AIRecommendations } from '@/components/AIRecommendations';
 import { RecipientModal } from '@/components/RecipientModal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { BudgetWarning } from '@/components/BudgetWarning';
+import { logger } from '@/lib/logger';
 
 type StatusType = 'idea' | 'considering' | 'purchased' | 'wrapped' | 'given';
 
@@ -286,7 +287,7 @@ export default function UnifiedGiftsPage() {
     });
 
     if (error) {
-      console.error('Bulk update error:', error);
+      logger.error('Bulk update error:', error);
       toast.error('Failed to update gifts');
       return;
     }

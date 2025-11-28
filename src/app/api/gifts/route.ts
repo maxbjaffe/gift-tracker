@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 // GET /api/gifts - List all gifts for the authenticated user or filter by recipient
 export async function GET(request: NextRequest) {
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(gifts || []);
     }
   } catch (error: any) {
-    console.error('Error fetching gifts:', error);
+    logger.error('Error fetching gifts:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch gifts' },
       { status: 500 }
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
         .insert(links as any);
 
       if (linkError) {
-        console.error('Error linking gift to recipients:', linkError);
+        logger.error('Error linking gift to recipients:', linkError);
         // Don't throw - gift is already created
       }
     }
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
       gift,
     });
   } catch (error: any) {
-    console.error('Error creating gift:', error);
+    logger.error('Error creating gift:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create gift' },
       { status: 500 }

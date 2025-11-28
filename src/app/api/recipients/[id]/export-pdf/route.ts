@@ -1,6 +1,7 @@
 // API endpoint for exporting recipient gift list as PDF
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -52,7 +53,7 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (giftsError) {
-      console.error('Error fetching gifts:', giftsError);
+      logger.error('Error fetching gifts:', giftsError);
       return NextResponse.json(
         { error: 'Failed to fetch gifts' },
         { status: 500 }
@@ -70,7 +71,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Error in export-pdf endpoint:', error);
+    logger.error('Error in export-pdf endpoint:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

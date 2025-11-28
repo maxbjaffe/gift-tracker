@@ -2,6 +2,7 @@
 // Provides intelligent context for AI recommendations based on user feedback and trends
 
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 export interface TrendingGift {
   gift_name: string;
@@ -89,13 +90,13 @@ export class RecommendationAnalyticsService {
       });
 
       if (error) {
-        console.error('Error fetching trending gifts:', error);
+        logger.error('Error fetching trending gifts:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Exception fetching trending gifts:', error);
+      logger.error('Exception fetching trending gifts:', error);
       return [];
     }
   }
@@ -119,13 +120,13 @@ export class RecommendationAnalyticsService {
       });
 
       if (error) {
-        console.error('Error fetching successful gifts:', error);
+        logger.error('Error fetching successful gifts:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Exception fetching successful gifts:', error);
+      logger.error('Exception fetching successful gifts:', error);
       return [];
     }
   }
@@ -144,13 +145,13 @@ export class RecommendationAnalyticsService {
       });
 
       if (error) {
-        console.error('Error fetching dismissed recommendations:', error);
+        logger.error('Error fetching dismissed recommendations:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Exception fetching dismissed recommendations:', error);
+      logger.error('Exception fetching dismissed recommendations:', error);
       return [];
     }
   }
@@ -237,16 +238,16 @@ export class RecommendationAnalyticsService {
       });
 
       if (error) {
-        console.error('Error recording feedback:', error);
+        logger.error('Error recording feedback:', error);
         throw error;
       }
 
       // Update trending gifts asynchronously (don't wait)
       this.updateTrendingGifts().catch(err =>
-        console.error('Error updating trending gifts:', err)
+        logger.error('Error updating trending gifts:', err)
       );
     } catch (error) {
-      console.error('Exception recording feedback:', error);
+      logger.error('Exception recording feedback:', error);
       throw error;
     }
   }
@@ -261,10 +262,10 @@ export class RecommendationAnalyticsService {
       const { error } = await supabase.rpc('update_trending_gifts');
 
       if (error) {
-        console.error('Error updating trending gifts:', error);
+        logger.error('Error updating trending gifts:', error);
       }
     } catch (error) {
-      console.error('Exception updating trending gifts:', error);
+      logger.error('Exception updating trending gifts:', error);
     }
   }
 
@@ -305,7 +306,7 @@ export class RecommendationAnalyticsService {
         conversionRate,
       };
     } catch (error) {
-      console.error('Error fetching feedback stats:', error);
+      logger.error('Error fetching feedback stats:', error);
       return {
         totalRecommendations: 0,
         addedCount: 0,

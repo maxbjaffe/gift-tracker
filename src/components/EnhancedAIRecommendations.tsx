@@ -14,6 +14,7 @@ import {
 import { Sparkles, Loader2, Plus, X, Store, Tag, TrendingUp, ShoppingBag } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface Recommendation {
   title: string;
@@ -83,7 +84,7 @@ export function EnhancedAIRecommendations({
       const data = await response.json();
       setRecommendations(data.recommendations || []);
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      logger.error('Error generating recommendations:', error);
       toast.error('Failed to generate recommendations');
     } finally {
       setLoading(false);
@@ -153,7 +154,7 @@ export function EnhancedAIRecommendations({
           recommendation_description: recommendation.description,
           feedback_type: 'added',
         }),
-      }).catch(err => console.error('Error recording feedback:', err));
+      }).catch(err => logger.error('Error recording feedback:', err));
 
       toast.success(`Added "${recommendation.title}" to ${recipientName}'s list`);
 
@@ -161,7 +162,7 @@ export function EnhancedAIRecommendations({
         onGiftAdded();
       }
     } catch (error) {
-      console.error('Error adding gift:', error);
+      logger.error('Error adding gift:', error);
       toast.error('Failed to add gift');
     } finally {
       setAddingIndex(null);
@@ -184,7 +185,7 @@ export function EnhancedAIRecommendations({
       setDismissedIds(prev => new Set(prev).add(index));
       toast.success('Recommendation dismissed');
     } catch (error) {
-      console.error('Error dismissing recommendation:', error);
+      logger.error('Error dismissing recommendation:', error);
       toast.error('Failed to dismiss recommendation');
     }
   };

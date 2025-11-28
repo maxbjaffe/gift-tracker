@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Edit, Share2, FileDown, MessageSquare, Sparkles } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface Recipient {
   id: string;
@@ -112,13 +113,13 @@ export default function RecipientDetailPage() {
         .single();
 
       if (error) {
-        console.error('Error fetching recipient:', error);
+        logger.error('Error fetching recipient:', error);
         throw error;
       }
 
       setRecipient(data);
     } catch (error) {
-      console.error('Error fetching recipient:', error);
+      logger.error('Error fetching recipient:', error);
       alert('Failed to load recipient');
     } finally {
       setLoading(false);
@@ -132,7 +133,7 @@ export default function RecipientDetailPage() {
       const data = await response.json();
       setAssignedGifts(data);
     } catch (error) {
-      console.error('Error fetching assigned gifts:', error);
+      logger.error('Error fetching assigned gifts:', error);
     }
   };
 
@@ -162,7 +163,7 @@ export default function RecipientDetailPage() {
       setSurveyAnalyzing(false);
       setShowSuggestionsModal(true);
     } catch (error) {
-      console.error('Error analyzing survey:', error);
+      logger.error('Error analyzing survey:', error);
       alert('Failed to analyze survey. Please try again.');
       setSurveyAnalyzing(false);
     }
@@ -216,7 +217,7 @@ export default function RecipientDetailPage() {
       setShowSuggestionsModal(false);
       setApplyingSuggestions(false);
     } catch (error) {
-      console.error('Error applying suggestions:', error);
+      logger.error('Error applying suggestions:', error);
       alert('Failed to update profile. Please try again.');
       setApplyingSuggestions(false);
     }
@@ -243,7 +244,7 @@ export default function RecipientDetailPage() {
       const data = await response.json();
       setRecommendations(data.recommendations || []);
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      logger.error('Error generating recommendations:', error);
       alert('Failed to generate recommendations');
     } finally {
       setGenerating(false);
@@ -279,7 +280,7 @@ export default function RecipientDetailPage() {
 
       // Log debug info if available
       if (result.debug) {
-        console.log('Price extraction debug:', result.debug);
+        logger.log('Price extraction debug:', result.debug);
       }
 
       // Remove recommendation from list
@@ -293,7 +294,7 @@ export default function RecipientDetailPage() {
       }
 
     } catch (error) {
-      console.error('Error recording feedback:', error);
+      logger.error('Error recording feedback:', error);
       alert('Failed to record feedback');
     } finally {
       setProcessingFeedback(null);

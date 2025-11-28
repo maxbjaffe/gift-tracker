@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -122,7 +123,7 @@ Keep responses conversational and friendly. Format gift suggestions clearly so t
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (error) {
-          console.error('Stream error:', error);
+          logger.error('Stream error:', error);
           controller.error(error);
         }
       },
@@ -136,7 +137,7 @@ Keep responses conversational and friendly. Format gift suggestions clearly so t
       },
     });
   } catch (error) {
-    console.error('Chat error:', error);
+    logger.error('Chat error:', error);
     return new Response('Internal server error', { status: 500 });
   }
 }

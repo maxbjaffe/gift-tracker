@@ -1,6 +1,7 @@
 // API endpoint for claiming/unclaiming gifts on shared lists
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/lib/logger';
 
 // Create a Supabase client with anon key for public access
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error claiming gift:', updateError);
+      logger.error('Error claiming gift:', updateError);
       return NextResponse.json(
         { error: 'Failed to claim gift item' },
         { status: 500 }
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
       expiresAt: updatedGiftRecipient.claim_expires_at,
     });
   } catch (error) {
-    console.error('Error in claim endpoint:', error);
+    logger.error('Error in claim endpoint:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -181,7 +182,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', giftRecipientId);
 
     if (updateError) {
-      console.error('Error unclaiming gift:', updateError);
+      logger.error('Error unclaiming gift:', updateError);
       return NextResponse.json(
         { error: 'Failed to unclaim gift item' },
         { status: 500 }
@@ -193,7 +194,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Gift item unclaimed successfully',
     });
   } catch (error) {
-    console.error('Error in unclaim endpoint:', error);
+    logger.error('Error in unclaim endpoint:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

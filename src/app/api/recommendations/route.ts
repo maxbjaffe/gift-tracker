@@ -3,6 +3,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -95,8 +96,8 @@ export async function POST(request: NextRequest) {
         throw new Error('Response is not an array');
       }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
-      console.error('Raw response:', textContent.text);
+      logger.error('Failed to parse AI response:', parseError);
+      logger.error('Raw response:', textContent.text);
       return NextResponse.json(
         {
           error: 'Failed to parse AI response. The AI may have returned an invalid format.',
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
         rec.image_thumb = imageResult.thumbnail;
         rec.image_source = imageResult.source; // Track if it's real or placeholder
       } catch (imageError) {
-        console.error('Error fetching image:', imageError);
+        logger.error('Error fetching image:', imageError);
         // Fallback to enhanced placeholder
         const imageResult = await fetchProductImage(
           rec.category || 'gift',
@@ -157,7 +158,7 @@ export async function POST(request: NextRequest) {
       recommendations,
     });
   } catch (error: any) {
-    console.error('Error generating recommendations:', error);
+    logger.error('Error generating recommendations:', error);
 
     // Provide helpful error message if it's a model not found error
     if (error.status === 404 && error.message?.includes('model:')) {

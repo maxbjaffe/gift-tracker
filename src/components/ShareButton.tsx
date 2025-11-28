@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
 
 type Recipient = Database['public']['Tables']['recipients']['Row'];
 
@@ -51,7 +52,7 @@ export function ShareButton({ recipient, onShareUpdated }: ShareButtonProps) {
 
       onShareUpdated?.();
     } catch (error) {
-      console.error('Error enabling sharing:', error);
+      logger.error('Error enabling sharing:', error);
       alert('An error occurred while enabling sharing');
     } finally {
       setLoading(false);
@@ -84,7 +85,7 @@ export function ShareButton({ recipient, onShareUpdated }: ShareButtonProps) {
 
       onShareUpdated?.();
     } catch (error) {
-      console.error('Error disabling sharing:', error);
+      logger.error('Error disabling sharing:', error);
       alert('An error occurred while disabling sharing');
     } finally {
       setLoading(false);

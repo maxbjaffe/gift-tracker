@@ -8,6 +8,7 @@ import { Database } from '@/types/database.types';
 import Image from 'next/image';
 import { ClaimGiftModal } from '@/components/ClaimGiftModal';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 
 type Recipient = Database['public']['Tables']['recipients']['Row'];
 type Gift = Database['public']['Tables']['gifts']['Row'];
@@ -73,7 +74,7 @@ export default function SharePage() {
         .order('created_at', { ascending: false });
 
       if (giftsError) {
-        console.error('Error loading gifts:', giftsError);
+        logger.error('Error loading gifts:', giftsError);
         setError('Failed to load gift items');
         return;
       }
@@ -84,7 +85,7 @@ export default function SharePage() {
       // Track view (anonymously)
       trackView(recipientData.id);
     } catch (err) {
-      console.error('Error loading shared list:', err);
+      logger.error('Error loading shared list:', err);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -101,7 +102,7 @@ export default function SharePage() {
       });
     } catch (err) {
       // Silently fail - tracking is not critical
-      console.error('Failed to track view:', err);
+      logger.error('Failed to track view:', err);
     }
   }
 
@@ -153,7 +154,7 @@ export default function SharePage() {
       await loadSharedList();
       alert('Item unclaimed successfully!');
     } catch (err) {
-      console.error('Error unclaiming item:', err);
+      logger.error('Error unclaiming item:', err);
       alert('An error occurred while unclaiming the item');
     }
   }

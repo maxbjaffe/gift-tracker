@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { UserPlus, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Avatar from '@/components/Avatar';
+import { logger } from '@/lib/logger';
 
 export default function ChildrenPage() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function ChildrenPage() {
       const data = await fetchChildren();
       setChildren(data);
     } catch (error) {
-      console.error('Error loading children:', error);
+      logger.error('Error loading children:', error);
       toast.error('Failed to load children');
     } finally {
       setLoading(false);

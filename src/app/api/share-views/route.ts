@@ -1,6 +1,7 @@
 // API endpoint for tracking anonymous share views
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/lib/logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (insertError) {
-      console.error('Error tracking view:', insertError);
+      logger.error('Error tracking view:', insertError);
       // Don't fail the request if tracking fails
     }
 
@@ -47,12 +48,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (updateError) {
-      console.error('Error incrementing view count:', updateError);
+      logger.error('Error incrementing view count:', updateError);
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in share-views endpoint:', error);
+    logger.error('Error in share-views endpoint:', error);
     // Return success even if tracking fails - it's not critical
     return NextResponse.json({ success: true });
   }

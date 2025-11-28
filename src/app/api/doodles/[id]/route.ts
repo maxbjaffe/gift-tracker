@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // GET - Fetch a single drawing's full data
 export async function GET(
@@ -27,13 +28,13 @@ export async function GET(
       .single();
 
     if (error) {
-      console.error('Error fetching drawing:', error);
+      logger.error('Error fetching drawing:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ drawing });
   } catch (error) {
-    console.error('Unexpected error in GET /api/doodles/[id]:', error);
+    logger.error('Unexpected error in GET /api/doodles/[id]:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

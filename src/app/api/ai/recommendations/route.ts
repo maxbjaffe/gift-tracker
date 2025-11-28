@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -130,7 +131,7 @@ Consider:
         throw new Error('No JSON found in response');
       }
     } catch (parseError) {
-      console.error('Error parsing Claude response:', parseError);
+      logger.error('Error parsing Claude response:', parseError);
       return NextResponse.json(
         { error: 'Failed to parse AI response' },
         { status: 500 }
@@ -145,7 +146,7 @@ Consider:
       suggestions: suggestions.suggestions || [],
     });
   } catch (error) {
-    console.error('Error generating recommendations:', error);
+    logger.error('Error generating recommendations:', error);
     return NextResponse.json(
       { error: 'Failed to generate recommendations' },
       { status: 500 }

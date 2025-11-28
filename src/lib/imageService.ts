@@ -1,4 +1,5 @@
 // Enhanced Image Service - Fetches real product images via OpenGraph or uses premium placeholders
+import { logger } from '@/lib/logger';
 
 interface ImageResult {
   url: string;
@@ -53,7 +54,7 @@ async function extractOpenGraphImage(url: string): Promise<string | null> {
 
     return null;
   } catch (error) {
-    console.error('Error extracting OpenGraph image:', error);
+    logger.error('Error extracting OpenGraph image:', error);
     return null;
   }
 }

@@ -23,6 +23,7 @@ import type { Consequence, Child, RestrictionType, Severity } from '@/types/acco
 import { toast } from 'sonner';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
+import { logger } from '@/lib/logger';
 
 export default function EditConsequencePage() {
   const router = useRouter();
@@ -72,7 +73,7 @@ export default function EditConsequencePage() {
 
       setChildren(childrenData);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       toast.error('Failed to load consequence');
     } finally {
       setLoading(false);
@@ -106,7 +107,7 @@ export default function EditConsequencePage() {
       toast.success('Consequence updated successfully!');
       router.push('/accountability/consequences');
     } catch (error) {
-      console.error('Error updating consequence:', error);
+      logger.error('Error updating consequence:', error);
       toast.error('Failed to update consequence');
     } finally {
       setSaving(false);
