@@ -671,17 +671,8 @@ export default function RecipientDetailPage() {
                       onClick={() => handleFeedback(rec, 'rejected')}
                       disabled={processingFeedback === rec.title}
                       className="w-full px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
-                      >
-                        ✕ Dismiss
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => handleFeedback(rec, 'liked')}
-                      disabled={processingFeedback === rec.title}
-                      className="w-full px-3 h-button-sm bg-transparent text-purple-600 hover:text-purple-700 hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-sm font-medium rounded-lg"
                     >
-                      ❤️ Remember for Later
+                      ✕ Dismiss
                     </button>
                   </div>
                 </div>
