@@ -396,13 +396,22 @@ export default function UnifiedGiftsPage() {
             </h1>
             <p className="text-gray-600 mt-1">Smart gift management with budget insights</p>
           </div>
-          <Button
-            onClick={() => setIsRecipientModalOpen(true)}
-            className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light gap-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            Add Recipient
-          </Button>
+          <div className="flex gap-3">
+            <Link
+              href="/gifts/new"
+              className="px-4 h-11 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4" />
+              Create Gift
+            </Link>
+            <Button
+              onClick={() => setIsRecipientModalOpen(true)}
+              className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              Add Recipient
+            </Button>
+          </div>
         </div>
 
         {/* Budget Analytics Cards */}
