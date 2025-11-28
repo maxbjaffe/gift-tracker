@@ -193,9 +193,9 @@ export default function RecipientsPage() {
                 <Link href={`/recipients/${recipient.id}`} className="block">
                   <div className="flex justify-center mb-3 md:mb-4">
                     <Avatar
-                      type={recipient.avatar_type}
-                      data={recipient.avatar_data}
-                      background={recipient.avatar_background}
+                      type={recipient.avatar_type ?? undefined}
+                      data={recipient.avatar_data ?? undefined}
+                      background={recipient.avatar_background ?? undefined}
                       name={recipient.name}
                       size="lg"
                       showBorder

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       // Get recipients
       const { data: recipients } = await supabase
         .from('recipients')
-        .select('name, relationship, age, interests, birthday')
+        .select('name, relationship, age_range, interests, birthday')
         .eq('user_id', user.id);
 
       // Get existing gifts
@@ -55,8 +55,8 @@ ${
         .map(
           (r) =>
             `- ${r.name}${r.relationship ? ` (${r.relationship})` : ''}${
-              r.age ? `, age ${r.age}` : ''
-            }${r.interests ? `, interests: ${r.interests}` : ''}`
+              r.age_range ? `, age range: ${r.age_range}` : ''
+            }${r.interests && r.interests.length > 0 ? `, interests: ${r.interests.join(', ')}` : ''}`
         )
         .join('\n')
     : '- No recipients added yet'

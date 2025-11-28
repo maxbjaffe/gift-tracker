@@ -98,7 +98,7 @@ export default function EditConsequencePage() {
         restriction_item: formData.restriction_item,
         reason: formData.reason,
         duration_days: formData.duration_days ? parseInt(formData.duration_days) : undefined,
-        expires_at,
+        expires_at: expires_at ?? undefined,
         severity: formData.severity,
         notes: formData.notes || undefined,
       });

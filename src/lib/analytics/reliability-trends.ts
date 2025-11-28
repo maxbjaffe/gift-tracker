@@ -214,7 +214,7 @@ export async function getChildrenComparison(userId: string): Promise<{
       comparison.push({
         childId: child.id,
         childName: child.name,
-        age: child.age,
+        age: child.age ?? undefined,
         reliabilityScore: currentStats.reliability_score || 0,
         totalCommitments: currentStats.total_commitments || 0,
         improvement,

@@ -1,6 +1,6 @@
 // Avatar Utilities for Gift Tracker
 
-export type AvatarType = 'preset' | 'emoji' | null;
+export type AvatarType = 'preset' | 'emoji' | 'ai' | 'photo' | 'initials' | null;
 
 export interface AvatarData {
   type: AvatarType;

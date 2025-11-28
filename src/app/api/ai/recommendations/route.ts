@@ -61,9 +61,9 @@ export async function POST(request: NextRequest) {
 Recipient Information:
 - Name: ${recipient.name}
 - Relationship: ${recipient.relationship || 'Not specified'}
-- Age: ${recipient.age || 'Not specified'}
+- Age Range: ${recipient.age_range || 'Not specified'}
 - Birthday: ${recipient.birthday ? new Date(recipient.birthday).toLocaleDateString() : 'Not specified'}
-- Interests: ${recipient.interests || 'Not specified'}
+- Interests: ${recipient.interests && recipient.interests.length > 0 ? recipient.interests.join(', ') : 'Not specified'}
 - Notes: ${recipient.notes || 'None'}
 
 Budget Guidance:

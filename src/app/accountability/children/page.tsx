@@ -110,8 +110,8 @@ export default function ChildrenPage() {
                   {/* Avatar */}
                   <Avatar
                     type={child.avatar_type as 'preset' | 'emoji' | null}
-                    data={child.avatar_data}
-                    background={child.avatar_background}
+                    data={child.avatar_data ?? undefined}
+                    background={child.avatar_background ?? undefined}
                     name={child.name}
                     size="lg"
                     showBorder

@@ -355,9 +355,9 @@ export default function RecipientDetailPage() {
             <div className="flex flex-col md:flex-row justify-between items-start gap-4 md:gap-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 w-full md:w-auto">
                 <Avatar
-                  type={recipient.avatar_type}
-                  data={recipient.avatar_data}
-                  background={recipient.avatar_background}
+                  type={recipient.avatar_type ?? undefined}
+                  data={recipient.avatar_data ?? undefined}
+                  background={recipient.avatar_background ?? undefined}
                   name={recipient.name}
                   size="xl"
                   showBorder
