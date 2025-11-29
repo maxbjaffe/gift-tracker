@@ -22,9 +22,11 @@ export default function GiftsPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [viewMode, setViewMode] = useState<'all' | 'ideas' | 'confirmed'>('all')
 
+  const safeGifts = gifts || []
+
   // Filter gifts based on filters and view mode
   const filteredGifts = useMemo(() => {
-    return gifts.filter((gift) => {
+    return safeGifts.filter((gift) => {
       // Category filter
       if (categoryFilter !== 'all' && gift.category !== categoryFilter) {
         return false
@@ -45,19 +47,19 @@ export default function GiftsPage() {
 
       return true
     })
-  }, [gifts, categoryFilter, statusFilter, viewMode])
+  }, [safeGifts, categoryFilter, statusFilter, viewMode])
 
   // Calculate stats
   const stats = useMemo(() => {
-    const ideaCount = gifts.filter((g) => g.status === 'idea').length
-    const confirmedCount = gifts.filter((g) => g.status !== 'idea').length
+    const ideaCount = safeGifts.filter((g) => g.status === 'idea').length
+    const confirmedCount = safeGifts.filter((g) => g.status !== 'idea').length
     const totalValue = filteredGifts.reduce(
       (sum, g) => sum + (g.current_price || 0),
       0
     )
 
     return { ideaCount, confirmedCount, totalValue }
-  }, [gifts, filteredGifts])
+  }, [safeGifts, filteredGifts])
 
   if (loading) {
     return (
@@ -67,7 +69,7 @@ export default function GiftsPage() {
     )
   }
 
-  if (gifts.length === 0) {
+  if (safeGifts.length === 0) {
     return (
       <div className="container mx-auto p-4 md:p-6 lg:p-8">
         <EmptyState
@@ -91,7 +93,7 @@ export default function GiftsPage() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          <ExportButtons data={gifts} type="gifts" />
+          <ExportButtons data={safeGifts} type="gifts" />
           <Button asChild className="h-button-md">
             <Link href="/gifts/new">
               <Plus className="h-4 w-4 mr-2" />
@@ -138,7 +140,7 @@ export default function GiftsPage() {
       <Card className="p-4 md:p-5 lg:p-6 mb-4 md:mb-6">
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="mb-4">
           <TabsList className="grid w-full grid-cols-3 h-auto">
-            <TabsTrigger value="all" className="text-xs md:text-sm h-button-md">All ({gifts.length})</TabsTrigger>
+            <TabsTrigger value="all" className="text-xs md:text-sm h-button-md">All ({safeGifts.length})</TabsTrigger>
             <TabsTrigger value="ideas" className="text-xs md:text-sm h-button-md">Ideas ({stats.ideaCount})</TabsTrigger>
             <TabsTrigger value="confirmed" className="text-xs md:text-sm h-button-md">Confirmed ({stats.confirmedCount})</TabsTrigger>
           </TabsList>
@@ -191,7 +193,7 @@ export default function GiftsPage() {
       {/* Results count */}
       <div className="mb-4">
         <p className="text-xs md:text-sm text-gray-600">
-          Showing {filteredGifts.length} of {gifts.length} gifts
+          Showing {filteredGifts.length} of {safeGifts.length} gifts
         </p>
       </div>
 

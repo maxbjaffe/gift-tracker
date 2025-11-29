@@ -68,10 +68,13 @@ export default function UnifiedGiftsPage() {
 
   const loading = recipientsLoading || giftsLoading;
 
+  const safeRecipients = recipients || []
+  const safeGifts = gifts || []
+
   // Budget analytics - using per-recipient status
   const analytics = useMemo(() => {
     // Create gift-recipient pairs with status - filter out invalid data
-    const giftRecipientPairs = gifts
+    const giftRecipientPairs = safeGifts
       .filter(gift => gift && gift.id) // Ensure gift exists
       .flatMap(gift =>
         (gift.recipients || [])
@@ -109,26 +112,26 @@ export default function UnifiedGiftsPage() {
       totalValue,
       purchasedValue,
       ideasValue,
-      giftCount: gifts.length,
+      giftCount: safeGifts.length,
       purchasedCount: giftRecipientPairs.filter((pair) =>
         ['purchased', 'wrapped', 'given'].includes(pair.status)
       ).length,
       ideasCount: giftRecipientPairs.filter((pair) => ['idea', 'considering'].includes(pair.status)).length,
       byRecipient,
     };
-  }, [gifts]);
+  }, [safeGifts]);
 
   // Group gifts by recipient
   const giftsByRecipient = useMemo(() => {
-    const grouped: Record<string, typeof gifts> = {};
+    const grouped: Record<string, typeof safeGifts> = {};
 
     // Initialize with all recipients
-    recipients.forEach((recipient) => {
+    safeRecipients.forEach((recipient) => {
       grouped[recipient.id] = [];
     });
 
     // Group gifts
-    gifts.forEach((gift) => {
+    safeGifts.forEach((gift) => {
       if (gift.recipients && gift.recipients.length > 0) {
         gift.recipients.forEach((recipient) => {
           if (!grouped[recipient.id]) {
@@ -146,11 +149,11 @@ export default function UnifiedGiftsPage() {
     });
 
     return grouped;
-  }, [gifts, recipients]);
+  }, [safeGifts, safeRecipients]);
 
   // Filter gifts - checking if ANY recipient matches the status filter
   const filteredGifts = useMemo(() => {
-    return gifts.filter((gift) => {
+    return safeGifts.filter((gift) => {
       // Status filter - check if ANY recipient has this status
       if (statusFilter !== 'all') {
         const hasMatchingStatus = gift.recipients?.some(recipient => {
@@ -174,7 +177,7 @@ export default function UnifiedGiftsPage() {
 
       return true;
     });
-  }, [gifts, statusFilter, searchQuery]);
+  }, [safeGifts, statusFilter, searchQuery]);
 
   const filteredGiftsByRecipient = useMemo(() => {
     return Object.entries(giftsByRecipient).reduce((acc, [recipientId, recipientGifts]) => {
@@ -206,7 +209,7 @@ export default function UnifiedGiftsPage() {
       }
 
       return acc;
-    }, {} as Record<string, typeof gifts>);
+    }, {} as Record<string, typeof safeGifts>);
   }, [giftsByRecipient, statusFilter, searchQuery]);
 
   const toggleSection = (recipientId: string) => {
@@ -249,7 +252,7 @@ export default function UnifiedGiftsPage() {
 
     // Collect all gift-recipient assignment IDs
     const assignmentIds: string[] = [];
-    gifts.forEach(gift => {
+    safeGifts.forEach(gift => {
       if (selectedGifts.has(gift.id) && gift.recipients) {
         gift.recipients.forEach(recipient => {
           // Each recipient object contains gift_recipient_id from the junction table
@@ -791,7 +794,7 @@ export default function UnifiedGiftsPage() {
           /* Recipient-Grouped View */
           <div className="space-y-4">
             {Object.entries(filteredGiftsByRecipient).map(([recipientId, recipientGifts]) => {
-              const recipient = recipients.find((r) => r.id === recipientId);
+              const recipient = safeRecipients.find((r) => r.id === recipientId);
               const isOpen = openSections.has(recipientId);
 
               if (!recipient && recipientId !== 'unassigned') return null;

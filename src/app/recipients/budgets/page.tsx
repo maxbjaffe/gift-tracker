@@ -16,9 +16,12 @@ export default function BudgetsPage() {
 
   const loading = recipientsLoading || giftsLoading
 
+  const safeRecipients = recipients || []
+  const safeGifts = gifts || []
+
   // Calculate spending per recipient
   const budgetData = useMemo(() => {
-    if (!recipients.length || !gifts.length) return []
+    if (!safeRecipients.length || !safeGifts.length) return []
 
     // Get all gift_recipients relationships
     const spendingByRecipient = new Map<string, number>()
@@ -26,7 +29,7 @@ export default function BudgetsPage() {
     // Note: This is a simplified version. In a real app, you'd fetch
     // the gift_recipients join table to get exact associations
     // For now, we'll calculate total spending
-    gifts.forEach((gift) => {
+    safeGifts.forEach((gift) => {
       if (gift.current_price && gift.status !== 'idea') {
         // For each gift, we'd need to know which recipients it's for
         // This would require fetching from gift_recipients table
@@ -34,7 +37,7 @@ export default function BudgetsPage() {
       }
     })
 
-    return recipients
+    return safeRecipients
       .filter((r) => r.max_budget && r.max_budget > 0)
       .map((recipient) => ({
         id: recipient.id,
@@ -42,7 +45,7 @@ export default function BudgetsPage() {
         budget: recipient.max_budget!,
         spent: spendingByRecipient.get(recipient.id) || 0,
       }))
-  }, [recipients, gifts])
+  }, [safeRecipients, safeGifts])
 
   // Calculate overall stats
   const overallStats = useMemo(() => {

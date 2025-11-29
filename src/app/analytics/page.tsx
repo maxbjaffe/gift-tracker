@@ -22,6 +22,9 @@ export default function AnalyticsPage() {
 
   const loading = giftsLoading || recipientsLoading
 
+  const safeRecipients = recipients || []
+  const safeGifts = gifts || []
+
   // Detect mobile for responsive charts
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -33,14 +36,14 @@ export default function AnalyticsPage() {
   // Calculate analytics data
   const analytics = useMemo(() => {
     // Overall stats
-    const totalSpent = gifts.reduce((sum, g) => sum + (g.current_price || 0), 0)
-    const averageGiftPrice = gifts.length > 0 ? totalSpent / gifts.length : 0
-    const mostExpensiveGift = gifts.reduce((max, g) =>
+    const totalSpent = safeGifts.reduce((sum, g) => sum + (g.current_price || 0), 0)
+    const averageGiftPrice = safeGifts.length > 0 ? totalSpent / safeGifts.length : 0
+    const mostExpensiveGift = safeGifts.reduce((max, g) =>
       (g.current_price || 0) > (max.current_price || 0) ? g : max
-    , gifts[0])
+    , safeGifts[0])
 
     // Spending by category
-    const categoryData = gifts.reduce((acc, gift) => {
+    const categoryData = safeGifts.reduce((acc, gift) => {
       const category = gift.category || 'other'
       if (!acc[category]) {
         acc[category] = { name: category, value: 0, count: 0 }
@@ -53,7 +56,7 @@ export default function AnalyticsPage() {
     const categoryChartData = Object.values(categoryData)
 
     // Spending by status
-    const statusData = gifts.reduce((acc, gift) => {
+    const statusData = safeGifts.reduce((acc, gift) => {
       const status = gift.status
       if (!acc[status]) {
         acc[status] = { name: status, amount: 0, count: 0 }
@@ -66,7 +69,7 @@ export default function AnalyticsPage() {
     const statusChartData = Object.values(statusData)
 
     // Monthly spending trend
-    const monthlyData = gifts.reduce((acc, gift) => {
+    const monthlyData = safeGifts.reduce((acc, gift) => {
       const date = gift.purchase_date || gift.created_at
       const month = new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
       if (!acc[month]) {
@@ -80,7 +83,7 @@ export default function AnalyticsPage() {
     const monthlyChartData = Object.values(monthlyData).slice(-12) // Last 12 months
 
     // Top 5 most expensive gifts
-    const topGifts = [...gifts]
+    const topGifts = [...safeGifts]
       .filter(g => g.current_price)
       .sort((a, b) => (b.current_price || 0) - (a.current_price || 0))
       .slice(0, 5)
@@ -94,7 +97,7 @@ export default function AnalyticsPage() {
       monthlyChartData,
       topGifts,
     }
-  }, [gifts, recipients])
+  }, [safeGifts, safeRecipients])
 
   if (loading) {
     return (
@@ -148,7 +151,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs md:text-sm text-gray-600 mb-1">Total Gifts</p>
-              <p className="text-xl md:text-2xl font-bold text-green-600">{gifts.length}</p>
+              <p className="text-xl md:text-2xl font-bold text-green-600">{safeGifts.length}</p>
             </div>
             <Package className="h-8 w-8 md:h-10 md:w-10 text-green-600" />
           </div>
@@ -158,7 +161,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs md:text-sm text-gray-600 mb-1">Recipients</p>
-              <p className="text-xl md:text-2xl font-bold text-orange-600">{recipients.length}</p>
+              <p className="text-xl md:text-2xl font-bold text-orange-600">{safeRecipients.length}</p>
             </div>
             <Users className="h-8 w-8 md:h-10 md:w-10 text-orange-600" />
           </div>
