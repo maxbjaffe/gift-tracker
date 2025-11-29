@@ -170,7 +170,17 @@ export default function NewGiftPage() {
     setError(null);
 
     try {
+      const supabase = createClient();
+
+      // Get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error('You must be logged in to create a gift');
+      }
+
       const giftData = {
+        user_id: user.id,
         name: formData.name,
         url: formData.url || null,
         current_price: formData.price ? parseFloat(formData.price) : null,
@@ -187,7 +197,6 @@ export default function NewGiftPage() {
         notes: formData.notes || null,
       };
 
-      const supabase = createClient();
       const { data, error: insertError } = await supabase
         .from('gifts')
         .insert([giftData])
