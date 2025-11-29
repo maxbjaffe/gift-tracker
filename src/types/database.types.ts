@@ -2891,3 +2891,33 @@ export type GiftWithRecipients = Gift & {
 export type RecipientWithGifts = Recipient & {
   gifts?: Gift[]
 }
+
+// Gift categories constant
+export const GIFT_CATEGORIES = [
+  'electronics',
+  'books',
+  'gaming',
+  'toys',
+  'clothing',
+  'fashion',
+  'shoes',
+  'jewelry',
+  'watches',
+  'food',
+  'coffee',
+  'kitchen',
+  'home',
+  'furniture',
+  'art',
+  'music',
+  'sports',
+  'fitness',
+  'automotive',
+  'beauty',
+  'health',
+  'pets',
+  'travel',
+  'outdoor',
+  'office',
+  'other'
+] as const

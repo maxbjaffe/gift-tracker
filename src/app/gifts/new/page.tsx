@@ -439,7 +439,7 @@ export default function NewGiftPage() {
                   className="w-full h-11 md:h-12 px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent capitalize"
                 >
                   <option value="">Select a category...</option>
-                  {GIFT_CATEGORIES.map((cat) => (
+                  {(GIFT_CATEGORIES || []).map((cat) => (
                     <option key={cat} value={cat} className="capitalize">
                       {cat}
                     </option>
