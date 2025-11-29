@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'GiftStash',
   },
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
   openGraph: {
     title: appConfig.title,
     description: appConfig.description,

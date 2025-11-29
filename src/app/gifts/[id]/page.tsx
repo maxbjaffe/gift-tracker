@@ -79,8 +79,8 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         .eq('gift_id', params.id);
 
       if (linkError) throw linkError;
-      
-      const recipients = linkData.map((item: GiftRecipient) => item.recipients);
+
+      const recipients = (linkData || []).map((item: GiftRecipient) => item.recipients);
       setLinkedRecipients(recipients);
       
       setLoading(false);
