@@ -242,7 +242,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=mom">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👩</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/woman-1-128.png"
+                      alt="Mom"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-pink-700">For Mom</h3>
                   <p className="text-xs md:text-sm text-gray-600">Thoughtful gifts for the best mom</p>
                 </CardContent>
@@ -253,7 +261,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=dad">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👨</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/man-1-128.png"
+                      alt="Dad"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-blue-700">For Dad</h3>
                   <p className="text-xs md:text-sm text-gray-600">Perfect gifts for every dad</p>
                 </CardContent>
@@ -264,7 +280,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=kids">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👶</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/boy-1-128.png"
+                      alt="Kids"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-yellow-700">For Kids</h3>
                   <p className="text-xs md:text-sm text-gray-600">Fun gifts children will love</p>
                 </CardContent>
@@ -275,7 +299,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=grandparents">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👴</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/elder-woman-1-128.png"
+                      alt="Grandparents"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-purple-700">For Grandparents</h3>
                   <p className="text-xs md:text-sm text-gray-600">Heartwarming gifts for grandma & grandpa</p>
                 </CardContent>
@@ -286,7 +318,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=siblings">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👫</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/teen-girl-1-128.png"
+                      alt="Siblings"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-green-700">For Siblings</h3>
                   <p className="text-xs md:text-sm text-gray-600">Great gifts for brothers & sisters</p>
                 </CardContent>
@@ -297,7 +337,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=friends">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👯</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/woman-2-128.png"
+                      alt="Friends"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-orange-700">For Friends</h3>
                   <p className="text-xs md:text-sm text-gray-600">Gifts to show you care</p>
                 </CardContent>
@@ -308,7 +356,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=coworkers">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">💼</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/man-3-128.png"
+                      alt="Co-workers"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-gray-700">For Co-workers</h3>
                   <p className="text-xs md:text-sm text-gray-600">Professional yet thoughtful gifts</p>
                 </CardContent>
@@ -319,7 +375,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=teachers">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">📚</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/woman-4-128.png"
+                      alt="Teachers"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-red-700">For Teachers</h3>
                   <p className="text-xs md:text-sm text-gray-600">Appreciate those who educate</p>
                 </CardContent>
@@ -330,7 +394,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=partner">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">💑</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/woman-5-128.png"
+                      alt="Partner"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-rose-700">For Partner</h3>
                   <p className="text-xs md:text-sm text-gray-600">Romantic gifts for your loved one</p>
                 </CardContent>
@@ -341,7 +413,15 @@ export function GiftStashLanding() {
             <Link href="/inspiration?recipient=teens">
               <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-200 h-full">
                 <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">🎮</div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
+                    <Image
+                      src="/avatars/teen-boy-1-128.png"
+                      alt="Teens"
+                      width={96}
+                      height={96}
+                      className="rounded-full"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg md:text-xl text-indigo-700">For Teens</h3>
                   <p className="text-xs md:text-sm text-gray-600">Trendy gifts teens actually want</p>
                 </CardContent>
