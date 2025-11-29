@@ -158,6 +158,34 @@ const nextConfig = {
     // TODO: Fix all type errors and re-enable after deployment
     ignoreBuildErrors: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'target.scene7.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.ugg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.media-amazon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.cloudfront.net',
+      },
+    ],
+  },
   async headers() {
     return [
       {
