@@ -222,6 +222,146 @@ export function GiftStashLanding() {
         </div>
       </section>
 
+      {/* Gift Ideas by Recipient - Inspired by giftlist.com */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+        <div className="container px-4 md:px-6 max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              Find the Perfect Gift for{' '}
+              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
+                Everyone
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Browse curated gift ideas tailored to the special people in your life
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+            {/* Mom */}
+            <Link href="/inspiration?recipient=mom">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👩</div>
+                  <h3 className="font-bold text-lg md:text-xl text-pink-700">For Mom</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Thoughtful gifts for the best mom</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Dad */}
+            <Link href="/inspiration?recipient=dad">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👨</div>
+                  <h3 className="font-bold text-lg md:text-xl text-blue-700">For Dad</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Perfect gifts for every dad</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Kids */}
+            <Link href="/inspiration?recipient=kids">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👶</div>
+                  <h3 className="font-bold text-lg md:text-xl text-yellow-700">For Kids</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Fun gifts children will love</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Grandparents */}
+            <Link href="/inspiration?recipient=grandparents">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👴</div>
+                  <h3 className="font-bold text-lg md:text-xl text-purple-700">For Grandparents</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Heartwarming gifts for grandma & grandpa</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Siblings */}
+            <Link href="/inspiration?recipient=siblings">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👫</div>
+                  <h3 className="font-bold text-lg md:text-xl text-green-700">For Siblings</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Great gifts for brothers & sisters</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Friends */}
+            <Link href="/inspiration?recipient=friends">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">👯</div>
+                  <h3 className="font-bold text-lg md:text-xl text-orange-700">For Friends</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Gifts to show you care</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Co-workers */}
+            <Link href="/inspiration?recipient=coworkers">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">💼</div>
+                  <h3 className="font-bold text-lg md:text-xl text-gray-700">For Co-workers</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Professional yet thoughtful gifts</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Teachers */}
+            <Link href="/inspiration?recipient=teachers">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">📚</div>
+                  <h3 className="font-bold text-lg md:text-xl text-red-700">For Teachers</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Appreciate those who educate</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Partner/Spouse */}
+            <Link href="/inspiration?recipient=partner">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">💑</div>
+                  <h3 className="font-bold text-lg md:text-xl text-rose-700">For Partner</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Romantic gifts for your loved one</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            {/* Teens */}
+            <Link href="/inspiration?recipient=teens">
+              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-200 h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="text-5xl md:text-6xl group-hover:scale-110 transition-transform">🎮</div>
+                  <h3 className="font-bold text-lg md:text-xl text-indigo-700">For Teens</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Trendy gifts teens actually want</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link href="/inspiration">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light text-lg px-8 py-6"
+              >
+                Browse All Gift Ideas
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Complete Solution Framework */}
       <section id="features" className="py-16 md:py-24 bg-gradient-to-br from-orange-50/50 via-blue-50/50 to-purple-50/50">
         <div className="container px-4 md:px-6 max-w-7xl mx-auto">
