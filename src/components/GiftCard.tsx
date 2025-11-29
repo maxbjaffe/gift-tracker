@@ -116,10 +116,10 @@ export default function GiftCard({ gift, recipients = [], onSave }: GiftCardProp
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-3">
           {/* Price */}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-lg font-bold text-purple-600">{gift.price_range}</span>
+            <span className="text-base font-bold text-purple-600">{gift.price_range}</span>
             {gift.category && (
               <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
                 {gift.category}
@@ -128,12 +128,12 @@ export default function GiftCard({ gift, recipients = [], onSave }: GiftCardProp
           </div>
 
           {/* Name */}
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
+          <h3 className="font-semibold text-gray-900 mb-1.5 line-clamp-2 text-sm">
             {gift.name}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+          <p className="text-xs text-gray-600 line-clamp-1 mb-2">
             {gift.description}
           </p>
 

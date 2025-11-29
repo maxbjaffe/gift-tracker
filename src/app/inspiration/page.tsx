@@ -333,7 +333,7 @@ export default function InspirationPage() {
             <p className="text-sm text-gray-600 mb-4">
               Showing {filteredGifts.length} gift{filteredGifts.length !== 1 ? 's' : ''}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {filteredGifts.map((gift, index) => (
                 <GiftCard
                   key={index}
