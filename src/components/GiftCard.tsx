@@ -116,40 +116,30 @@ export default function GiftCard({ gift, recipients = [], onSave }: GiftCardProp
         </div>
 
         {/* Content */}
-        <div className="p-3">
+        <div className="p-2">
           {/* Price */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-base font-bold text-purple-600">{gift.price_range}</span>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-bold text-purple-600">{gift.price_range}</span>
             {gift.category && (
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
+              <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">
                 {gift.category}
               </span>
             )}
           </div>
 
           {/* Name */}
-          <h3 className="font-semibold text-gray-900 mb-1.5 line-clamp-2 text-sm">
+          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-xs">
             {gift.name}
           </h3>
 
-          {/* Description */}
-          <p className="text-xs text-gray-600 line-clamp-1 mb-2">
-            {gift.description}
-          </p>
-
-          {/* Meta Info */}
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            {gift.age_range && (
-              <span className="flex items-center">
-                👤 {gift.age_range}
-              </span>
-            )}
-            {gift.occasion && (
-              <span className="flex items-center">
-                🎉 {gift.occasion}
-              </span>
-            )}
-          </div>
+          {/* Meta Info - Only show if available and compact */}
+          {(gift.age_range || gift.occasion) && (
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              {gift.age_range && (
+                <span className="truncate">👤 {gift.age_range}</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

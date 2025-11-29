@@ -81,11 +81,11 @@ export default function InspirationPage() {
     setLoading(true);
     try {
       const filters: any = {};
-      if (category) filters.category = category;
+      if (category && category !== 'all') filters.category = category;
       if (minPrice) filters.minPrice = parseInt(minPrice);
       if (maxPrice) filters.maxPrice = parseInt(maxPrice);
-      if (ageRange) filters.ageRange = ageRange;
-      if (occasion) filters.occasion = occasion;
+      if (ageRange && ageRange !== 'all') filters.ageRange = ageRange;
+      if (occasion && occasion !== 'all') filters.occasion = occasion;
 
       const response = await fetch('/api/gift-inspiration', {
         method: 'POST',
@@ -137,11 +137,11 @@ export default function InspirationPage() {
   };
 
   const clearFilters = () => {
-    setCategory('');
+    setCategory('all');
     setMinPrice('');
     setMaxPrice('');
-    setAgeRange('');
-    setOccasion('');
+    setAgeRange('all');
+    setOccasion('all');
     setSearchQuery('');
   };
 
@@ -155,7 +155,7 @@ export default function InspirationPage() {
     );
   });
 
-  const hasActiveFilters = category || minPrice || maxPrice || ageRange || occasion;
+  const hasActiveFilters = (category && category !== 'all') || minPrice || maxPrice || (ageRange && ageRange !== 'all') || (occasion && occasion !== 'all');
 
   return (
     <>
@@ -221,7 +221,7 @@ export default function InspirationPage() {
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     <SelectItem value="Electronics">Electronics</SelectItem>
                     <SelectItem value="Books">Books</SelectItem>
                     <SelectItem value="Toys">Toys</SelectItem>
@@ -266,7 +266,7 @@ export default function InspirationPage() {
                     <SelectValue placeholder="All Ages" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Ages</SelectItem>
+                    <SelectItem value="all">All Ages</SelectItem>
                     <SelectItem value="0-5">0-5 years</SelectItem>
                     <SelectItem value="6-12">6-12 years</SelectItem>
                     <SelectItem value="13-17">13-17 years</SelectItem>
@@ -286,7 +286,7 @@ export default function InspirationPage() {
                     <SelectValue placeholder="All Occasions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Occasions</SelectItem>
+                    <SelectItem value="all">All Occasions</SelectItem>
                     <SelectItem value="Birthday">Birthday</SelectItem>
                     <SelectItem value="Holiday">Holiday</SelectItem>
                     <SelectItem value="Anniversary">Anniversary</SelectItem>
@@ -333,7 +333,7 @@ export default function InspirationPage() {
             <p className="text-sm text-gray-600 mb-4">
               Showing {filteredGifts.length} gift{filteredGifts.length !== 1 ? 's' : ''}
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2">
               {filteredGifts.map((gift, index) => (
                 <GiftCard
                   key={index}
