@@ -29,11 +29,15 @@ export default function DashboardPage() {
     )
   }
 
+  // Add safety checks for undefined arrays
+  const safeRecipients = recipients || []
+  const safeGifts = gifts || []
+
   // Calculate stats using per-recipient status
-  const totalGifts = gifts.length
+  const totalGifts = safeGifts.length
 
   // Count gift-recipient pairs by status
-  const giftRecipientPairs = gifts.flatMap(gift =>
+  const giftRecipientPairs = safeGifts.flatMap(gift =>
     (gift.recipients || []).map(recipient => ({
       gift,
       recipient,
@@ -54,7 +58,7 @@ export default function DashboardPage() {
     }, 0)
 
   // Get upcoming birthdays (next 90 days)
-  const upcomingBirthdays = recipients
+  const upcomingBirthdays = safeRecipients
     .filter((r) => r.birthday)
     .map((r) => {
       const birthday = new Date(r.birthday!)
@@ -89,15 +93,15 @@ export default function DashboardPage() {
   // Calculate achievements
   const achievements = {
     giftMaster: totalGifts >= 10,
-    budgetWizard: recipients.some(r => r.max_budget && r.max_budget > 0),
+    budgetWizard: safeRecipients.some(r => r.max_budget && r.max_budget > 0),
     earlyBird: upcomingBirthdays.length > 0 && upcomingBirthdays[0].daysUntil > 7,
-    organized: recipients.length >= 5
+    organized: safeRecipients.length >= 5
   }
 
   const achievementCount = Object.values(achievements).filter(Boolean).length
 
   // Empty state
-  const isEmpty = recipients.length === 0 && gifts.length === 0
+  const isEmpty = safeRecipients.length === 0 && safeGifts.length === 0
 
   return (
     <>
@@ -163,7 +167,7 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Recipients</p>
                     <p className="text-4xl font-bold bg-gradient-to-r from-giftstash-blue to-purple-600 bg-clip-text text-transparent">
-                      {recipients.length}
+                      {safeRecipients.length}
                     </p>
                   </div>
                   <div className="h-14 w-14 bg-gradient-to-br from-giftstash-blue/20 to-purple-600/20 rounded-2xl flex items-center justify-center">
@@ -291,7 +295,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Budget Overview */}
-              <DashboardBudgetOverview recipients={recipients} />
+              <DashboardBudgetOverview recipients={safeRecipients} />
 
               {/* AI Gift Pick */}
               <AIGiftRecoOfTheDay />
