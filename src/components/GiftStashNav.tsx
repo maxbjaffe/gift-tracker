@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { UserMenu } from '@/components/shared/UserMenu';
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { Home, Gift, Users, Info, BarChart3, Menu } from 'lucide-react';
+import { Home, Gift, Users, Info, BarChart3, Menu, BookOpen } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -42,6 +42,7 @@ export function GiftStashNav() {
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
     { href: '/gifts', label: 'Gifts', icon: Gift },
     { href: '/recipients', label: 'Recipients', icon: Users },
+    { href: '/help', label: 'Help', icon: BookOpen },
     { href: '/about', label: 'About', icon: Info },
   ];
 
