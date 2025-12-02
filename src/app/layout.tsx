@@ -8,7 +8,8 @@ import Image from 'next/image'
 import { UserMenu } from '@/components/shared/UserMenu'
 import { MobileNav } from '@/components/shared/MobileNav'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { isGiftStashApp, getCurrentAppConfig } from '@/lib/app-config'
+import { isGiftStashApp, getCurrentAppConfig, PWA_CONFIG } from '@/lib/app-config'
+import { PWAProvider } from '@/components/pwa/PWAProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,7 +18,9 @@ const appConfig = getCurrentAppConfig()
 export const metadata: Metadata = {
   title: appConfig.title,
   description: appConfig.description,
-  manifest: '/manifest.json',
+  // Manifest is injected conditionally by PWAProvider based on feature flags
+  // This prevents PWA features from activating when disabled
+  ...(PWA_CONFIG.enabled && { manifest: '/manifest.json' }),
   themeColor: '#f97316',
   appleWebApp: {
     capable: true,
@@ -82,6 +85,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <PWAProvider>
         {showFamilyHubHeader && (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container flex h-16 items-center px-4">
@@ -203,6 +207,7 @@ export default async function RootLayout({
         )}
 
         <Toaster />
+        </PWAProvider>
       </body>
     </html>
   )

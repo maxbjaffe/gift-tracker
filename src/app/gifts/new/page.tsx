@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { GIFT_CATEGORIES } from '@/types/database.types';
 
-export default function NewGiftPage() {
+function NewGiftPageContent() {
   const router = useRouter();
-  
+  const searchParams = useSearchParams();
+
   const [productUrl, setProductUrl] = useState('');
   const [productName, setProductName] = useState('');
   const [storeName, setStoreName] = useState('');
@@ -16,7 +17,8 @@ export default function NewGiftPage() {
   const [error, setError] = useState<string | null>(null);
   const [extractionFailed, setExtractionFailed] = useState(false);
   const [detectedStore, setDetectedStore] = useState('');
-  
+  const [fromShare, setFromShare] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     url: '',
@@ -33,6 +35,40 @@ export default function NewGiftPage() {
     occasion_date: '',
     notes: '',
   });
+
+  // Pre-fill form from URL params (from share target or extension)
+  useEffect(() => {
+    const name = searchParams.get('name');
+    const url = searchParams.get('url');
+    const price = searchParams.get('price');
+    const store = searchParams.get('store');
+    const brand = searchParams.get('brand');
+    const category = searchParams.get('category');
+    const description = searchParams.get('description');
+    const image_url = searchParams.get('image_url');
+    const notes = searchParams.get('notes');
+    const from = searchParams.get('from');
+
+    if (from === 'share') {
+      setFromShare(true);
+    }
+
+    // Only update if we have params
+    if (name || url || price || store || brand || category || description || image_url || notes) {
+      setFormData(prev => ({
+        ...prev,
+        name: name || prev.name,
+        url: url || prev.url,
+        price: price || prev.price,
+        store: store || prev.store,
+        brand: brand || prev.brand,
+        category: category || prev.category,
+        description: description || prev.description,
+        image_url: image_url || prev.image_url,
+        notes: notes || prev.notes,
+      }));
+    }
+  }, [searchParams]);
 
   const handleExtractFromUrl = async () => {
     if (!productUrl.trim()) {
@@ -606,5 +642,20 @@ export default function NewGiftPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function NewGiftPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-6 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse text-4xl mb-4">🎁</div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <NewGiftPageContent />
+    </Suspense>
   );
 }

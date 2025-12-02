@@ -1,161 +1,86 @@
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: true, // TEMPORARILY DISABLED - PWA breaking auth sessions
-  // Include custom service worker code for update handling
-  additionalManifestEntries: [
-    { url: '/sw-custom.js', revision: Date.now().toString() }
-  ],
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'google-fonts-webfonts',
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 365 * 24 * 60 * 60 // 365 days
-        }
-      }
-    },
-    {
-      urlPattern: /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'google-fonts-stylesheets',
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 7 * 24 * 60 * 60 // 7 days
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'static-font-assets',
-        expiration: {
-          maxEntries: 4,
-          maxAgeSeconds: 7 * 24 * 60 * 60 // 7 days
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'static-image-assets',
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      urlPattern: /\/_next\/image\?url=.+$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'next-image',
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:mp3|wav|ogg)$/i,
-      handler: 'CacheFirst',
-      options: {
-        rangeRequests: true,
-        cacheName: 'static-audio-assets',
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:mp4|webm)$/i,
-      handler: 'CacheFirst',
-      options: {
-        rangeRequests: true,
-        cacheName: 'static-video-assets',
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:js)$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'static-js-assets',
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:css|less)$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'static-style-assets',
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      urlPattern: /\/_next\/data\/.+\/.+\.json$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'next-data',
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      // Auth-related routes and dynamic APIs - never cache
-      urlPattern: /\/api\/(auth|user|recommendations|recipients\/.*\/export-pdf|recipients\/.*\/share|feedback|gifts|ai|claims)\/.*$/i,
-      handler: 'NetworkOnly',
-      options: {
-        cacheName: 'auth-apis',
-      }
-    },
-    {
-      // All other API routes - NetworkOnly for POST/PUT/DELETE, NetworkFirst for GET
-      urlPattern: /\/api\/.*$/i,
-      handler: 'NetworkOnly', // Changed from NetworkFirst to prevent stale auth issues
-      options: {
-        cacheName: 'apis',
-      }
-    },
-    {
-      urlPattern: /.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'others',
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        },
-        networkTimeoutSeconds: 10
+// =============================================================================
+// PWA Configuration
+// =============================================================================
+// PWA is controlled via environment variables:
+// - NEXT_PUBLIC_PWA_ENABLED: Master switch for all PWA features
+// - NEXT_PUBLIC_PWA_SERVICE_WORKER: Enable service worker (caching)
+// - NEXT_PUBLIC_PWA_STATIC_CACHING: Enable static asset caching
+//
+// Rollout phases:
+// 1. PWA_ENABLED=true only: Manifest + installable, no service worker
+// 2. Add SERVICE_WORKER=true: Enables SW registration
+// 3. Add STATIC_CACHING=true: Enables font/image caching
+//
+// IMPORTANT: Never cache pages or API routes - this broke auth before!
+
+const isPWAEnabled = process.env.NEXT_PUBLIC_PWA_ENABLED === 'true'
+const isServiceWorkerEnabled = process.env.NEXT_PUBLIC_PWA_SERVICE_WORKER === 'true'
+const isStaticCachingEnabled = process.env.NEXT_PUBLIC_PWA_STATIC_CACHING === 'true'
+
+// Minimal caching strategy - only static assets that can't break auth
+const minimalCaching = [
+  {
+    // Google Fonts - safe to cache aggressively
+    urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'google-fonts',
+      expiration: {
+        maxEntries: 10,
+        maxAgeSeconds: 365 * 24 * 60 * 60 // 1 year
       }
     }
-  ]
-});
+  },
+  {
+    // Local font files
+    urlPattern: /\.(?:woff|woff2|ttf|otf|eot)$/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'local-fonts',
+      expiration: {
+        maxEntries: 10,
+        maxAgeSeconds: 365 * 24 * 60 * 60
+      }
+    }
+  },
+  {
+    // Static images in /images folder only
+    urlPattern: /\/images\/.*\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'static-images',
+      expiration: {
+        maxEntries: 50,
+        maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+      }
+    }
+  },
+  // IMPORTANT: Everything else goes to network - NO catch-all caching!
+  // This prevents auth session issues
+]
+
+// No caching at all - safest option
+const noCaching = []
+
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  // Only register SW if both PWA and service worker are enabled
+  register: isPWAEnabled && isServiceWorkerEnabled,
+  skipWaiting: true,
+  // Disable completely if PWA feature flag is off
+  disable: !isPWAEnabled || !isServiceWorkerEnabled,
+  // Use minimal caching only if static caching is enabled
+  runtimeCaching: isStaticCachingEnabled ? minimalCaching : noCaching,
+  // Don't cache pages - this is what broke auth
+  buildExcludes: [/middleware-manifest\.json$/],
+  // Exclude all pages and API routes from precaching
+  publicExcludes: ['!api/**/*', '!**/*.html'],
+})
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // ⚠️ Temporarily ignore TypeScript errors during build for deployment
-    // TODO: Fix all type errors and re-enable after deployment
+    // TODO: Fix all type errors and re-enable
     ignoreBuildErrors: true,
   },
   images: {
@@ -194,16 +119,16 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'ALLOWALL', // Allow embedding in any iframe
+            value: 'ALLOWALL',
           },
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors *", // Allow embedding from any origin
+            value: 'frame-ancestors *',
           },
         ],
       },
-    ];
+    ]
   },
-};
+}
 
-module.exports = withPWA(nextConfig);
+module.exports = withPWA(nextConfig)

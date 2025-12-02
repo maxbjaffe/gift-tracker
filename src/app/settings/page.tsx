@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Phone, Save, User, Monitor, Copy, RefreshCw, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Loader2, Phone, Save, User, Monitor, Copy, RefreshCw, ExternalLink, ArrowLeft, Smartphone, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { isPWAEnabled } from '@/lib/app-config';
+import { unregisterAllServiceWorkers, isRunningAsPWA } from '@/components/pwa/PWAProvider';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -22,6 +24,13 @@ export default function SettingsPage() {
   const [dashboardKioskUrl, setDashboardKioskUrl] = useState('');
   const [doodleKioskUrl, setDoodleKioskUrl] = useState('');
   const [loadingKiosk, setLoadingKiosk] = useState(false);
+  const [clearingPWA, setClearingPWA] = useState(false);
+  const [isPWA, setIsPWA] = useState(false);
+
+  useEffect(() => {
+    // Check if running as PWA on client
+    setIsPWA(isRunningAsPWA());
+  }, []);
 
   useEffect(() => {
     loadProfile();
@@ -486,6 +495,85 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* PWA Settings - Only show if PWA is enabled */}
+          {isPWAEnabled() && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5" />
+                  App Installation (PWA)
+                </CardTitle>
+                <CardDescription>
+                  Install GiftStash as an app on your device for quick access
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${isPWA ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  <span className="text-sm">
+                    {isPWA ? 'Running as installed app' : 'Running in browser'}
+                  </span>
+                </div>
+
+                {!isPWA && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-purple-900 mb-2">
+                      Install GiftStash
+                    </h4>
+                    <p className="text-sm text-purple-800 mb-3">
+                      Add GiftStash to your home screen for the best experience:
+                    </p>
+                    <ul className="text-sm text-purple-700 space-y-1 list-disc list-inside">
+                      <li><strong>Chrome/Edge:</strong> Click the install icon in the address bar</li>
+                      <li><strong>Safari (iOS):</strong> Tap Share, then "Add to Home Screen"</li>
+                      <li><strong>Android:</strong> Tap menu, then "Install app" or "Add to Home Screen"</li>
+                    </ul>
+                  </div>
+                )}
+
+                {/* Debug/Troubleshooting section */}
+                <div className="border-t pt-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Troubleshooting</h4>
+                  <p className="text-xs text-gray-500 mb-3">
+                    If you're experiencing issues with caching or stale data, clear the app cache.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      setClearingPWA(true);
+                      try {
+                        const success = await unregisterAllServiceWorkers();
+                        if (success) {
+                          toast.success('Cache cleared! The page will reload.');
+                          // Give time for the toast to show
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 1500);
+                        } else {
+                          toast.info('No service workers to clear');
+                        }
+                      } catch (error) {
+                        toast.error('Failed to clear cache');
+                      } finally {
+                        setClearingPWA(false);
+                      }
+                    }}
+                    disabled={clearingPWA}
+                    className="gap-2"
+                  >
+                    {clearingPWA ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Clear App Cache
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Save Button */}
           <div className="flex justify-end gap-3">
