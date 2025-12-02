@@ -1,52 +1,37 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ProductTourModal } from '@/components/ProductTourModal'
-import { DayInLifeCarousel } from '@/components/DayInLifeCarousel'
-import { getCurrentAppConfig } from '@/lib/app-config'
-import { Play } from 'lucide-react'
+import { Chrome, MessageSquare, Sparkles, Gift, Users, TrendingUp } from 'lucide-react'
 
 export function GiftStashLanding() {
-  const config = getCurrentAppConfig()
-  const [showTour, setShowTour] = useState(false)
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2">
             <Image
               src="/images/GiftStashIconGSv2.png"
               alt="GiftStash"
-              width={40}
-              height={40}
-              className="h-10 w-10"
+              width={36}
+              height={36}
+              className="h-9 w-9"
             />
-            <span className="text-xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-gray-900">
               GiftStash
             </span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              className="text-sm hidden sm:flex"
-              onClick={() => setShowTour(true)}
-            >
-              <Play className="h-4 w-4 mr-2" />
-              Take a Tour
-            </Button>
+          <div className="flex items-center gap-2">
             <Link href="/login">
-              <Button variant="ghost" className="text-sm">
+              <Button variant="ghost" size="sm">
                 Log In
               </Button>
             </Link>
             <Link href="/signup">
-              <Button className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light text-sm">
+              <Button size="sm" className="bg-orange-500 hover:bg-orange-600">
                 Sign Up Free
               </Button>
             </Link>
@@ -54,746 +39,164 @@ export function GiftStashLanding() {
         </div>
       </header>
 
-      <ProductTourModal isOpen={showTour} onClose={() => setShowTour(false)} />
-
-      {/* Hero Section */}
+      {/* Hero Section - Clean and focused */}
       <section className="container px-4 py-16 md:py-24 md:px-6">
-        <div className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto">
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Never Forget a{' '}
-              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                Gift Idea
-              </span>{' '}
-              Again
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto">
-              Save gift ideas from any website with our Chrome extension, text to save via SMS, and get AI-powered suggestions
-            </p>
-          </div>
-
-          {/* SMS Quick Start Card */}
-          <div className="w-full max-w-2xl bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200">
-            <div className="flex flex-col items-center gap-4">
-              <div className="text-4xl">📱</div>
-              <h3 className="text-xl md:text-2xl font-bold text-center">
-                Text Gift Ideas On The Go
-              </h3>
-              <p className="text-center text-gray-700">
-                Add GiftStash to your contacts and text gift ideas anytime - no app needed!
-              </p>
-              <a
-                href="/api/contact/vcard"
-                download="GiftStash.vcf"
-                className="w-full sm:w-auto"
-              >
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto bg-gradient-to-r from-giftstash-blue to-giftstash-orange hover:shadow-xl text-white text-lg px-8 py-6"
-                >
-                  📇 Add to Contacts
-                </Button>
-              </a>
-              <p className="text-sm text-gray-600 text-center">
-                Then text: "LEGO set for Mom" or "AirPods for Sarah - $249"
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Link href="/signup" className="w-full sm:w-auto">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light text-lg px-8 py-6"
-              >
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
+            Never forget a gift idea again
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+            Save gift ideas from anywhere - text them, clip them from websites, or let AI suggest them. Stay organized and never scramble for last-minute gifts.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+            <Link href="/signup">
+              <Button size="lg" className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-base px-8">
                 Get Started Free
               </Button>
             </Link>
-            <Link href="#extension" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 border-2">
-                🧩 Get Chrome Extension
+            <a href="/api/contact/vcard" download="GiftStash.vcf">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-base px-8">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Add to Contacts
               </Button>
-            </Link>
+            </a>
           </div>
-
-          {/* Hero Image - App Preview */}
-          <div className="w-full max-w-4xl mt-12 bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-gray-100">
-            <div className="flex flex-col items-center gap-8">
-              <Image
-                src="/images/GiftStashFull-800.png"
-                alt="GiftStash Logo"
-                width={800}
-                height={211}
-                className="w-full max-w-2xl h-auto"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                <Card className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200 hover:shadow-xl transition-all hover:scale-105">
-                  <div className="text-5xl">🧩</div>
-                  <p className="text-base font-bold text-center bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                    Chrome Extension
-                  </p>
-                  <p className="text-xs text-gray-600 text-center">One-click save from any site</p>
-                </Card>
-                <Card className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200 hover:shadow-xl transition-all hover:scale-105">
-                  <div className="text-5xl">📱</div>
-                  <p className="text-base font-bold text-center bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                    SMS Integration
-                  </p>
-                  <p className="text-xs text-gray-600 text-center">Text ideas on the go</p>
-                </Card>
-                <Card className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-200 hover:shadow-xl transition-all hover:scale-105">
-                  <div className="text-5xl">🤖</div>
-                  <p className="text-base font-bold text-center bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                    AI Suggestions
-                  </p>
-                  <p className="text-xs text-gray-600 text-center">Smart gift recommendations</p>
-                </Card>
-              </div>
-            </div>
-          </div>
+          <p className="text-sm text-gray-500">
+            No credit card required
+          </p>
         </div>
       </section>
 
-      {/* Gift Idea Management Lifecycle */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              The Gift Idea Management{' '}
-              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                Lifecycle
-              </span>
+      {/* How It Works - 3 simple steps */}
+      <section className="border-y bg-gray-50 py-16 md:py-20">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+              Three ways to save gift ideas
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Transform gift-giving into a seamless, organized, and joyful experience
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-orange-50 to-blue-50 rounded-3xl p-6 md:p-10 shadow-2xl border-2 border-orange-200">
-            <Image
-              src="/images/GSValueImages/GiftStashEduOverview.png"
-              alt="The Gift Idea Management Lifecycle - Capture, Organize, Decide, Track"
-              width={1600}
-              height={600}
-              className="w-full h-auto rounded-xl"
-              priority
-            />
-          </div>
-
-          {/* Key Insights Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 hover:shadow-xl transition-all">
-              <CardContent className="p-6">
-                <div className="text-4xl mb-3">💡</div>
-                <h3 className="font-bold text-lg mb-2 text-giftstash-orange">Capture Ideas</h3>
-                <p className="text-sm text-gray-700">
-                  Never forget a gift idea by capturing it immediately from anywhere via SMS, browser, or web
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 hover:shadow-xl transition-all">
-              <CardContent className="p-6">
-                <div className="text-4xl mb-3">📋</div>
-                <h3 className="font-bold text-lg mb-2 text-giftstash-blue">Organize & Plan</h3>
-                <p className="text-sm text-gray-700">
-                  Structured organization prevents scattered notes and last-minute stress with smart budgeting
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 hover:shadow-xl transition-all">
-              <CardContent className="p-6">
-                <div className="text-4xl mb-3">🛒</div>
-                <h3 className="font-bold text-lg mb-2 text-purple-600">Decide & Purchase</h3>
-                <p className="text-sm text-gray-700">
-                  Smart tools and AI inspiration help find the perfect gift within budget
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-200 hover:shadow-xl transition-all">
-              <CardContent className="p-6">
-                <div className="text-4xl mb-3">🎁</div>
-                <h3 className="font-bold text-lg mb-2 text-pink-600">Track Progress</h3>
-                <p className="text-sm text-gray-700">
-                  Monitor the gift lifecycle through stages while tracking overall spending
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Gift Ideas by Recipient - Inspired by giftlist.com */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
-        <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Find the Perfect Gift for{' '}
-              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                Everyone
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Browse curated gift ideas tailored to the special people in your life
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-            {/* Mom */}
-            <Link href="/inspiration?recipient=mom">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/woman-1-128.png"
-                      alt="Mom"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-pink-700">For Mom</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Thoughtful gifts for the best mom</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Dad */}
-            <Link href="/inspiration?recipient=dad">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/man-1-128.png"
-                      alt="Dad"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-blue-700">For Dad</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Perfect gifts for every dad</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Kids */}
-            <Link href="/inspiration?recipient=kids">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/boy-1-128.png"
-                      alt="Kids"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-yellow-700">For Kids</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Fun gifts children will love</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Grandparents */}
-            <Link href="/inspiration?recipient=grandparents">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/elder-woman-1-128.png"
-                      alt="Grandparents"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-purple-700">For Grandparents</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Heartwarming gifts for grandma & grandpa</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Siblings */}
-            <Link href="/inspiration?recipient=siblings">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/teen-girl-1-128.png"
-                      alt="Siblings"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-green-700">For Siblings</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Great gifts for brothers & sisters</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Friends */}
-            <Link href="/inspiration?recipient=friends">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/woman-2-128.png"
-                      alt="Friends"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-orange-700">For Friends</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Gifts to show you care</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Co-workers */}
-            <Link href="/inspiration?recipient=coworkers">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/man-3-128.png"
-                      alt="Co-workers"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-gray-700">For Co-workers</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Professional yet thoughtful gifts</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Teachers */}
-            <Link href="/inspiration?recipient=teachers">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/woman-4-128.png"
-                      alt="Teachers"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-red-700">For Teachers</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Appreciate those who educate</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Partner/Spouse */}
-            <Link href="/inspiration?recipient=partner">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/woman-5-128.png"
-                      alt="Partner"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-rose-700">For Partner</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Romantic gifts for your loved one</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Teens */}
-            <Link href="/inspiration?recipient=teens">
-              <Card className="group hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-200 h-full">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 group-hover:scale-110 transition-transform">
-                    <Image
-                      src="/avatars/teen-boy-1-128.png"
-                      alt="Teens"
-                      width={96}
-                      height={96}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-indigo-700">For Teens</h3>
-                  <p className="text-xs md:text-sm text-gray-600">Trendy gifts teens actually want</p>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-
-          <div className="text-center mt-10">
-            <Link href="/inspiration">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light text-lg px-8 py-6"
-              >
-                Browse All Gift Ideas
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Complete Solution Framework */}
-      <section id="features" className="py-16 md:py-24 bg-gradient-to-br from-orange-50/50 via-blue-50/50 to-purple-50/50">
-        <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Your{' '}
-              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                Complete Solution
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Multi-channel capture meets intelligent organization with AI-powered insights
-            </p>
-          </div>
-
-          <div className="bg-white rounded-3xl p-6 md:p-10 shadow-2xl border-2 border-gray-200">
-            <Image
-              src="/images/GSValueImages/GiftStashvisualframework.png"
-              alt="GiftStash Complete Solution Framework - Multi-Channel Capture, Smart Organization, AI Intelligence, Budget Analytics"
-              width={1600}
-              height={800}
-              className="w-full h-auto rounded-xl"
-            />
-          </div>
-
-          {/* Feature Highlight Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 hover:shadow-xl transition-all hover:scale-105">
-              <CardContent className="p-6 text-center">
-                <div className="text-5xl mb-4">📱</div>
-                <h3 className="font-bold text-xl mb-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                  Multi-Channel Capture
-                </h3>
-                <p className="text-sm text-gray-600">
-                  SMS, Chrome Extension, or Web Dashboard - save ideas your way
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 hover:shadow-xl transition-all hover:scale-105">
-              <CardContent className="p-6 text-center">
-                <div className="text-5xl mb-4">📊</div>
-                <h3 className="font-bold text-xl mb-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                  Smart Organization
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Recipient profiles, status workflow, smart filters
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 hover:shadow-xl transition-all hover:scale-105">
-              <CardContent className="p-6 text-center">
-                <div className="text-5xl mb-4">🤖</div>
-                <h3 className="font-bold text-xl mb-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                  AI-Powered Intelligence
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Personalized recommendations, vision analysis, smart parsing
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-200 hover:shadow-xl transition-all hover:scale-105">
-              <CardContent className="p-6 text-center">
-                <div className="text-5xl mb-4">💰</div>
-                <h3 className="font-bold text-xl mb-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                  Budget & Analytics
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Track spending, set budgets, shopping lists
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Chrome Extension Highlight Section */}
-      <section id="extension" className="py-16 md:py-24 bg-gradient-to-r from-giftstash-blue to-giftstash-orange">
-        <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="text-white space-y-6">
-              <div className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold mb-2">
-                🧩 Chrome Extension
-              </div>
-              <h2 className="text-3xl md:text-5xl font-bold">
-                Save Gift Ideas While You Browse
-              </h2>
-              <p className="text-xl md:text-2xl opacity-90">
-                Spotted the perfect gift online? Save it to GiftStash with one click. Our Chrome extension works on any website - Amazon, Etsy, Target, anywhere.
-              </p>
-              <ul className="space-y-4 text-lg">
-                <li className="flex items-start gap-3">
-                  <span className="text-2xl">✓</span>
-                  <span>One-click save from any website</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-2xl">✓</span>
-                  <span>Automatically captures price, image, and link</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-2xl">✓</span>
-                  <span>Assign to recipients right from the popup</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-2xl">✓</span>
-                  <span>Track price changes and get deal alerts</span>
-                </li>
-              </ul>
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  size="lg"
-                  className="bg-white text-giftstash-blue hover:bg-gray-100 text-lg px-8 py-6 shadow-xl"
-                  asChild
-                >
-                  <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer">
-                    Add to Chrome - It's Free
-                  </a>
-                </Button>
-                <Link href="/signup">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="text-lg px-8 py-6 border-2 border-white text-white hover:bg-white/10"
-                  >
-                    Sign Up First
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            <div className="relative">
-              <Card className="bg-white p-6 shadow-2xl">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 pb-4 border-b">
-                    <Image
-                      src="/images/GiftStashIconGSv2.png"
-                      alt="GiftStash Extension"
-                      width={48}
-                      height={48}
-                      className="h-12 w-12"
-                    />
-                    <div>
-                      <h3 className="font-bold text-lg">GiftStash</h3>
-                      <p className="text-sm text-gray-600">Save this gift idea</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm font-semibold mb-1">Product Name</p>
-                      <p className="text-xs text-gray-600">Wireless Headphones - Premium Sound</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm font-semibold mb-1">Price</p>
-                      <p className="text-xs text-gray-600">$129.99</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm font-semibold mb-1">For:</p>
-                      <div className="flex gap-2 mt-2">
-                        <div className="px-3 py-1 bg-giftstash-orange/10 text-giftstash-orange rounded-full text-xs font-semibold">
-                          Mom
-                        </div>
-                        <div className="px-3 py-1 bg-giftstash-blue/10 text-giftstash-blue rounded-full text-xs font-semibold">
-                          Sister
-                        </div>
-                      </div>
-                    </div>
-                    <Button className="w-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue">
-                      Save Gift
-                    </Button>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center space-y-4">
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                  <MessageSquare className="h-7 w-7 text-blue-600" />
                 </div>
-              </Card>
+                <h3 className="text-lg font-semibold">Text It</h3>
+                <p className="text-gray-600 text-sm">
+                  Add GiftStash to your contacts and text gift ideas anytime. Just send "AirPods for Mom - $249"
+                </p>
+              </div>
+              <div className="text-center space-y-4">
+                <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mx-auto">
+                  <Chrome className="h-7 w-7 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Clip It</h3>
+                <p className="text-gray-600 text-sm">
+                  Use our Chrome extension to save gifts from any website with one click. Price, image, and link included.
+                </p>
+              </div>
+              <div className="text-center space-y-4">
+                <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
+                  <Sparkles className="h-7 w-7 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Ask AI</h3>
+                <p className="text-gray-600 text-sm">
+                  Not sure what to get? Our AI suggests personalized gift ideas based on the recipient's interests.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* User Journey / Getting Started */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Getting Started is{' '}
-              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                Simple & Quick
-              </span>
+      {/* Features - Compact grid */}
+      <section className="py-16 md:py-20">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">
+              Everything you need to be a great gift-giver
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From signup to saving your first gift in under 5 minutes
+            <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+              Simple tools that make gift-giving organized and stress-free
             </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-6 md:p-10 shadow-2xl border-2 border-blue-200">
-            <Image
-              src="/images/GSValueImages/Giftstashuserjourney.png"
-              alt="GiftStash User Journey - New User Onboarding Flow from Discovery to First Gift"
-              width={1600}
-              height={800}
-              className="w-full h-auto rounded-xl"
-            />
-          </div>
-
-          {/* Journey Steps Highlight */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-12">
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 hover:shadow-xl transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="text-3xl mb-2">🔍</div>
-                <h4 className="font-bold text-sm mb-1 text-giftstash-orange">Discovery & Signup</h4>
-                <p className="text-xs text-gray-600">
-                  Find GiftStash, see value props, sign up free
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 hover:shadow-xl transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="text-3xl mb-2">✉️</div>
-                <h4 className="font-bold text-sm mb-1 text-giftstash-blue">Account Creation</h4>
-                <p className="text-xs text-gray-600">
-                  Simple email signup, confirm, access dashboard
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 hover:shadow-xl transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="text-3xl mb-2">📱</div>
-                <h4 className="font-bold text-sm mb-1 text-purple-600">SMS Setup</h4>
-                <p className="text-xs text-gray-600">
-                  Add to contacts, text first gift, instant gratification
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-2 border-pink-200 hover:shadow-xl transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="text-3xl mb-2">🧩</div>
-                <h4 className="font-bold text-sm mb-1 text-pink-600">Extension Install</h4>
-                <p className="text-xs text-gray-600">
-                  One-click Chrome install, browse and save
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 hover:shadow-xl transition-all">
-              <CardContent className="p-4 text-center">
-                <div className="text-3xl mb-2">🎁</div>
-                <h4 className="font-bold text-sm mb-1 text-green-600">First Gift Saved</h4>
-                <p className="text-xs text-gray-600">
-                  Organize with recipients, feel accomplished
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Day in the Life Stories */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 via-blue-50/30 to-purple-50/30">
-        <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-block px-4 py-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue text-white rounded-full text-sm font-semibold mb-4">
-              📖 Real Stories, Real People
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              See{' '}
-              <span className="bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
-                GiftStash in Action
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From superheroes to busy parents to smart teens - discover how GiftStash fits into everyday life
-            </p>
-          </div>
-
-          <DayInLifeCarousel />
-
-          <div className="text-center mt-8">
-            <p className="text-sm text-gray-600 mb-4">
-              Stories auto-rotate every 8 seconds • Click arrows to browse
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/50 via-blue-50/50 to-purple-50/50">
-        <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            Powerful Features
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-            Everything you need to become the best gift-giver
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {config.features.map((feature, index) => (
-              <Card key={index} className="hover:shadow-xl transition-all hover:scale-105 bg-white border border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="border-0 shadow-sm">
                 <CardContent className="p-6">
-                  <div className="text-5xl mb-4">{feature.icon}</div>
-                  <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <Gift className="h-8 w-8 text-orange-500 mb-3" />
+                  <h3 className="font-semibold mb-2">Gift Tracking</h3>
+                  <p className="text-sm text-gray-600">
+                    Track gifts from idea to given. Know what you've purchased, wrapped, and delivered.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-6">
+                  <Users className="h-8 w-8 text-blue-500 mb-3" />
+                  <h3 className="font-semibold mb-2">Recipient Profiles</h3>
+                  <p className="text-sm text-gray-600">
+                    Store interests, sizes, and preferences. Never give the wrong size again.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-6">
+                  <TrendingUp className="h-8 w-8 text-green-500 mb-3" />
+                  <h3 className="font-semibold mb-2">Budget Tracking</h3>
+                  <p className="text-sm text-gray-600">
+                    Set budgets per person or occasion. See spending at a glance.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-giftstash-orange to-giftstash-blue">
-        <div className="container px-4 md:px-6 max-w-4xl mx-auto text-center space-y-8 text-white">
-          <h2 className="text-3xl md:text-5xl font-bold">
-            Ready to Start Saving Gift Ideas?
-          </h2>
-          <p className="text-xl md:text-2xl opacity-90">
-            Join thousands of people who never forget a gift idea
-          </p>
-          <Link href="/signup">
-            <Button
-              size="lg"
-              className="bg-white text-giftstash-orange hover:bg-gray-100 text-lg px-8 py-6 shadow-xl"
-            >
-              Get Started Free - No Credit Card Required
-            </Button>
-          </Link>
+      {/* Quick Start CTA */}
+      <section className="bg-gradient-to-r from-orange-500 to-orange-600 py-16">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-2xl mx-auto text-center text-white space-y-6">
+            <h2 className="text-2xl md:text-3xl font-bold">
+              Start saving gift ideas in 30 seconds
+            </h2>
+            <p className="text-orange-100">
+              Sign up free and add GiftStash to your contacts. The next great gift idea is just a text away.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/signup">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-orange-600 hover:bg-orange-50">
+                  Create Free Account
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t bg-white">
-        <div className="container py-8 px-4 md:px-6">
+      {/* Footer - Simple */}
+      <footer className="border-t py-8">
+        <div className="container px-4 md:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
               <Image
                 src="/images/GiftStashIconGSv2.png"
                 alt="GiftStash"
-                width={32}
-                height={32}
-                className="h-8 w-8"
+                width={24}
+                height={24}
+                className="h-6 w-6"
               />
-              <span className="font-semibold">GiftStash</span>
+              <span className="text-sm font-medium text-gray-700">GiftStash</span>
             </div>
-            <p className="text-sm text-gray-600 text-center md:text-left">
+            <p className="text-sm text-gray-500">
               © 2025 GiftStash. Never forget a gift idea again.
             </p>
             <div className="flex gap-6 text-sm">
-              <Link href="/about" className="text-gray-600 hover:text-giftstash-orange">
-                About
-              </Link>
-              <Link href="/how-it-works" className="text-gray-600 hover:text-giftstash-orange">
-                How It Works
-              </Link>
-              <Link href="/privacy" className="text-gray-600 hover:text-giftstash-orange">
+              <Link href="/privacy" className="text-gray-500 hover:text-gray-700">
                 Privacy
               </Link>
-              <Link href="/terms" className="text-gray-600 hover:text-giftstash-orange">
+              <Link href="/terms" className="text-gray-500 hover:text-gray-700">
                 Terms
+              </Link>
+              <Link href="/setup" className="text-gray-500 hover:text-gray-700">
+                Setup
               </Link>
             </div>
           </div>
