@@ -1,6 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { formatTwiMLResponse, validateWebhookSignature } from '@/lib/sms/twilio-client';
+import { createClient } from '@supabase/supabase-js';
+import { formatTwiMLResponse, validateWebhookSignature, formatPhoneNumber } from '@/lib/sms/twilio-client';
 import { detectMessageIntent, routeMessage } from '@/lib/sms/message-router';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+/**
+ * Look up user by phone number
+ * Searches the profiles table for a matching phone_number field
+ */
+async function getUserByPhoneNumber(phoneNumber: string): Promise<string | null> {
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Normalize phone number to E.164 format for comparison
+    const normalizedPhone = formatPhoneNumber(phoneNumber);
+
+    // Try exact match first
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('phone_number', normalizedPhone)
+      .single();
+
+    if (data) {
+      return data.id;
+    }
+
+    // If no exact match, try without +1 prefix (in case stored differently)
+    if (normalizedPhone.startsWith('+1')) {
+      const withoutCountryCode = normalizedPhone.slice(2);
+      const { data: data2 } = await supabase
+        .from('profiles')
+        .select('id')
+        .or(`phone_number.eq.${withoutCountryCode},phone_number.eq.${normalizedPhone}`)
+        .single();
+
+      if (data2) {
+        return data2.id;
+      }
+    }
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('[SMS Webhook] Error looking up user by phone:', error);
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[SMS Webhook] Error in getUserByPhoneNumber:', error);
+    return null;
+  }
+}
 
 /**
  * POST /api/sms/webhook
@@ -35,15 +86,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Optional: Validate Twilio signature for security
-    // Uncomment when deploying to production
-    /*
+    // Validate Twilio signature for security
     const signature = request.headers.get('X-Twilio-Signature');
-    const url = request.url;
-    const params = Object.fromEntries(formData.entries()) as Record<string, string>;
+    if (signature) {
+      // Construct the full URL that Twilio used to sign the request
+      // In production, use the actual webhook URL, not request.url which may differ
+      const webhookUrl = process.env.TWILIO_WEBHOOK_URL || request.url;
+      const params = Object.fromEntries(formData.entries()) as Record<string, string>;
 
-    if (signature && !validateWebhookSignature(signature, url, params)) {
-      console.error('[SMS Webhook] Invalid Twilio signature');
+      if (!validateWebhookSignature(signature, webhookUrl, params)) {
+        console.error('[SMS Webhook] Invalid Twilio signature');
+        return new NextResponse(
+          formatTwiMLResponse('Unauthorized'),
+          {
+            status: 401,
+            headers: { 'Content-Type': 'text/xml' },
+          }
+        );
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      // In production, require signature validation
+      console.error('[SMS Webhook] Missing Twilio signature in production');
       return new NextResponse(
         formatTwiMLResponse('Unauthorized'),
         {
@@ -52,15 +115,32 @@ export async function POST(request: NextRequest) {
         }
       );
     }
-    */
+
+    // Look up user by phone number
+    const userId = await getUserByPhoneNumber(from);
+
+    if (!userId) {
+      console.log(`[SMS Webhook] No user found for phone number: ${from}`);
+      return new NextResponse(
+        formatTwiMLResponse(
+          "Welcome to GiftStash! To save gift ideas via text, please add your phone number in the app settings first.\n\nVisit giftstash.app/settings to get started."
+        ),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'text/xml' },
+        }
+      );
+    }
+
+    console.log(`[SMS Webhook] Found user: ${userId}`);
 
     // Detect message intent
     const { intent, confidence } = detectMessageIntent(body);
 
     console.log(`[SMS Webhook] Detected intent: ${intent} (confidence: ${confidence})`);
 
-    // Route message to appropriate handler
-    const responseMessage = await routeMessage(intent, body, from);
+    // Route message to appropriate handler with userId
+    const responseMessage = await routeMessage(intent, body, from, userId);
 
     console.log(`[SMS Webhook] Response: "${responseMessage}"`);
 
