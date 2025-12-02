@@ -16,17 +16,28 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ recipientId, recipientName }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: recipientName
-        ? `Hi! I'm here to help you find the perfect gift for ${recipientName}. What kind of gift are you looking for? Any specific occasion, budget, or interests I should know about?`
-        : `Hi! I'm your AI gift finder assistant. Tell me about who you're shopping for - their age, interests, the occasion, and your budget - and I'll help you find the perfect gift!`,
-    },
-  ]);
+  // Initialize with empty array to prevent hydration mismatch
+  // The initial message is set in useEffect after client-side mount
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Set initial message on client-side only to prevent hydration mismatch
+  useEffect(() => {
+    if (!isInitialized) {
+      setMessages([
+        {
+          role: 'assistant',
+          content: recipientName
+            ? `Hi! I'm here to help you find the perfect gift for ${recipientName}. What kind of gift are you looking for? Any specific occasion, budget, or interests I should know about?`
+            : `Hi! I'm your AI gift finder assistant. Tell me about who you're shopping for - their age, interests, the occasion, and your budget - and I'll help you find the perfect gift!`,
+        },
+      ]);
+      setIsInitialized(true);
+    }
+  }, [recipientName, isInitialized]);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -86,6 +97,17 @@ export default function ChatInterface({ recipientId, recipientName }: ChatInterf
     <div className="flex flex-col h-full">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Show loading indicator while initializing */}
+        {!isInitialized && (
+          <div className="flex justify-start">
+            <div className="bg-gray-100 rounded-2xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                <span className="text-sm text-gray-600">Starting chat...</span>
+              </div>
+            </div>
+          </div>
+        )}
         {messages.map((message, index) => (
           <div
             key={index}
@@ -133,12 +155,12 @@ export default function ChatInterface({ recipientId, recipientName }: ChatInterf
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            disabled={isLoading}
+            disabled={isLoading || !isInitialized}
             className="flex-1"
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || !isInitialized}
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
           >
             {isLoading ? (
