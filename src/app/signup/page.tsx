@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,6 +50,7 @@ export default function SignupPage() {
 
       if (data.user) {
         toast.success('Account created! Please check your email to confirm.')
+        // After email confirmation, they'll be redirected to /setup for onboarding
         router.push('/login')
       }
     } catch (error) {
@@ -64,7 +66,13 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
-            <span className="text-6xl">🎁</span>
+            <Image
+              src="/images/GiftStashIconGSv2.png"
+              alt="GiftStash"
+              width={80}
+              height={80}
+              className="h-20 w-20"
+            />
           </div>
           <CardTitle className="text-2xl text-center">Create an account</CardTitle>
           <CardDescription className="text-center">

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Phone, Save, User, Monitor, Copy, RefreshCw, ExternalLink, ArrowLeft, Smartphone, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { isPWAEnabled } from '@/lib/app-config';
+import { isPWAEnabled, isGiftStashApp } from '@/lib/app-config';
 import { unregisterAllServiceWorkers, isRunningAsPWA } from '@/components/pwa/PWAProvider';
 
 export default function SettingsPage() {
@@ -26,10 +26,13 @@ export default function SettingsPage() {
   const [loadingKiosk, setLoadingKiosk] = useState(false);
   const [clearingPWA, setClearingPWA] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
+  const [showPWASection, setShowPWASection] = useState(false);
 
   useEffect(() => {
     // Check if running as PWA on client
     setIsPWA(isRunningAsPWA());
+    // Show PWA section for GiftStash app
+    setShowPWASection(isGiftStashApp());
   }, []);
 
   useEffect(() => {
@@ -496,8 +499,8 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* PWA Settings - Only show if PWA is enabled */}
-          {isPWAEnabled() && (
+          {/* PWA Settings - Show for GiftStash app (always useful for installation) */}
+          {showPWASection && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

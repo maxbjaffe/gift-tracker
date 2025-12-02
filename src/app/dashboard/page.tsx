@@ -9,7 +9,7 @@ import { AIGiftRecoOfTheDay } from '@/components/AIGiftRecoOfTheDay'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Users, Gift, Calendar, DollarSign, Sparkles, Award, Plus, ArrowRight } from 'lucide-react'
+import { Users, Gift, Calendar, DollarSign, Sparkles, Award, Plus, ArrowRight, Settings, MessageSquare, Chrome, Smartphone } from 'lucide-react'
 import { getUpcomingHolidays } from '@/lib/utils/holidays'
 
 export default function DashboardPage() {
@@ -138,6 +138,47 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
+            {/* Setup Prompt - Get the most out of GiftStash */}
+            <Card className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+              <div className="p-4 md:p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="h-12 w-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Settings className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">Get the Full GiftStash Experience</h3>
+                      <p className="text-sm text-gray-600">
+                        Save gift ideas via text, install the app, or add the browser extension for one-click saving.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 md:flex-shrink-0">
+                    <Button asChild size="sm" className="bg-purple-600 hover:bg-purple-700">
+                      <Link href="/setup">
+                        <Smartphone className="h-4 w-4 mr-1" />
+                        Quick Setup
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <MessageSquare className="h-3 w-3" />
+                    <span>Text gift ideas</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Smartphone className="h-3 w-3" />
+                    <span>Install app</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Chrome className="h-3 w-3" />
+                    <span>Browser extension</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             {/* Quick Action CTAs */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Button asChild size="lg" className="h-20 text-lg bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light shadow-lg hover:shadow-xl transition-all">
