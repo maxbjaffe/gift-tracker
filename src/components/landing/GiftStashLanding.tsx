@@ -1,38 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Chrome, MessageSquare, Sparkles, Gift, Users, TrendingUp } from 'lucide-react'
 
-// Rotating taglines for emotional connection
+// Taglines for emotional connection - randomly selected on page load
 const TAGLINES = [
-  { text: "Because the best gifts aren't asked for", emphasis: "best gifts" },
-  { text: "They shouldn't have to ask", emphasis: "shouldn't" },
-  { text: "The joy is in the giving", emphasis: "joy" },
-  { text: "From 'she'd love that' to 'she loved that'", emphasis: "'she loved that'" },
-  { text: "Thoughtful gifts don't come from a wishlist", emphasis: "Thoughtful" },
+  "Because the best gifts aren't asked for",
+  "They shouldn't have to ask",
+  "The joy is in the giving",
+  "From 'she'd love that' to 'she loved that'",
+  "Thoughtful gifts don't come from a wishlist",
 ]
 
 export function GiftStashLanding() {
-  const [taglineIndex, setTaglineIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
-
-  // Rotate taglines every 4 seconds with fade effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsVisible(false)
-      setTimeout(() => {
-        setTaglineIndex((prev) => (prev + 1) % TAGLINES.length)
-        setIsVisible(true)
-      }, 300)
-    }, 4000)
-    return () => clearInterval(interval)
+  // Pick a random tagline once on mount (changes on page refresh)
+  const tagline = useMemo(() => {
+    return TAGLINES[Math.floor(Math.random() * TAGLINES.length)]
   }, [])
-
-  const currentTagline = TAGLINES[taglineIndex]
 
   return (
     <div className="min-h-screen bg-white">
@@ -69,14 +57,19 @@ export function GiftStashLanding() {
       {/* Hero Section */}
       <section className="container px-4 py-16 md:py-24 md:px-6">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          {/* Rotating tagline */}
-          <p
-            className={`text-orange-500 font-medium text-lg transition-opacity duration-300 ${
-              isVisible ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            {currentTagline.text}
-          </p>
+          {/* Logo and Brand */}
+          <div className="flex flex-col items-center gap-3">
+            <Image
+              src="/images/GiftStashIconGSv2.png"
+              alt="GiftStash"
+              width={96}
+              height={96}
+              className="h-24 w-24 md:h-28 md:w-28"
+            />
+            <p className="text-orange-500 font-medium text-lg italic">
+              {tagline}
+            </p>
+          </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
             Never forget a gift idea again
