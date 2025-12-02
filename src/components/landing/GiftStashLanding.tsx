@@ -60,11 +60,12 @@ export function GiftStashLanding() {
           {/* Logo and Brand */}
           <div className="flex flex-col items-center gap-3">
             <Image
-              src="/images/GiftStashIconGSv2.png"
+              src="/images/GiftStashIcon-512.png"
               alt="GiftStash"
-              width={96}
-              height={96}
-              className="h-24 w-24 md:h-28 md:w-28"
+              width={128}
+              height={128}
+              className="h-28 w-28 md:h-32 md:w-32"
+              priority
             />
             <p className="text-orange-500 font-medium text-lg italic">
               {tagline}

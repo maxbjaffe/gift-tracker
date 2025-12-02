@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { useRecipients } from '@/lib/hooks/useRecipients'
 import { useGifts } from '@/lib/hooks/useGifts'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
@@ -13,8 +14,40 @@ import { Users, Gift, Calendar, DollarSign, Sparkles, Award, Plus, ArrowRight, S
 import { getUpcomingHolidays } from '@/lib/utils/holidays'
 
 export default function DashboardPage() {
-  const { recipients, loading: recipientsLoading } = useRecipients()
-  const { gifts, loading: giftsLoading } = useGifts()
+  const { recipients, loading: recipientsLoading, refetch: refetchRecipients } = useRecipients()
+  const { gifts, loading: giftsLoading, refetch: refetchGifts } = useGifts()
+  const seedAttempted = useRef(false)
+
+  // Seed sample data for new users on first visit
+  useEffect(() => {
+    const seedSampleData = async () => {
+      if (seedAttempted.current) return
+      seedAttempted.current = true
+
+      try {
+        const response = await fetch('/api/seed-sample-data', {
+          method: 'POST',
+        })
+        const data = await response.json()
+
+        // If sample data was created, refresh the data
+        if (data.seeded) {
+          refetchRecipients?.()
+          refetchGifts?.()
+        }
+      } catch (error) {
+        console.error('Error seeding sample data:', error)
+      }
+    }
+
+    // Only attempt seed after initial load completes and if no data exists
+    if (!recipientsLoading && !giftsLoading) {
+      const hasNoData = (!recipients || recipients.length === 0) && (!gifts || gifts.length === 0)
+      if (hasNoData) {
+        seedSampleData()
+      }
+    }
+  }, [recipientsLoading, giftsLoading, recipients, gifts, refetchRecipients, refetchGifts])
 
   const loading = recipientsLoading || giftsLoading
 
