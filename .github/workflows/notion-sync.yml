@@ -1,0 +1,81 @@
+name: Sync to Notion
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      sync_type:
+        description: 'Type of sync to perform'
+        required: true
+        default: 'deployment'
+        type: choice
+        options:
+          - deployment
+          - full
+
+jobs:
+  log-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10  # Get recent commits for changelog
+
+      - name: Get commit info
+        id: commit_info
+        run: |
+          # Get the commit message and hash
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s')
+          COMMIT_HASH=$(git log -1 --pretty=format:'%h')
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+
+          # Get list of changed files (last commit)
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | head -20 | tr '\n' ', ' || echo "Initial commit")
+
+          # Create a summary of changes from last 5 commits
+          RECENT_CHANGES=$(git log -5 --pretty=format:'• %s' | head -500)
+
+          # Export to GitHub outputs (handle multiline)
+          echo "commit_msg<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "recent_changes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RECENT_CHANGES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Log deployment to Notion
+        env:
+          DEPLOY_URL: ${{ secrets.PRODUCTION_URL }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DEPLOYMENT_LOG_DB: ${{ secrets.NOTION_DEPLOYMENT_LOG_DB }}
+        run: |
+          # Call the Notion API endpoint to log the deployment
+          curl -X POST "${{ secrets.PRODUCTION_URL }}/api/notion/log-deployment" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "version": "${{ steps.commit_info.outputs.commit_hash }}",
+              "status": "Success",
+              "environment": "Production",
+              "deployUrl": "${{ secrets.PRODUCTION_URL }}",
+              "commitHash": "${{ steps.commit_info.outputs.commit_hash }}",
+              "changes": "${{ steps.commit_info.outputs.commit_msg }}"
+            }' || echo "Notion sync failed but continuing..."
+
+      - name: Summary
+        run: |
+          echo "## Deployment Logged to Notion" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ steps.commit_info.outputs.commit_hash }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Message**: ${{ steps.commit_info.outputs.commit_msg }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ steps.commit_info.outputs.commit_author }}" >> $GITHUB_STEP_SUMMARY
