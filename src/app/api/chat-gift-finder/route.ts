@@ -5,8 +5,13 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
+// Check for API key at startup
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('[chat-gift-finder] ANTHROPIC_API_KEY not configured');
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
 interface Message {
@@ -16,6 +21,14 @@ interface Message {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check API key first
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: 'AI chat is not configured. Please add ANTHROPIC_API_KEY.' },
+        { status: 503 }
+      );
+    }
+
     const { messages, recipientId } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
@@ -86,7 +99,7 @@ Keep the conversation natural and friendly. If the user provides vague info, ask
     }));
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
       system: systemPrompt,
       messages: claudeMessages,

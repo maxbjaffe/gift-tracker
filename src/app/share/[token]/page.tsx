@@ -7,7 +7,9 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
 import Image from 'next/image';
 import { ClaimGiftModal } from '@/components/ClaimGiftModal';
+import { UnclaimGiftModal } from '@/components/UnclaimGiftModal';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
 type Recipient = Database['public']['Tables']['recipients']['Row'];
@@ -32,6 +34,7 @@ export default function SharePage() {
   const [recipient, setRecipient] = useState<Recipient | null>(null);
   const [gifts, setGifts] = useState<GiftWithDetails[]>([]);
   const [claimingGift, setClaimingGift] = useState<{ id: string; name: string } | null>(null);
+  const [unclaimingGift, setUnclaimingGift] = useState<{ id: string; name: string; email: string | null } | null>(null);
 
   useEffect(() => {
     loadSharedList();
@@ -127,13 +130,7 @@ export default function SharePage() {
     await loadSharedList();
   }
 
-  async function handleUnclaim(giftRecipientId: string, claimedByEmail: string | null) {
-    if (claimedByEmail && !confirm('Enter your email to verify you claimed this item')) {
-      return;
-    }
-
-    const email = claimedByEmail ? prompt('Enter the email you used to claim this item:') : null;
-
+  async function handleUnclaim(giftRecipientId: string, email: string | null) {
     try {
       const url = new URL('/api/claims', window.location.origin);
       url.searchParams.set('giftRecipientId', giftRecipientId);
@@ -146,16 +143,15 @@ export default function SharePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || 'Failed to unclaim item');
-        return;
+        throw new Error(data.error || 'Failed to unreserve item');
       }
 
       // Refresh the list
       await loadSharedList();
-      alert('Item unclaimed successfully!');
+      toast.success('Gift unreserved successfully!');
     } catch (err) {
       logger.error('Error unclaiming item:', err);
-      alert('An error occurred while unclaiming the item');
+      throw err;
     }
   }
 
@@ -297,10 +293,14 @@ export default function SharePage() {
                     Reserved by {giftRecipient.claimed_by_name}
                   </p>
                   <button
-                    onClick={() => handleUnclaim(giftRecipient.id, giftRecipient.claimed_by_email)}
+                    onClick={() => setUnclaimingGift({
+                      id: giftRecipient.id,
+                      name: giftRecipient.gift.name,
+                      email: giftRecipient.claimed_by_email
+                    })}
                     className="text-sm text-blue-600 hover:underline"
                   >
-                    Unreserve (if you claimed this)
+                    Unreserve (if you reserved this)
                   </button>
                 </div>
               ))}
@@ -327,6 +327,18 @@ export default function SharePage() {
             giftName={claimingGift.name}
             giftRecipientId={claimingGift.id}
             onClaim={handleClaim}
+          />
+        )}
+
+        {/* Unclaim Modal */}
+        {unclaimingGift && (
+          <UnclaimGiftModal
+            isOpen={true}
+            onClose={() => setUnclaimingGift(null)}
+            giftName={unclaimingGift.name}
+            giftRecipientId={unclaimingGift.id}
+            claimedByEmail={unclaimingGift.email}
+            onUnclaim={handleUnclaim}
           />
         )}
       </div>
