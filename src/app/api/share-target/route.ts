@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
  *
  * The manifest.json declares:
  * "share_target": {
- *   "action": "/share-target",
+ *   "action": "/api/share-target",
  *   "method": "POST",
  *   "enctype": "multipart/form-data",
  *   "params": { "title": "title", "text": "text", "url": "url" }
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const text = formData.get('text')?.toString() || ''
     const url = formData.get('url')?.toString() || ''
 
-    // Build query params and redirect to the page component
+    // Build query params and redirect to the share-target page
     const params = new URLSearchParams()
     if (title) params.set('title', title)
     if (text) params.set('text', text)
@@ -37,14 +37,4 @@ export async function POST(request: NextRequest) {
     // On error, redirect to the page anyway - it will show an error state
     return NextResponse.redirect(new URL('/share-target', request.url))
   }
-}
-
-/**
- * GET handler - just renders the page
- * (The page component handles the actual logic)
- */
-export async function GET() {
-  // GET requests are handled by the page.tsx component
-  // This is just here for completeness
-  return new NextResponse(null, { status: 200 })
 }
