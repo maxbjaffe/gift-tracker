@@ -53,7 +53,9 @@ jobs:
       - name: Log Deployment to Notion
         run: |
           ENVIRONMENT="${{ github.event.deployment.environment }}"
-          if [[ "$ENVIRONMENT" != "Production" && "$ENVIRONMENT" != "production" ]]; then
+                   # Check if environment contains "Production" (Vercel uses "Production – projectname")
+          if [[ "$ENVIRONMENT" != *"Production"* && "$ENVIRONMENT" != *"production"* ]]; then
+            echo "Skipping non-production deployment: $ENVIRONMENT"
             exit 0
           fi
           SHORT_SHA=$(echo "${{ github.event.deployment.sha }}" | cut -c1-7)
