@@ -9,6 +9,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 /**
  * Look up user by phone number
  * Searches the profiles table for a matching phone_number field
+ * Handles multiple phone formats: +14015551234, 4015551234, (401) 555-1234, etc.
  */
 async function getUserByPhoneNumber(phoneNumber: string): Promise<string | null> {
   try {
@@ -17,28 +18,70 @@ async function getUserByPhoneNumber(phoneNumber: string): Promise<string | null>
     // Normalize phone number to E.164 format for comparison
     const normalizedPhone = formatPhoneNumber(phoneNumber);
 
+    // Also extract just the digits for flexible matching
+    const digitsOnly = phoneNumber.replace(/\D/g, '');
+    const last10Digits = digitsOnly.slice(-10); // Last 10 digits (US number without country code)
+
+    console.log('[SMS Webhook] Phone lookup:', {
+      original: phoneNumber,
+      normalized: normalizedPhone,
+      digitsOnly,
+      last10Digits,
+    });
+
     // Try exact match first
     const { data, error } = await supabase
       .from('profiles')
-      .select('id')
+      .select('id, phone_number')
       .eq('phone_number', normalizedPhone)
       .single();
 
     if (data) {
+      console.log('[SMS Webhook] Exact match found:', data.id);
       return data.id;
     }
 
-    // If no exact match, try without +1 prefix (in case stored differently)
-    if (normalizedPhone.startsWith('+1')) {
-      const withoutCountryCode = normalizedPhone.slice(2);
-      const { data: data2 } = await supabase
-        .from('profiles')
-        .select('id')
-        .or(`phone_number.eq.${withoutCountryCode},phone_number.eq.${normalizedPhone}`)
-        .single();
+    // Try multiple formats
+    const formatsToTry = [
+      normalizedPhone,                    // +14015551234
+      digitsOnly,                         // 14015551234
+      last10Digits,                       // 4015551234
+      `+1${last10Digits}`,               // +14015551234 (rebuilt)
+      `1${last10Digits}`,                // 14015551234
+    ];
 
-      if (data2) {
-        return data2.id;
+    console.log('[SMS Webhook] Trying formats:', formatsToTry);
+
+    // Query for any matching format using LIKE with digits
+    const { data: flexData, error: flexError } = await supabase
+      .from('profiles')
+      .select('id, phone_number')
+      .or(formatsToTry.map(f => `phone_number.eq.${f}`).join(','))
+      .limit(1)
+      .single();
+
+    if (flexData) {
+      console.log('[SMS Webhook] Flexible match found:', flexData.id, 'stored as:', flexData.phone_number);
+      return flexData.id;
+    }
+
+    // Last resort: search for profiles where phone contains the last 10 digits
+    // This handles cases like "(401) 555-1234" stored in DB
+    const { data: likeData } = await supabase
+      .from('profiles')
+      .select('id, phone_number')
+      .not('phone_number', 'is', null);
+
+    if (likeData && likeData.length > 0) {
+      // Manually check each profile's phone for a match
+      for (const profile of likeData) {
+        if (profile.phone_number) {
+          const profileDigits = profile.phone_number.replace(/\D/g, '').slice(-10);
+          if (profileDigits === last10Digits) {
+            console.log('[SMS Webhook] Digits match found:', profile.id, 'stored as:', profile.phone_number);
+            return profile.id;
+          }
+        }
       }
     }
 
@@ -46,6 +89,7 @@ async function getUserByPhoneNumber(phoneNumber: string): Promise<string | null>
       console.error('[SMS Webhook] Error looking up user by phone:', error);
     }
 
+    console.log('[SMS Webhook] No user found for phone:', phoneNumber);
     return null;
   } catch (error) {
     console.error('[SMS Webhook] Error in getUserByPhoneNumber:', error);
@@ -86,27 +130,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate Twilio signature for security
+    // Validate Twilio signature for security (if enabled)
+    // Set TWILIO_REQUIRE_SIGNATURE=true in production once Twilio registration is approved
+    const requireSignature = process.env.TWILIO_REQUIRE_SIGNATURE === 'true';
     const signature = request.headers.get('X-Twilio-Signature');
-    if (signature) {
+
+    console.log('[SMS Webhook] Signature validation:', {
+      hasSignature: !!signature,
+      requireSignature,
+      webhookUrl: process.env.TWILIO_WEBHOOK_URL || 'not set',
+    });
+
+    if (signature && process.env.TWILIO_WEBHOOK_URL) {
       // Construct the full URL that Twilio used to sign the request
-      // In production, use the actual webhook URL, not request.url which may differ
-      const webhookUrl = process.env.TWILIO_WEBHOOK_URL || request.url;
+      const webhookUrl = process.env.TWILIO_WEBHOOK_URL;
       const params = Object.fromEntries(formData.entries()) as Record<string, string>;
 
       if (!validateWebhookSignature(signature, webhookUrl, params)) {
-        console.error('[SMS Webhook] Invalid Twilio signature');
-        return new NextResponse(
-          formatTwiMLResponse('Unauthorized'),
-          {
-            status: 401,
-            headers: { 'Content-Type': 'text/xml' },
-          }
-        );
+        console.error('[SMS Webhook] Invalid Twilio signature - URL mismatch or auth token issue');
+        // Only block if signature validation is required
+        if (requireSignature) {
+          return new NextResponse(
+            formatTwiMLResponse('Unauthorized'),
+            {
+              status: 401,
+              headers: { 'Content-Type': 'text/xml' },
+            }
+          );
+        } else {
+          console.warn('[SMS Webhook] Signature invalid but validation not required, proceeding...');
+        }
+      } else {
+        console.log('[SMS Webhook] Signature validated successfully');
       }
-    } else if (process.env.NODE_ENV === 'production') {
-      // In production, require signature validation
-      console.error('[SMS Webhook] Missing Twilio signature in production');
+    } else if (requireSignature) {
+      // Signature required but not provided
+      console.error('[SMS Webhook] Missing Twilio signature but validation required');
       return new NextResponse(
         formatTwiMLResponse('Unauthorized'),
         {

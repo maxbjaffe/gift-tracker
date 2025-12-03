@@ -7,13 +7,18 @@
  * - "Buy book for Dad"
  */
 
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServiceSupabaseClient } from '@/lib/supabase/server';
 import { findRecipientMatch } from '@/lib/recipient-matcher';
 import { getSMSContext, saveSMSContext } from './context-manager';
 import Anthropic from '@anthropic-ai/sdk';
 
+// Check for API key at module load time
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('[Gift Handler] ANTHROPIC_API_KEY not configured - AI extraction will fail');
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
 interface ExtractedGift {
@@ -50,6 +55,12 @@ export async function handleGiftMessage(
   try {
     console.log('[Gift Handler] Processing gift message:', message);
 
+    // Check if Anthropic API key is configured
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('[Gift Handler] ANTHROPIC_API_KEY not configured');
+      return 'Gift tracking is temporarily unavailable. Please try again later or add gifts through the app.';
+    }
+
     // 1. Extract gift details using Claude AI
     const extractedData = await extractGiftDetails(message);
 
@@ -65,7 +76,7 @@ export async function handleGiftMessage(
     console.log('[Gift Handler] Extracted:', extractedData);
 
     // 2. Match recipient using fuzzy matching
-    const supabase = await createServerSupabaseClient();
+    const supabase = createServiceSupabaseClient();
     const matchResult = await findRecipientMatch(
       extractedData.recipientName,
       userId,
@@ -209,7 +220,7 @@ export async function handleGiftConfirmation(
         // User selected a suggestion
         const selectedRecipient = suggestions[selectedIndex].recipient;
 
-        const supabase = await createServerSupabaseClient();
+        const supabase = createServiceSupabaseClient();
         await saveGift(
           {
             name: pendingGift.item,
@@ -239,7 +250,7 @@ export async function handleGiftConfirmation(
 
       if (normalized === 'y' || normalized === 'yes') {
         // User confirmed - save the gift
-        const supabase = await createServerSupabaseClient();
+        const supabase = createServiceSupabaseClient();
         await saveGift(
           {
             name: pendingGift.item,

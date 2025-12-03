@@ -10,6 +10,8 @@ export interface SMSContext {
   lastMessage: string;
   lastIntent: string;
   pendingClarification: string | null;
+  // Use parsedData for gift handler compatibility
+  parsedData: Record<string, unknown>;
   contextData: {
     partialConsequence?: {
       childId?: string;
@@ -32,6 +34,38 @@ export interface SMSContext {
   updatedAt: string;
 }
 
+// Raw database row type (snake_case)
+interface SMSContextRow {
+  id: string;
+  phone_number: string;
+  user_id: string | null;
+  last_message: string;
+  last_intent: string;
+  pending_clarification: string | null;
+  context_data: Record<string, unknown>;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Transform database row to SMSContext
+function transformContext(row: SMSContextRow): SMSContext {
+  return {
+    id: row.id,
+    phoneNumber: row.phone_number,
+    userId: row.user_id,
+    lastMessage: row.last_message,
+    lastIntent: row.last_intent,
+    pendingClarification: row.pending_clarification,
+    // parsedData is an alias for contextData for gift handler compatibility
+    parsedData: row.context_data || {},
+    contextData: row.context_data as SMSContext['contextData'] || {},
+    expiresAt: row.expires_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 /**
  * Get or create SMS conversation context
  */
@@ -51,7 +85,11 @@ export async function getSMSContext(phoneNumber: string): Promise<SMSContext | n
     return null;
   }
 
-  return data as SMSContext | null;
+  if (!data) {
+    return null;
+  }
+
+  return transformContext(data as SMSContextRow);
 }
 
 /**
@@ -62,7 +100,7 @@ export async function saveSMSContext(
   userId: string | null,
   message: string,
   intent: string,
-  contextData: SMSContext['contextData'],
+  contextData: Record<string, unknown>,
   pendingClarification: string | null = null
 ): Promise<SMSContext | null> {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -94,7 +132,7 @@ export async function saveSMSContext(
     return null;
   }
 
-  return data as SMSContext;
+  return transformContext(data as SMSContextRow);
 }
 
 /**
