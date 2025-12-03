@@ -341,6 +341,7 @@ Return only the JSON object, no other text.`,
 
 /**
  * Save gift to database
+ * Creates a gift entry and links it to a recipient via gift_recipients table
  */
 async function saveGift(
   data: {
@@ -355,18 +356,48 @@ async function saveGift(
   },
   supabase: any
 ): Promise<void> {
-  const { error } = await supabase.from('gifts').insert({
-    ...data,
+  // First, insert the gift (without recipient_id - gifts table doesn't have that column)
+  const { data: giftData, error: giftError } = await supabase
+    .from('gifts')
+    .insert({
+      name: data.name,
+      description: data.description,
+      current_price: data.current_price,
+      url: data.url,
+      user_id: data.user_id,
+      source: data.source,
+      status: data.status,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (giftError) {
+    console.error('[Save Gift] Error creating gift:', giftError);
+    throw new Error('Failed to save gift to database');
+  }
+
+  console.log('[Save Gift] Created gift:', giftData.id);
+
+  // Then, create the gift_recipients link to associate the gift with the recipient
+  const { error: linkError } = await supabase.from('gift_recipients').insert({
+    gift_id: giftData.id,
+    recipient_id: data.recipient_id,
+    user_id: data.user_id,
+    status: data.status,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });
 
-  if (error) {
-    console.error('[Save Gift] Error:', error);
-    throw new Error('Failed to save gift to database');
+  if (linkError) {
+    console.error('[Save Gift] Error linking gift to recipient:', linkError);
+    // Try to clean up the gift we just created
+    await supabase.from('gifts').delete().eq('id', giftData.id);
+    throw new Error('Failed to link gift to recipient');
   }
 
-  console.log('[Save Gift] Successfully saved:', data.name);
+  console.log('[Save Gift] Successfully saved and linked:', data.name);
 }
 
 /**
