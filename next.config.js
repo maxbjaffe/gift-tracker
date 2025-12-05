@@ -109,6 +109,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*.cloudfront.net',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.weatherapi.com',
+      },
     ],
   },
   async headers() {
@@ -124,6 +128,46 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: 'frame-ancestors *',
+          },
+        ],
+      },
+      {
+        // Cache static images for 1 year (immutable)
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache avatars for 1 year
+        source: '/avatars/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache Next.js optimized images for 1 year
+        source: '/_next/image/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache static JS/CSS chunks for 1 year (they have hashes in filenames)
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

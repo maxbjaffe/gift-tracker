@@ -34,19 +34,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('Received SMS from:', from, 'Message:', body, 'Images:', mediaUrls.length);
-    console.log('Environment check:', {
-      hasSupabaseUrl: !!supabaseUrl,
-      hasServiceKey: !!supabaseServiceKey,
-      hasAnthropicKey: !!anthropicApiKey,
-      hasTwilioToken: !!twilioAuthToken,
-    });
-
     // Check for GiftStash commands (EXPORT, HELP, etc.)
     const messageText = (body || '').trim().toUpperCase();
 
     if (messageText === 'EXPORT') {
-      console.log('Processing EXPORT command');
       const { handleExportCommand } = await import('@/lib/sms/commands');
       const response = await handleExportCommand(from);
       const twiml = new MessagingResponse();
@@ -58,7 +49,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (messageText === 'HELP') {
-      console.log('Processing HELP command');
       const { handleHelpCommand } = await import('@/lib/sms/commands');
       const response = await handleHelpCommand();
       const twiml = new MessagingResponse();
@@ -76,7 +66,6 @@ export async function POST(request: NextRequest) {
     const { intent } = detectMessageIntent(body);
 
     if (['consequence', 'commitment', 'query', 'response'].includes(intent)) {
-      console.log('Routing to accountability system:', intent);
       const response = await routeMessage(intent, body, from);
       return new NextResponse(formatTwiMLResponse(response), {
         status: 200,
@@ -85,8 +74,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Otherwise, continue with gift tracking logic below
-    console.log('Processing as gift tracking message');
-
     // Validate Twilio signature for security (skip if token not available)
     if (twilioAuthToken) {
       const url = request.url;
@@ -100,8 +87,6 @@ export async function POST(request: NextRequest) {
         console.error('Invalid Twilio signature');
         return new NextResponse('Unauthorized', { status: 401 });
       }
-    } else {
-      console.warn('⚠️  TWILIO_AUTH_TOKEN not set - skipping signature validation (INSECURE!)');
     }
 
     // Create Supabase admin client (bypasses RLS)
@@ -118,7 +103,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (userError || !userData) {
-      console.log('User not found for phone:', from);
       const twiml = new MessagingResponse();
       twiml.message(
         "Hi! I couldn't find your account. Please register your phone number in the app settings first."
@@ -151,8 +135,6 @@ export async function POST(request: NextRequest) {
     let imageData: any[] = [];
 
     if (hasImages) {
-      console.log(`Received ${mediaUrls.length} image(s). Processing with Vision AI...`);
-
       // Download and encode images for Vision API
       for (let i = 0; i < mediaUrls.length; i++) {
         try {
@@ -233,7 +215,6 @@ If you can't extract certain information, use null for that field (or empty arra
 
     for (const model of modelsToTry) {
       try {
-        console.log(`Trying model: ${model}`);
 
         // Build content array with text and images (if present)
         const contentArray: any[] = [];
@@ -259,10 +240,8 @@ If you can't extract certain information, use null for that field (or empty arra
             },
           ],
         });
-        console.log(`✓ Successfully used model: ${model}`);
         break; // Success! Exit loop
       } catch (error: any) {
-        console.log(`✗ Model ${model} failed:`, error.message);
         lastError = error;
         continue; // Try next model
       }
@@ -297,8 +276,6 @@ If you can't extract certain information, use null for that field (or empty arra
       };
     }
 
-    console.log('Parsed gift data:', parsedData);
-
     // Update the SMS record with parsed data
     if (smsRecord) {
       await supabase
@@ -311,8 +288,6 @@ If you can't extract certain information, use null for that field (or empty arra
     let storedImageUrls: string[] = [];
 
     if (hasImages && mediaUrls.length > 0) {
-      console.log(`Storing ${mediaUrls.length} image(s) in Supabase Storage...`);
-
       for (let i = 0; i < mediaUrls.length; i++) {
         try {
           // Download the image from Twilio
@@ -341,7 +316,6 @@ If you can't extract certain information, use null for that field (or empty arra
               .getPublicUrl(filename);
 
             storedImageUrls.push(publicUrlData.publicUrl);
-            console.log(`✓ Stored image ${i}: ${publicUrlData.publicUrl}`);
           }
         } catch (error) {
           console.error(`Error processing image ${i}:`, error);
@@ -367,8 +341,6 @@ If you can't extract certain information, use null for that field (or empty arra
 
           if (recipientData) {
             recipientIds.push(recipientData.id);
-          } else {
-            console.log(`Recipient not found: ${recipientName}`);
           }
         }
       }
