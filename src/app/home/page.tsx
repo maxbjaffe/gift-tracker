@@ -128,9 +128,44 @@ export default function HomePage() {
 
   useEffect(() => {
     loadDashboard();
-    // Auto-refresh every 5 minutes
-    const interval = setInterval(loadDashboard, 5 * 60 * 1000);
-    return () => clearInterval(interval);
+
+    // Auto-refresh every 5 minutes, but only when tab is visible
+    let interval: NodeJS.Timeout | null = null;
+
+    const startRefreshInterval = () => {
+      if (!interval) {
+        interval = setInterval(loadDashboard, 5 * 60 * 1000);
+      }
+    };
+
+    const stopRefreshInterval = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopRefreshInterval();
+      } else {
+        // Refresh data when tab becomes visible again
+        loadDashboard();
+        startRefreshInterval();
+      }
+    };
+
+    // Start interval if tab is visible
+    if (!document.hidden) {
+      startRefreshInterval();
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      stopRefreshInterval();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   async function loadDashboard() {
@@ -355,10 +390,13 @@ export default function HomePage() {
                             <div className="text-xs text-gray-600 font-bold">
                               {idx === 0 ? 'Today' : format(parseISO(day.date), 'EEE')}
                             </div>
-                            <img
+                            <Image
                               src={day.conditionIcon}
                               alt={day.condition}
-                              className="h-8 w-8 mx-auto my-1"
+                              width={32}
+                              height={32}
+                              className="mx-auto my-1"
+                              unoptimized
                             />
                             <div className="text-sm font-bold">
                               {Math.round(day.maxTemp)}° / {Math.round(day.minTemp)}°

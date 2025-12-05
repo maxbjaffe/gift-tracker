@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts'
+} from '@/components/charts/DynamicCharts'
 import { TrendingUp, DollarSign, Package, Users } from 'lucide-react'
 
 const COLORS = ['#F57F20', '#2E7BB4', '#5CB85C', '#FF9A4D', '#4A9FD8', '#f59e0b', '#ef4444']
