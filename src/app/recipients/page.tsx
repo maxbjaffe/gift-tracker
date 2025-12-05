@@ -6,9 +6,10 @@ import { createClient } from '@/lib/supabase/client';
 import { GiftStashNav } from '@/components/GiftStashNav';
 import Avatar from '@/components/Avatar';
 import { RecipientModal } from '@/components/RecipientModal';
+import { BulkRecipientModal } from '@/components/BulkRecipientModal';
 import { RecipientBudgetSummary } from '@/components/RecipientBudgetSummary';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
+import { Pencil, Users } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
 type Recipient = {
@@ -27,6 +28,7 @@ export default function RecipientsPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
 
   useEffect(() => {
@@ -101,15 +103,25 @@ export default function RecipientsPage() {
               Manage the people you're buying gifts for
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setSelectedRecipient(null);
-              setIsModalOpen(true);
-            }}
-            className="w-full md:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap h-button-md px-4 md:px-6 font-semibold"
-          >
-            + Add Recipient
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <Button
+              onClick={() => setIsBulkModalOpen(true)}
+              variant="outline"
+              className="w-full sm:w-auto text-sm md:text-base whitespace-nowrap h-button-md px-4 md:px-6 font-semibold border-2"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Add Multiple
+            </Button>
+            <Button
+              onClick={() => {
+                setSelectedRecipient(null);
+                setIsModalOpen(true);
+              }}
+              className="w-full sm:w-auto bg-gradient-to-r from-giftstash-orange to-giftstash-blue hover:from-giftstash-orange-light hover:to-giftstash-blue-light shadow-lg hover:shadow-xl text-sm md:text-base whitespace-nowrap h-button-md px-4 md:px-6 font-semibold"
+            >
+              + Add Recipient
+            </Button>
+          </div>
         </div>
 
         {recipients.length === 0 ? (
@@ -249,6 +261,15 @@ export default function RecipientsPage() {
           fetchRecipients();
         }}
         recipient={selectedRecipient}
+      />
+
+      {/* Bulk Recipient Modal */}
+      <BulkRecipientModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        onSuccess={() => {
+          fetchRecipients();
+        }}
       />
       </div>
     </>
