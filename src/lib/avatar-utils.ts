@@ -17,21 +17,30 @@ export interface PresetAvatar {
   url: string; // Local path to avatar image
 }
 
-// Custom 3D avatars - diverse, high-quality illustrations (28 avatars)
+// Custom 3D avatars - diverse, high-quality illustrations (45 avatars)
 export const AVATAR_PRESETS: PresetAvatar[] = [
   // PEOPLE - Custom 3D-style avatars
 
-  // Boys (ages 5-12) - 1 avatar
+  // Toddlers (ages 1-4) - 1 avatar
+  { id: 'toddler-boy-1', name: 'Curly Toddler', category: 'people', url: '/avatars/toddler-boy-1-256.png' },
+
+  // Boys (ages 5-12) - 3 avatars
   { id: 'boy-1', name: 'Boy 1', category: 'people', url: '/avatars/boy-1-256.png' },
+  { id: 'boy-2', name: 'Skater Boy', category: 'people', url: '/avatars/boy-2-256.png' },
+  { id: 'boy-3', name: 'Superhero Boy', category: 'people', url: '/avatars/boy-3-256.png' },
+
+  // Girls (ages 5-12) - 1 avatar
+  { id: 'girl-1', name: 'Poofy Ponytails', category: 'people', url: '/avatars/girl-1-256.png' },
 
   // Teen Boys (ages 13-17) - 2 avatars
   { id: 'teen-boy-1', name: 'Teen Boy 1', category: 'people', url: '/avatars/teen-boy-1-256.png' },
   { id: 'teen-boy-2', name: 'Teen Boy 2', category: 'people', url: '/avatars/teen-boy-2-256.png' },
 
-  // Teen Girls (ages 13-17) - 1 avatar
+  // Teen Girls (ages 13-17) - 2 avatars
   { id: 'teen-girl-1', name: 'Teen Girl 1', category: 'people', url: '/avatars/teen-girl-1-256.png' },
+  { id: 'teen-girl-2', name: 'Braces Girl', category: 'people', url: '/avatars/teen-girl-2-256.png' },
 
-  // Men (adults) - 10 avatars
+  // Men (adults) - 14 avatars
   { id: 'man-1', name: 'Man 1', category: 'people', url: '/avatars/man-1-256.png' },
   { id: 'man-2', name: 'Man 2', category: 'people', url: '/avatars/man-2-256.png' },
   { id: 'man-3', name: 'Man 3', category: 'people', url: '/avatars/man-3-256.png' },
@@ -42,8 +51,12 @@ export const AVATAR_PRESETS: PresetAvatar[] = [
   { id: 'man-8', name: 'Man 8', category: 'people', url: '/avatars/man-8-256.png' },
   { id: 'man-9', name: 'Man 9', category: 'people', url: '/avatars/man-9-256.png' },
   { id: 'man-10', name: 'Man 10', category: 'people', url: '/avatars/man-10-256.png' },
+  { id: 'man-11', name: 'Tattoo Dad', category: 'people', url: '/avatars/man-11-256.png' },
+  { id: 'man-12', name: 'Hipster Guy', category: 'people', url: '/avatars/man-12-256.png' },
+  { id: 'man-13', name: 'Tired Dad', category: 'people', url: '/avatars/man-13-256.png' },
+  { id: 'man-14', name: 'Tech Bro', category: 'people', url: '/avatars/man-14-256.png' },
 
-  // Women (adults) - 11 avatars
+  // Women (adults) - 18 avatars
   { id: 'woman-1', name: 'Woman 1', category: 'people', url: '/avatars/woman-1-256.png' },
   { id: 'woman-2', name: 'Woman 2', category: 'people', url: '/avatars/woman-2-256.png' },
   { id: 'woman-3', name: 'Woman 3', category: 'people', url: '/avatars/woman-3-256.png' },
@@ -55,11 +68,19 @@ export const AVATAR_PRESETS: PresetAvatar[] = [
   { id: 'woman-9', name: 'Woman 9', category: 'people', url: '/avatars/woman-9-256.png' },
   { id: 'woman-10', name: 'Woman 10', category: 'people', url: '/avatars/woman-10-256.png' },
   { id: 'woman-11', name: 'Woman 11', category: 'people', url: '/avatars/woman-11-256.png' },
+  { id: 'woman-12', name: 'Box Braids', category: 'people', url: '/avatars/woman-12-256.png' },
+  { id: 'woman-13', name: 'Professional Locs', category: 'people', url: '/avatars/woman-13-256.png' },
+  { id: 'woman-14', name: 'Bold Auntie', category: 'people', url: '/avatars/woman-14-256.png' },
+  { id: 'woman-15', name: 'Fitness Mom', category: 'people', url: '/avatars/woman-15-256.png' },
+  { id: 'woman-16', name: 'Coffee Mom', category: 'people', url: '/avatars/woman-16-256.png' },
+  { id: 'woman-17', name: 'Sophisticated', category: 'people', url: '/avatars/woman-17-256.png' },
+  { id: 'woman-18', name: 'Artistic', category: 'people', url: '/avatars/woman-18-256.png' },
 
-  // Elderly - 3 avatars
+  // Elderly - 4 avatars
   { id: 'elder-woman-1', name: 'Grandmother 1', category: 'people', url: '/avatars/elder-woman-1-256.png' },
   { id: 'elder-woman-2', name: 'Grandmother 2', category: 'people', url: '/avatars/elder-woman-2-256.png' },
   { id: 'elder-man-1', name: 'Grandfather 1', category: 'people', url: '/avatars/elder-man-1-256.png' },
+  { id: 'elder-man-2', name: 'Flannel Grandpa', category: 'people', url: '/avatars/elder-man-2-256.png' },
 ];
 
 // Gradient backgrounds for emojis

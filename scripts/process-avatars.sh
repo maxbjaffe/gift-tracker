@@ -13,8 +13,14 @@ mkdir -p "$DEST_DIR"
 declare -A AVATAR_MAP=(
     # Boys (ages 5-12)
     ["Little boy with messy blonde hair, missing front tooth, excited look.png"]="boy-1"
+    ["Skater-kid-with-backwards-cap-scraped-knee-energy-stoked-expression.png"]="boy-2"
+    ["Little-boy-with-superhero-obsession-showing-cape-implied-heroic-pose.png"]="boy-3"
 
-    # Girls (ages 5-12) - using existing files that could work
+    # Girls (ages 5-12)
+    ["Little-girl-with-poofy-ponytails-sparkly-barrettes-pure-joy.png"]="girl-1"
+
+    # Toddlers
+    ["Toddler-boy-with-chubby-cheeks-wild-curly-hair-mischievous-grin.png"]="toddler-boy-1"
 
     # Teen Boys
     ["Teenage boy with shaggy hair covering one eye, shy smile.png"]="teen-boy-1"
@@ -22,6 +28,7 @@ declare -A AVATAR_MAP=(
 
     # Teen Girls
     ["Teenage girl with blue-streaked hair, nose ring, playful smirk.png"]="teen-girl-1"
+    ["Teenage-girl-with-braces-excitement-bursting-through.png"]="teen-girl-2"
 
     # Men
     ["Middle-aged man with salt-and-pepper beard, kind eyes, glasses.png"]="man-1"
@@ -34,6 +41,10 @@ declare -A AVATAR_MAP=(
     ["Wholesome dad with sweater vest, genuine warmth.png"]="man-8"
     ["Dad-type with receding hairline, dad jokes energy.png"]="man-9"
     ["Younger Dad, Glasses, mix of cool and comic nerd.png"]="man-10"
+    ["Dad-with-shaved-head-full-sleeve-tattoo-peeking-out-warm-smile.png"]="man-11"
+    ["Hipster-guy-with-round-tortoise-glasses-neat-beard-beanie.png"]="man-12"
+    ["Young-dad-holding-it-together-slight-stubble-tired-but-happy-eyes.png"]="man-13"
+    ["Tech-bro-with-airpods-implied-hoodie-optimistic-smirk.png"]="man-14"
 
     # Women
     ["Young woman with curly red hair and freckles, green eyes, warm smile.png"]="woman-1"
@@ -47,11 +58,19 @@ declare -A AVATAR_MAP=(
     ["Quirky aunt type with big glasses, colorful scarf.png"]="woman-9"
     ["Younger Mom, with brown hair messy bun artsy.png"]="woman-10"
     ["Younger Mom, with brown hair put up in a messy bun, large round blue:green eyes, great smile, cool bad ass mom vibes.png"]="woman-11"
+    ["Young-woman-with-box-braids-nose-stud-infectious-energy.png"]="woman-12"
+    ["Professional-woman-with-locs-pulled-up-elegant-confidence.png"]="woman-13"
+    ["Auntie-with-big-personality-bold-jewelry-knowing-look.png"]="woman-14"
+    ["Fitness-mom-with-high-ponytail-healthy-glow-encouraging-smile.png"]="woman-15"
+    ["Young-mom-with-messy-bun-coffee-fueled-determination-real-smile.png"]="woman-16"
+    ["Sophisticated-woman-with-chic-bob-minimal-jewelry-quiet-confidence.png"]="woman-17"
+    ["Artistic-young-woman-with-paint-stained-fingers-implied-dreamy-look.png"]="woman-18"
 
     # Elderly
     ["Elderly grandmother with silver bun, rosy cheeks, pearl earrings.png"]="elder-woman-1"
     ["Grandmother with gray braids, reading glasses on nose.png"]="elder-woman-2"
     ["Elderly grandfather with bald head, bushy white eyebrows, jolly expression.png"]="elder-man-1"
+    ["Grandpa-with-thick-white-mustache-flannel-shirt-vibes-twinkle-in-eye.png"]="elder-man-2"
 )
 
 # Size configurations
