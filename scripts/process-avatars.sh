@@ -3,8 +3,9 @@
 # Script to process custom avatars - rename and create multiple sizes
 # This creates optimized versions of the avatars for web use
 
-SOURCE_DIR="/Users/max.jaffe/gift-tracker/public/images/Avatars"
-DEST_DIR="/Users/max.jaffe/gift-tracker/public/avatars"
+# Updated for home machine - MaxJaffe_Alexs
+SOURCE_DIR="/Users/MaxJaffe_Alexs/gift-tracker/public/avatars/new"
+DEST_DIR="/Users/MaxJaffe_Alexs/gift-tracker/public/avatars"
 
 # Create destination directory
 mkdir -p "$DEST_DIR"
