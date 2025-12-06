@@ -1,118 +1,68 @@
 #!/bin/bash
 
-# Script to process custom avatars - rename and create multiple sizes
-# This creates optimized versions of the avatars for web use
-
+# Script to process NEW avatars only - rename and create multiple sizes
 # Updated for home machine - MaxJaffe_Alexs
+
 SOURCE_DIR="/Users/MaxJaffe_Alexs/gift-tracker/public/avatars/new"
 DEST_DIR="/Users/MaxJaffe_Alexs/gift-tracker/public/avatars"
 
 # Create destination directory
 mkdir -p "$DEST_DIR"
 
-# Declare associative array for mapping old names to new IDs
-declare -A AVATAR_MAP=(
-    # Boys (ages 5-12)
-    ["Little boy with messy blonde hair, missing front tooth, excited look.png"]="boy-1"
-    ["Skater-kid-with-backwards-cap-scraped-knee-energy-stoked-expression.png"]="boy-2"
-    ["Little-boy-with-superhero-obsession-showing-cape-implied-heroic-pose.png"]="boy-3"
-
-    # Girls (ages 5-12)
-    ["Little-girl-with-poofy-ponytails-sparkly-barrettes-pure-joy.png"]="girl-1"
-
-    # Toddlers
-    ["Toddler-boy-with-chubby-cheeks-wild-curly-hair-mischievous-grin.png"]="toddler-boy-1"
-
-    # Teen Boys
-    ["Teenage boy with shaggy hair covering one eye, shy smile.png"]="teen-boy-1"
-    ["Young man with K-pop style hair, smooth features.png"]="teen-boy-2"
-
-    # Teen Girls
-    ["Teenage girl with blue-streaked hair, nose ring, playful smirk.png"]="teen-girl-1"
-    ["Teenage-girl-with-braces-excitement-bursting-through.png"]="teen-girl-2"
-
-    # Men
-    ["Middle-aged man with salt-and-pepper beard, kind eyes, glasses.png"]="man-1"
-    ["Young man with dark skin, short fade haircut, bright confident smile.png"]="man-2"
-    ["Latino man with thick mustache, warm brown eyes, friendly grin.png"]="man-3"
-    ["Athletic young man with buzzcut, dimples.png"]="man-4"
-    ["Man with man-bun, full beard, hipster glasses.png"]="man-5"
-    ["Man with dreadlocks, infectious laugh, gold earring.png"]="man-6"
-    ["Professional man with sharp haircut, subtle smile.png"]="man-7"
-    ["Wholesome dad with sweater vest, genuine warmth.png"]="man-8"
-    ["Dad-type with receding hairline, dad jokes energy.png"]="man-9"
-    ["Younger Dad, Glasses, mix of cool and comic nerd.png"]="man-10"
-    ["Dad-with-shaved-head-full-sleeve-tattoo-peeking-out-warm-smile.png"]="man-11"
-    ["Hipster-guy-with-round-tortoise-glasses-neat-beard-beanie.png"]="man-12"
-    ["Young-dad-holding-it-together-slight-stubble-tired-but-happy-eyes.png"]="man-13"
-    ["Tech-bro-with-airpods-implied-hoodie-optimistic-smirk.png"]="man-14"
-
-    # Women
-    ["Young woman with curly red hair and freckles, green eyes, warm smile.png"]="woman-1"
-    ["Asian woman with long black hair, subtle makeup, serene expression.png"]="woman-2"
-    ["Woman with hijab, soft features, gentle smile.png"]="woman-3"
-    ["Woman with short pixie cut, bold red lipstick.png"]="woman-4"
-    ["Woman with silver bob, artistic vibe, dangly earrings.png"]="woman-5"
-    ["Young professional woman with sleek ponytail, confident look.png"]="woman-6"
-    ["Young woman with natural afro, hoop earrings, radiant smile.png"]="woman-7"
-    ["Punk rock woman with mohawk, multiple piercings, friendly face.png"]="woman-8"
-    ["Quirky aunt type with big glasses, colorful scarf.png"]="woman-9"
-    ["Younger Mom, with brown hair messy bun artsy.png"]="woman-10"
-    ["Younger Mom, with brown hair put up in a messy bun, large round blue:green eyes, great smile, cool bad ass mom vibes.png"]="woman-11"
-    ["Young-woman-with-box-braids-nose-stud-infectious-energy.png"]="woman-12"
-    ["Professional-woman-with-locs-pulled-up-elegant-confidence.png"]="woman-13"
-    ["Auntie-with-big-personality-bold-jewelry-knowing-look.png"]="woman-14"
-    ["Fitness-mom-with-high-ponytail-healthy-glow-encouraging-smile.png"]="woman-15"
-    ["Young-mom-with-messy-bun-coffee-fueled-determination-real-smile.png"]="woman-16"
-    ["Sophisticated-woman-with-chic-bob-minimal-jewelry-quiet-confidence.png"]="woman-17"
-    ["Artistic-young-woman-with-paint-stained-fingers-implied-dreamy-look.png"]="woman-18"
-
-    # Elderly
-    ["Elderly grandmother with silver bun, rosy cheeks, pearl earrings.png"]="elder-woman-1"
-    ["Grandmother with gray braids, reading glasses on nose.png"]="elder-woman-2"
-    ["Elderly grandfather with bald head, bushy white eyebrows, jolly expression.png"]="elder-man-1"
-    ["Grandpa-with-thick-white-mustache-flannel-shirt-vibes-twinkle-in-eye.png"]="elder-man-2"
-)
-
 # Size configurations
 SIZES=(512 256 128 64)
 
-echo "Processing avatars..."
+echo "Processing NEW avatars..."
 echo "===================="
+echo "Source: $SOURCE_DIR"
+echo "Destination: $DEST_DIR"
+echo ""
 
-# Process each file
-for old_name in "${!AVATAR_MAP[@]}"; do
-    new_id="${AVATAR_MAP[$old_name]}"
-    source_file="$SOURCE_DIR/$old_name"
+# Process each file with simple mapping
+process_avatar() {
+    local filename="$1"
+    local new_id="$2"
+    local source_file="$SOURCE_DIR/$filename"
 
     if [ ! -f "$source_file" ]; then
-        echo "⚠️  Warning: Source file not found: $old_name"
-        continue
+        echo "⚠️  Not found: $filename"
+        return
     fi
 
-    echo ""
     echo "Processing: $new_id"
 
-    # Create each size
     for size in "${SIZES[@]}"; do
         output_file="$DEST_DIR/${new_id}-${size}.png"
-
-        # Use sips to resize and optimize
         sips -z $size $size "$source_file" --out "$output_file" > /dev/null 2>&1
 
         if [ $? -eq 0 ]; then
             file_size=$(ls -lh "$output_file" | awk '{print $5}')
-            echo "  ✅ Created ${size}px version ($file_size)"
+            echo "  ✅ ${size}px ($file_size)"
         else
-            echo "  ❌ Failed to create ${size}px version"
+            echo "  ❌ Failed ${size}px"
         fi
     done
-done
+}
+
+# Map the 17 new avatars (exact filenames from your new folder)
+process_avatar "Young woman with box braids, nose stud, infectious energy.png" "woman-12"
+process_avatar "Grandpa with thick white mustache, flannel shirt vibes, twinkle in eye.png" "elder-man-2"
+process_avatar "Toddler boy with chubby cheeks, wild curly hair, mischievous grin.png" "toddler-boy-1"
+process_avatar "Professional woman with locs pulled up, elegant confidence.png" "woman-13"
+process_avatar "Dad with shaved head, full sleeve tattoo peeking out, warm smile.png" "man-11"
+process_avatar "Teenage girl with braces, excitement bursting through.png" "teen-girl-2"
+process_avatar "Hipster guy with round tortoise glasses, neat beard, beanie.png" "man-12"
+process_avatar "Skater kid with backwards cap, scraped knee energy, stoked expression.png" "boy-2"
+process_avatar "Young dad holding it together, slight stubble, tired but happy eyes.png" "man-13"
+process_avatar "Little girl with poofy ponytails, sparkly barrettes, pure joy.png" "girl-1"
+process_avatar "Tech bro with airpods implied, hoodie, optimistic smirk.png" "man-14"
+process_avatar "Auntie with big personality, bold jewelry, knowing look.png" "woman-14"
+process_avatar "Fitness mom with high ponytail, healthy glow, encouraging smile.png" "woman-15"
+process_avatar "Young mom with messy bun, coffee-fueled determination, real smile.png" "woman-16"
+process_avatar "Little boy with superhero obsession showing, cape implied, heroic pose.png" "boy-3"
+process_avatar "Sophisticated woman with chic bob, minimal jewelry, quiet confidence.png" "woman-17"
+process_avatar "Artistic young woman with paint-stained fingers implied, dreamy look.png" "woman-18"
 
 echo ""
 echo "===================="
-echo "Avatar processing complete!"
-echo ""
-echo "Generated files in: $DEST_DIR"
-echo "Total avatars processed: ${#AVATAR_MAP[@]}"
-echo "Sizes created: ${SIZES[@]}px"
+echo "Done! Check $DEST_DIR for the processed avatars."
