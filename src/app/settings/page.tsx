@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [smsConsent, setSmsConsent] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [clearingPWA, setClearingPWA] = useState(false);
@@ -52,7 +54,7 @@ export default function SettingsPage() {
       // Get profile data
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('name, phone_number')
+        .select('name, phone_number, sms_consent')
         .eq('id', user.id)
         .single();
 
@@ -66,6 +68,7 @@ export default function SettingsPage() {
       if (profile) {
         setName(profile.name || '');
         setPhoneNumber(profile.phone_number || '');
+        setSmsConsent(profile.sms_consent || false);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -97,6 +100,12 @@ export default function SettingsPage() {
         return;
       }
 
+      // Require consent if phone number is provided
+      if (phoneNumber && !smsConsent) {
+        toast.error('Please agree to the SMS terms to use SMS features');
+        return;
+      }
+
       // Upsert profile
       const { error } = await supabase
         .from('profiles')
@@ -105,6 +114,7 @@ export default function SettingsPage() {
             id: user.id,
             name,
             phone_number: phoneNumber || null,
+            sms_consent: phoneNumber ? smsConsent : false,
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'id' }
@@ -218,7 +228,37 @@ export default function SettingsPage() {
                 </p>
               </div>
 
+              {/* SMS Consent Checkbox */}
               {phoneNumber && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={smsConsent}
+                      onChange={(e) => setSmsConsent(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                    />
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-900">
+                        I agree to receive SMS messages from GiftStash
+                      </span>
+                      <p className="text-gray-600 mt-1">
+                        By checking this box, you consent to receive SMS messages from GiftStash for gift tracking confirmations and service updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt-out, HELP for help. See our{' '}
+                        <Link href="/sms-terms" className="text-orange-600 hover:underline">
+                          SMS Terms
+                        </Link>{' '}
+                        and{' '}
+                        <Link href="/privacy#sms" className="text-orange-600 hover:underline">
+                          Privacy Policy
+                        </Link>
+                        .
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              )}
+
+              {phoneNumber && smsConsent && (
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                   <h4 className="font-semibold text-purple-900 mb-2">
                     How to add gifts via SMS:
@@ -227,7 +267,7 @@ export default function SettingsPage() {
                     Text your gift ideas to: <strong>+1 (401) 592-5209</strong>
                   </p>
                   <p className="text-xs text-purple-700">
-                    Example: "AirPods Pro for Sarah - $249"
+                    Example: &quot;AirPods Pro for Sarah - $249&quot;
                   </p>
                 </div>
               )}

@@ -267,8 +267,8 @@ export function GiftStashLanding() {
               <Link href="/terms" className="text-gray-500 hover:text-gray-700">
                 Terms
               </Link>
-              <Link href="/setup" className="text-gray-500 hover:text-gray-700">
-                Setup
+              <Link href="/sms-terms" className="text-gray-500 hover:text-gray-700">
+                SMS Terms
               </Link>
             </div>
           </div>

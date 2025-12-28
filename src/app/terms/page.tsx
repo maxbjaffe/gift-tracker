@@ -14,7 +14,7 @@ export default function TermsPage() {
 
             <div className="prose prose-gray max-w-none">
               <p className="text-gray-600 mb-6">
-                Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                Last updated: December 27, 2024
               </p>
 
               <h2 className="text-2xl font-semibold mt-8 mb-4">Acceptance of Terms</h2>
@@ -39,6 +39,24 @@ export default function TermsPage() {
                 <li>Notifying us of any unauthorized use</li>
               </ul>
 
+              <h2 id="sms" className="text-2xl font-semibold mt-8 mb-4">SMS Terms of Service</h2>
+              <p className="text-gray-700 mb-4">
+                By opting into SMS features, you agree to the following:
+              </p>
+              <ul className="list-disc pl-6 text-gray-700 mb-4 space-y-2">
+                <li>You consent to receive SMS messages from GiftStash related to gift tracking</li>
+                <li>Message frequency varies based on your usage</li>
+                <li>Message and data rates may apply</li>
+                <li>You can opt-out at any time by texting STOP</li>
+                <li>For help, text HELP or contact support@giftstash.app</li>
+              </ul>
+              <p className="text-gray-700 mb-4">
+                <strong>Supported Carriers:</strong> GiftStash SMS works with major US carriers including AT&T, Verizon, T-Mobile, Sprint, and most regional carriers.
+              </p>
+              <p className="text-gray-700 mb-6">
+                See our full <Link href="/sms-terms" className="text-giftstash-orange hover:underline">SMS Terms &amp; Conditions</Link> for complete details.
+              </p>
+
               <h2 className="text-2xl font-semibold mt-8 mb-4">Content</h2>
               <p className="text-gray-700 mb-6">
                 You retain all rights to the content you create on GiftStash. We will never share your gift ideas
@@ -54,6 +72,7 @@ export default function TermsPage() {
                 <li>Attempt to gain unauthorized access to the service</li>
                 <li>Interfere with or disrupt the service</li>
                 <li>Share your account with others</li>
+                <li>Use the SMS feature to send spam or unsolicited messages</li>
               </ul>
 
               <h2 className="text-2xl font-semibold mt-8 mb-4">Service Availability</h2>
@@ -64,8 +83,8 @@ export default function TermsPage() {
 
               <h2 className="text-2xl font-semibold mt-8 mb-4">Limitation of Liability</h2>
               <p className="text-gray-700 mb-6">
-                GiftStash is provided "as is" without warranties of any kind. We are not liable for any damages
-                arising from your use of the service.
+                GiftStash is provided &quot;as is&quot; without warranties of any kind. We are not liable for any damages
+                arising from your use of the service, including but not limited to SMS message delivery failures.
               </p>
 
               <h2 className="text-2xl font-semibold mt-8 mb-4">Changes to Terms</h2>
@@ -76,13 +95,19 @@ export default function TermsPage() {
 
               <h2 className="text-2xl font-semibold mt-8 mb-4">Contact Us</h2>
               <p className="text-gray-700 mb-6">
-                If you have any questions about these Terms of Service, please contact us through our feedback form.
+                If you have any questions about these Terms of Service, please contact us at support@giftstash.app.
               </p>
             </div>
 
-            <div className="mt-8 pt-8 border-t">
+            <div className="mt-8 pt-8 border-t flex gap-4">
               <Link href="/" className="text-giftstash-orange hover:text-giftstash-orange-light transition-colors">
                 ← Back to Home
+              </Link>
+              <Link href="/privacy" className="text-giftstash-orange hover:text-giftstash-orange-light transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/sms-terms" className="text-giftstash-orange hover:text-giftstash-orange-light transition-colors">
+                SMS Terms
               </Link>
             </div>
           </div>
