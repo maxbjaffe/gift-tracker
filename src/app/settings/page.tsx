@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Phone, Save, User, Monitor, Copy, RefreshCw, ExternalLink, ArrowLeft, Smartphone, Trash2 } from 'lucide-react';
+import { Loader2, Phone, Save, User, ArrowLeft, Smartphone, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { isPWAEnabled, isGiftStashApp } from '@/lib/app-config';
+import { isPWAEnabled } from '@/lib/app-config';
 import { unregisterAllServiceWorkers, isRunningAsPWA } from '@/components/pwa/PWAProvider';
 
 export default function SettingsPage() {
@@ -19,25 +19,16 @@ export default function SettingsPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [kioskUrl, setKioskUrl] = useState('');
-  const [accountabilityKioskUrl, setAccountabilityKioskUrl] = useState('');
-  const [dashboardKioskUrl, setDashboardKioskUrl] = useState('');
-  const [doodleKioskUrl, setDoodleKioskUrl] = useState('');
-  const [loadingKiosk, setLoadingKiosk] = useState(false);
   const [clearingPWA, setClearingPWA] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
-  const [showPWASection, setShowPWASection] = useState(false);
 
   useEffect(() => {
     // Check if running as PWA on client
     setIsPWA(isRunningAsPWA());
-    // Show PWA section for GiftStash app
-    setShowPWASection(isGiftStashApp());
   }, []);
 
   useEffect(() => {
     loadProfile();
-    loadKioskUrl();
   }, []);
 
   const loadProfile = async () => {
@@ -82,80 +73,6 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const loadKioskUrl = async () => {
-    try {
-      const response = await fetch('/api/kiosk/token');
-      const data = await response.json();
-
-      if (response.ok) {
-        setKioskUrl(data.url);
-        // Generate accountability kiosk URL by replacing /kiosk with /kiosk/accountability
-        const accountabilityUrl = data.url.replace('/kiosk?', '/kiosk/accountability?');
-        setAccountabilityKioskUrl(accountabilityUrl);
-        // Generate dashboard kiosk URL by replacing /kiosk with /kiosk/dashboard
-        const dashboardUrl = data.url.replace('/kiosk?', '/kiosk/dashboard?');
-        setDashboardKioskUrl(dashboardUrl);
-        // Generate doodle kiosk URL by replacing /kiosk with /kiosk/doodle
-        const doodleUrl = data.url.replace('/kiosk?', '/kiosk/doodle?');
-        setDoodleKioskUrl(doodleUrl);
-      } else {
-        console.error('Error loading kiosk URL:', data);
-        toast.error(`Failed to load kiosk URL: ${data.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error('Error loading kiosk URL:', error);
-      toast.error('Failed to load kiosk URL');
-    }
-  };
-
-  const regenerateKioskUrl = async () => {
-    setLoadingKiosk(true);
-    try {
-      const response = await fetch('/api/kiosk/token', { method: 'DELETE' });
-      if (response.ok) {
-        const data = await response.json();
-        setKioskUrl(data.url);
-        // Generate accountability kiosk URL
-        const accountabilityUrl = data.url.replace('/kiosk?', '/kiosk/accountability?');
-        setAccountabilityKioskUrl(accountabilityUrl);
-        // Generate dashboard kiosk URL
-        const dashboardUrl = data.url.replace('/kiosk?', '/kiosk/dashboard?');
-        setDashboardKioskUrl(dashboardUrl);
-        // Generate doodle kiosk URL
-        const doodleUrl = data.url.replace('/kiosk?', '/kiosk/doodle?');
-        setDoodleKioskUrl(doodleUrl);
-        toast.success('Kiosk URLs regenerated!');
-      } else {
-        toast.error('Failed to regenerate kiosk URL');
-      }
-    } catch (error) {
-      console.error('Error regenerating kiosk URL:', error);
-      toast.error('Failed to regenerate kiosk URL');
-    } finally {
-      setLoadingKiosk(false);
-    }
-  };
-
-  const copyKioskUrl = () => {
-    navigator.clipboard.writeText(kioskUrl);
-    toast.success('Checklist kiosk URL copied to clipboard!');
-  };
-
-  const copyAccountabilityKioskUrl = () => {
-    navigator.clipboard.writeText(accountabilityKioskUrl);
-    toast.success('Accountability kiosk URL copied to clipboard!');
-  };
-
-  const copyDashboardKioskUrl = () => {
-    navigator.clipboard.writeText(dashboardKioskUrl);
-    toast.success('Dashboard kiosk URL copied to clipboard!');
-  };
-
-  const copyDoodleKioskUrl = () => {
-    navigator.clipboard.writeText(doodleKioskUrl);
-    toast.success('Doodle Board kiosk URL copied to clipboard!');
   };
 
   const handleSave = async () => {
@@ -317,190 +234,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Kiosk/Dakboard Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Monitor className="h-5 w-5" />
-                Dakboard / Kiosk Mode
-              </CardTitle>
-              <CardDescription>
-                Access your dashboards without logging in - perfect for wall-mounted tablets
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Checklist Kiosk URL */}
-              <div>
-                <Label className="text-base font-semibold">Morning Checklist Kiosk</Label>
-                <p className="text-xs text-gray-600 mb-2">Shows daily checklist items for kids</p>
-                <div className="flex gap-2">
-                  <Input
-                    value={kioskUrl}
-                    readOnly
-                    className="bg-gray-50 font-mono text-sm"
-                    placeholder="Loading..."
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={copyKioskUrl}
-                    disabled={!kioskUrl}
-                    title="Copy URL"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => window.open(kioskUrl, '_blank')}
-                    disabled={!kioskUrl}
-                    title="Open in new tab"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Accountability Kiosk URL */}
-              <div>
-                <Label className="text-base font-semibold">Accountability Kiosk</Label>
-                <p className="text-xs text-gray-600 mb-2">Shows consequences and commitments</p>
-                <div className="flex gap-2">
-                  <Input
-                    value={accountabilityKioskUrl}
-                    readOnly
-                    className="bg-gray-50 font-mono text-sm"
-                    placeholder="Loading..."
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={copyAccountabilityKioskUrl}
-                    disabled={!accountabilityKioskUrl}
-                    title="Copy URL"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => window.open(accountabilityKioskUrl, '_blank')}
-                    disabled={!accountabilityKioskUrl}
-                    title="Open in new tab"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Dashboard Kiosk URL */}
-              <div>
-                <Label className="text-base font-semibold">Dashboard Kiosk</Label>
-                <p className="text-xs text-gray-600 mb-2">Full family command center with weather, events, quotes, and accountability</p>
-                <div className="flex gap-2">
-                  <Input
-                    value={dashboardKioskUrl}
-                    readOnly
-                    className="bg-gray-50 font-mono text-sm"
-                    placeholder="Loading..."
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={copyDashboardKioskUrl}
-                    disabled={!dashboardKioskUrl}
-                    title="Copy URL"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => window.open(dashboardKioskUrl, '_blank')}
-                    disabled={!dashboardKioskUrl}
-                    title="Open in new tab"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Doodle Board Kiosk URL */}
-              <div>
-                <Label className="text-base font-semibold">Doodle Board Kiosk 🎨</Label>
-                <p className="text-xs text-gray-600 mb-2">Interactive drawing board perfect for kids on touch screens</p>
-                <div className="flex gap-2">
-                  <Input
-                    value={doodleKioskUrl}
-                    readOnly
-                    className="bg-gray-50 font-mono text-sm"
-                    placeholder="Loading..."
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={copyDoodleKioskUrl}
-                    disabled={!doodleKioskUrl}
-                    title="Copy URL"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => window.open(doodleKioskUrl, '_blank')}
-                    disabled={!doodleKioskUrl}
-                    title="Open in new tab"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                <p className="text-xs text-gray-600">
-                  ⚠️ These URLs allow access without logging in. Keep them private and secure!
-                </p>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 mb-2">
-                  How to use Kiosk Mode:
-                </h4>
-                <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                  <li>Open any kiosk URL on your wall-mounted tablet or device</li>
-                  <li>Bookmark for easy access</li>
-                  <li>No login required - perfect for kids to use independently</li>
-                  <li><strong>Checklist:</strong> Daily morning routines with completion tracking</li>
-                  <li><strong>Accountability:</strong> Live view of consequences and commitments</li>
-                  <li><strong>Dashboard:</strong> Full family command center with weather, events, quotes, jokes, and accountability</li>
-                  <li>Ideal for Dakboard or dedicated family dashboard displays</li>
-                </ul>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={regenerateKioskUrl}
-                  disabled={loadingKiosk}
-                >
-                  {loadingKiosk ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                  )}
-                  Regenerate URL
-                </Button>
-                <p className="text-xs text-gray-500 self-center">
-                  (This will invalidate the old URL)
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* PWA Settings - Show for GiftStash app (always useful for installation) */}
-          {showPWASection && (
+          {/* PWA Settings */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -576,7 +310,6 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
-          )}
 
           {/* Save Button */}
           <div className="flex justify-end gap-3">

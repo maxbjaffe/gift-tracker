@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { X, Menu, Home, Gift, Users, BarChart3, MessageCircle, Sparkles, Target, Mail } from 'lucide-react'
+import { X, Menu, Home, Gift, Users, BarChart3, Sparkles, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
@@ -34,18 +34,13 @@ export function MobileNav({ user }: MobileNavProps) {
     router.refresh()
   }
 
-  const giftTrackerItems = [
+  const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/recipients', label: 'Recipients', icon: Users },
     { href: '/gifts', label: 'Gifts', icon: Gift },
     { href: '/inspiration', label: 'Inspiration', icon: Sparkles },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  ]
-
-  const accountabilityItems = [
-    { href: '/accountability', label: 'Accountability', icon: Target },
-    { href: '/accountability/analytics', label: 'Stats', icon: BarChart3 },
-    { href: '/emails', label: 'School Emails', icon: Mail },
+    { href: '/settings', label: 'Settings', icon: Settings },
   ]
 
   const isActive = (href: string) => {
@@ -83,8 +78,8 @@ export function MobileNav({ user }: MobileNavProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🏠</span>
-            <span className="font-bold text-lg">Family Hub</span>
+            <span className="text-2xl">🎁</span>
+            <span className="font-bold text-lg">GiftStash</span>
           </div>
           <button
             onClick={() => setIsOpen(false)}
@@ -97,9 +92,9 @@ export function MobileNav({ user }: MobileNavProps) {
 
         {/* User Info */}
         {user && (
-          <div className="p-4 border-b bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+          <div className="p-4 border-b bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center text-white font-bold">
                 {user.email?.[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -112,11 +107,7 @@ export function MobileNav({ user }: MobileNavProps) {
 
         {/* Navigation Links */}
         <nav className="flex flex-col p-2 gap-1 overflow-y-auto flex-1">
-          {/* Gift Tracker Section */}
-          <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            🎁 Gift Tracker
-          </div>
-          {giftTrackerItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
 
@@ -127,36 +118,8 @@ export function MobileNav({ user }: MobileNavProps) {
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                   active
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
                     : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            )
-          })}
-
-          {/* Divider */}
-          <div className="my-2 border-t border-gray-200 dark:border-gray-700" />
-
-          {/* Accountability Section */}
-          <div className="px-4 py-2 text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
-            🎯 Accountability
-          </div>
-          {accountabilityItems.map((item) => {
-            const Icon = item.icon
-            const active = isActive(item.href)
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  active
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                    : 'text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/20'
                 }`}
               >
                 <Icon className="h-5 w-5" />

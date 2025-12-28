@@ -59,21 +59,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Route to accountability system if message is about consequences/commitments
-    const { detectMessageIntent, routeMessage } = await import('@/lib/sms/message-router');
-    const { formatTwiMLResponse } = await import('@/lib/sms/twilio-client');
-
-    const { intent } = detectMessageIntent(body);
-
-    if (['consequence', 'commitment', 'query', 'response'].includes(intent)) {
-      const response = await routeMessage(intent, body, from);
-      return new NextResponse(formatTwiMLResponse(response), {
-        status: 200,
-        headers: { 'Content-Type': 'text/xml' },
-      });
-    }
-
-    // Otherwise, continue with gift tracking logic below
+    // Process gift tracking
     // Validate Twilio signature for security (skip if token not available)
     if (twilioAuthToken) {
       const url = request.url;

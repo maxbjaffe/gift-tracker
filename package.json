@@ -1,6 +1,6 @@
 {
-  "name": "gift-tracker",
-  "version": "0.1.0",
+  "name": "giftstash",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
