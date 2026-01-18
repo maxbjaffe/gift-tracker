@@ -1,0 +1,235 @@
+{
+  "version": "1.0.1",
+  "last_updated": "2026-01-18",
+  "changelog": [
+    "1.0.1: Added coach-specific gift suggestions"
+  ],
+
+  "teacher_roles": [
+    { "id": "homeroom", "name": "Homeroom/Classroom Teacher", "icon": "school" },
+    { "id": "assistant", "name": "Assistant/Aide", "icon": "user-plus" },
+    { "id": "specialist_art", "name": "Art Teacher", "icon": "palette" },
+    { "id": "specialist_music", "name": "Music Teacher", "icon": "music" },
+    { "id": "specialist_pe", "name": "PE Teacher", "icon": "dumbbell" },
+    { "id": "specialist_library", "name": "Librarian", "icon": "book" },
+    { "id": "specialist_stem", "name": "STEM/Science Teacher", "icon": "flask" },
+    { "id": "specialist_language", "name": "Language Teacher", "icon": "globe" },
+    { "id": "specialist_tech", "name": "Technology Teacher", "icon": "laptop" },
+    { "id": "special_ed", "name": "Special Education", "icon": "heart" },
+    { "id": "reading_specialist", "name": "Reading Specialist", "icon": "book-open" },
+    { "id": "math_specialist", "name": "Math Specialist", "icon": "calculator" },
+    { "id": "counselor", "name": "School Counselor", "icon": "message-circle" },
+    { "id": "nurse", "name": "School Nurse", "icon": "thermometer" },
+    { "id": "principal", "name": "Principal", "icon": "award" },
+    { "id": "vice_principal", "name": "Vice Principal", "icon": "award" },
+    { "id": "secretary", "name": "Office Secretary", "icon": "clipboard" },
+    { "id": "bus_driver", "name": "Bus Driver", "icon": "truck" },
+    { "id": "lunch_staff", "name": "Lunch/Cafeteria Staff", "icon": "utensils" },
+    { "id": "custodian", "name": "Custodian", "icon": "trash-2" },
+    { "id": "security", "name": "Security Guard", "icon": "shield" },
+    { "id": "coach", "name": "Coach", "icon": "trophy" },
+    { "id": "tutor", "name": "Tutor", "icon": "user-check" },
+    { "id": "after_school", "name": "After School Program", "icon": "clock" }
+  ],
+
+  "teacher_subjects": [
+    { "id": "homeroom", "name": "Homeroom/All Subjects" },
+    { "id": "math", "name": "Math" },
+    { "id": "english", "name": "English/Language Arts" },
+    { "id": "reading", "name": "Reading" },
+    { "id": "writing", "name": "Writing" },
+    { "id": "science", "name": "Science" },
+    { "id": "social_studies", "name": "Social Studies/History" },
+    { "id": "art", "name": "Art" },
+    { "id": "music", "name": "Music" },
+    { "id": "pe", "name": "Physical Education" },
+    { "id": "library", "name": "Library" },
+    { "id": "technology", "name": "Technology/Computer" },
+    { "id": "spanish", "name": "Spanish" },
+    { "id": "french", "name": "French" },
+    { "id": "mandarin", "name": "Mandarin" },
+    { "id": "other_language", "name": "Other Language" },
+    { "id": "drama", "name": "Drama/Theater" },
+    { "id": "band", "name": "Band" },
+    { "id": "orchestra", "name": "Orchestra" },
+    { "id": "chorus", "name": "Chorus" },
+    { "id": "health", "name": "Health" },
+    { "id": "special_ed", "name": "Special Education" },
+    { "id": "multiple", "name": "Multiple Subjects" },
+    { "id": "na", "name": "N/A (Non-teaching)" }
+  ],
+
+  "gift_policies": [
+    { "id": "unknown", "name": "Unknown", "description": "Haven't checked the policy" },
+    { "id": "no_gifts", "name": "No Gifts Allowed", "description": "School prohibits individual gifts" },
+    { "id": "class_gift_only", "name": "Class Gift Only", "description": "Pooled gifts only, no individual" },
+    { "id": "gift_cards_ok", "name": "Gift Cards OK", "description": "Gift cards explicitly allowed" },
+    { "id": "cash_limit", "name": "Cash/Value Limit", "description": "Gifts under a certain dollar amount" },
+    { "id": "homemade_preferred", "name": "Homemade Preferred", "description": "Teacher prefers handmade items" },
+    { "id": "anything_goes", "name": "Anything Goes", "description": "No restrictions" },
+    { "id": "donation_preferred", "name": "Donation Preferred", "description": "Prefers donation in their name" }
+  ],
+
+  "teacher_gift_timing": [
+    { "id": "holiday", "name": "Winter Holidays", "typical_date": "December", "remind_days": 14 },
+    { "id": "teacher_appreciation", "name": "Teacher Appreciation Week", "typical_date": "Early May", "remind_days": 21 },
+    { "id": "end_of_year", "name": "End of Year", "typical_date": "June", "remind_days": 21 },
+    { "id": "birthday", "name": "Birthday", "has_date": true, "remind_days": 14 },
+    { "id": "thank_you", "name": "Special Thank You", "has_date": false }
+  ],
+
+  "coach_sports": [
+    { "id": "soccer", "name": "Soccer" },
+    { "id": "baseball", "name": "Baseball" },
+    { "id": "softball", "name": "Softball" },
+    { "id": "basketball", "name": "Basketball" },
+    { "id": "football", "name": "Football" },
+    { "id": "hockey", "name": "Hockey" },
+    { "id": "lacrosse", "name": "Lacrosse" },
+    { "id": "tennis", "name": "Tennis" },
+    { "id": "swimming", "name": "Swimming" },
+    { "id": "track", "name": "Track & Field" },
+    { "id": "cross_country", "name": "Cross Country" },
+    { "id": "gymnastics", "name": "Gymnastics" },
+    { "id": "dance", "name": "Dance" },
+    { "id": "cheerleading", "name": "Cheerleading" },
+    { "id": "volleyball", "name": "Volleyball" },
+    { "id": "wrestling", "name": "Wrestling" },
+    { "id": "golf", "name": "Golf" },
+    { "id": "skiing", "name": "Skiing" },
+    { "id": "martial_arts", "name": "Martial Arts" },
+    { "id": "other", "name": "Other Sport" }
+  ],
+
+  "bulk_add_templates": {
+    "elementary_typical": {
+      "name": "Typical Elementary School",
+      "description": "Homeroom + common specialists",
+      "roles": [
+        { "role": "homeroom", "count": 1, "subject": "homeroom" },
+        { "role": "assistant", "count": 1, "subject": "homeroom", "optional": true },
+        { "role": "specialist_art", "count": 1, "subject": "art" },
+        { "role": "specialist_music", "count": 1, "subject": "music" },
+        { "role": "specialist_pe", "count": 1, "subject": "pe" },
+        { "role": "specialist_library", "count": 1, "subject": "library" }
+      ]
+    },
+    "elementary_full": {
+      "name": "Full Elementary Staff",
+      "description": "All teachers + support staff",
+      "roles": [
+        { "role": "homeroom", "count": 1, "subject": "homeroom" },
+        { "role": "assistant", "count": 1, "subject": "homeroom", "optional": true },
+        { "role": "specialist_art", "count": 1, "subject": "art" },
+        { "role": "specialist_music", "count": 1, "subject": "music" },
+        { "role": "specialist_pe", "count": 1, "subject": "pe" },
+        { "role": "specialist_library", "count": 1, "subject": "library" },
+        { "role": "specialist_language", "count": 1, "subject": "spanish", "optional": true },
+        { "role": "specialist_stem", "count": 1, "subject": "science", "optional": true },
+        { "role": "reading_specialist", "count": 1, "subject": "reading", "optional": true },
+        { "role": "counselor", "count": 1, "subject": "na", "optional": true },
+        { "role": "nurse", "count": 1, "subject": "na", "optional": true },
+        { "role": "principal", "count": 1, "subject": "na", "optional": true },
+        { "role": "secretary", "count": 1, "subject": "na", "optional": true }
+      ]
+    },
+    "middle_school": {
+      "name": "Middle School",
+      "description": "Multiple subject teachers",
+      "roles": [
+        { "role": "homeroom", "count": 1, "subject": "math", "label": "Math Teacher" },
+        { "role": "homeroom", "count": 1, "subject": "english", "label": "English Teacher" },
+        { "role": "homeroom", "count": 1, "subject": "science", "label": "Science Teacher" },
+        { "role": "homeroom", "count": 1, "subject": "social_studies", "label": "Social Studies Teacher" },
+        { "role": "specialist_pe", "count": 1, "subject": "pe" },
+        { "role": "specialist_art", "count": 1, "subject": "art", "optional": true },
+        { "role": "specialist_music", "count": 1, "subject": "music", "optional": true }
+      ]
+    },
+    "preschool": {
+      "name": "Preschool/Daycare",
+      "description": "Lead teacher + assistants",
+      "roles": [
+        { "role": "homeroom", "count": 1, "subject": "homeroom", "label": "Lead Teacher" },
+        { "role": "assistant", "count": 2, "subject": "homeroom", "label": "Assistant Teacher" }
+      ]
+    },
+    "sports_team": {
+      "name": "Sports Team",
+      "description": "Coaches for a single sport",
+      "roles": [
+        { "role": "coach", "count": 1, "label": "Head Coach" },
+        { "role": "coach", "count": 1, "label": "Assistant Coach", "optional": true }
+      ]
+    }
+  },
+
+  "common_teacher_gifts": {
+    "safe_bets": [
+      "Gift card (Amazon, Target, Starbucks, local coffee shop)",
+      "Classroom supplies (markers, sticky notes, tissues)",
+      "Hand sanitizer / hand lotion",
+      "Reusable tote bag",
+      "Nice pen or stationary",
+      "Chocolate or treats (check allergies)"
+    ],
+    "premium": [
+      "Spa gift card",
+      "Nice candle (check sensitivities)",
+      "Book with personal note",
+      "Donation to classroom fund",
+      "DoorDash / UberEats gift card"
+    ],
+    "avoid_unless_sure": [
+      "Mugs (teachers have too many)",
+      "Apple-themed items (cliche)",
+      "Homemade food (allergies/dietary)",
+      "Alcohol (policy issues)",
+      "Strong fragrances"
+    ]
+  },
+
+  "common_coach_gifts": {
+    "safe_bets": [
+      "Gift card (Dick's Sporting Goods, Amazon, local sports store)",
+      "Team photo in frame with thank you note",
+      "Sport-specific accessories (whistle, clipboard, stopwatch)",
+      "Cooler or insulated water jug",
+      "Gift card to local restaurant",
+      "Nice team-branded apparel (check size first)"
+    ],
+    "premium": [
+      "High-end coaching gear (quality whistle, digital stopwatch)",
+      "Personalized coaching clipboard or dry-erase board",
+      "Professional massage or spa gift card",
+      "Season tickets to local pro/college team",
+      "Engraved item with team name/year"
+    ],
+    "by_sport": {
+      "soccer": ["Soccer ball pump kit", "Cone set", "Pop-up goals"],
+      "baseball": ["Bucket of practice balls", "Pitching target net", "Batting tee"],
+      "softball": ["Practice softballs", "Hitting net", "Catching mitt"],
+      "basketball": ["Practice ball rack", "Shooting trainer", "Coaching whiteboard"],
+      "football": ["Practice cones", "Agility ladder", "Football pump"],
+      "hockey": ["Puck bucket", "Stick tape variety pack", "Coaching clipboard"],
+      "lacrosse": ["Ball bucket", "Rebounder net", "Training aids"],
+      "tennis": ["Ball hopper", "Racket bag", "Court squeegee"],
+      "swimming": ["Waterproof clipboard", "Stopwatch set", "Kickboard set"],
+      "gymnastics": ["Training mats", "Grip accessories", "Music speaker"],
+      "dance": ["Portable speaker", "Choreography notebook", "Warm-up gear"],
+      "martial_arts": ["Training pads", "Focus mitts", "Belt display"]
+    },
+    "avoid_unless_sure": [
+      "Alcohol (league policy issues)",
+      "Clothing without knowing size",
+      "Equipment they may already have",
+      "Items for sports they don't coach"
+    ],
+    "timing": {
+      "end_of_season": "Most common - after final game/tournament",
+      "holidays": "If season spans December",
+      "coach_birthday": "If you know the date",
+      "championship_win": "Celebrate with team gift"
+    }
+  }
+}

@@ -1,0 +1,300 @@
+{
+  "version": "1.0.1",
+  "last_updated": "2026-01-18",
+  "changelog": [
+    "1.0.1: Added stash_locations for structured gift inventory location tracking"
+  ],
+
+  "relationship_categories": [
+    {
+      "id": "immediate_family",
+      "name": "Immediate Family",
+      "icon": "home",
+      "sub_types": [
+        { "id": "spouse", "name": "Spouse/Partner", "show_anniversary": true },
+        { "id": "child", "name": "Child", "show_age": true, "show_grade": true },
+        { "id": "parent", "name": "Parent" },
+        { "id": "sibling", "name": "Sibling" },
+        { "id": "step_child", "name": "Step-Child", "show_age": true, "show_grade": true },
+        { "id": "step_parent", "name": "Step-Parent" }
+      ]
+    },
+    {
+      "id": "extended_family",
+      "name": "Extended Family",
+      "icon": "users",
+      "sub_types": [
+        { "id": "grandparent", "name": "Grandparent" },
+        { "id": "grandchild", "name": "Grandchild", "show_age": true },
+        { "id": "in_law_parent", "name": "Parent-in-Law" },
+        { "id": "in_law_sibling", "name": "Sibling-in-Law" },
+        { "id": "in_law_child", "name": "Son/Daughter-in-Law" },
+        { "id": "aunt_uncle", "name": "Aunt/Uncle" },
+        { "id": "cousin", "name": "Cousin" },
+        { "id": "niece_nephew", "name": "Niece/Nephew", "show_age": true }
+      ]
+    },
+    {
+      "id": "friends",
+      "name": "Friends",
+      "icon": "heart",
+      "sub_types": [
+        { "id": "close_friend", "name": "Close Friend" },
+        { "id": "couple_friends", "name": "Couple Friends" },
+        { "id": "kids_friend_parent", "name": "Kids' Friend's Parent" },
+        { "id": "kids_friend", "name": "Kids' Friend", "show_age": true },
+        { "id": "college_friend", "name": "College Friend" },
+        { "id": "childhood_friend", "name": "Childhood Friend" },
+        { "id": "work_friend", "name": "Work Friend" },
+        { "id": "neighbor_friend", "name": "Neighbor Friend" }
+      ]
+    },
+    {
+      "id": "professional",
+      "name": "Professional",
+      "icon": "briefcase",
+      "sub_types": [
+        { "id": "boss", "name": "Boss/Manager" },
+        { "id": "direct_report", "name": "Direct Report" },
+        { "id": "coworker", "name": "Coworker" },
+        { "id": "client", "name": "Client" },
+        { "id": "assistant", "name": "Assistant" },
+        { "id": "mentor", "name": "Mentor" },
+        { "id": "mentee", "name": "Mentee" },
+        { "id": "business_partner", "name": "Business Partner" }
+      ],
+      "default_avoid": ["alcohol", "clothing", "jewelry"]
+    },
+    {
+      "id": "community",
+      "name": "Community",
+      "icon": "map-pin",
+      "sub_types": [
+        { "id": "neighbor", "name": "Neighbor" },
+        { "id": "teacher", "name": "Teacher", "is_teacher": true },
+        { "id": "coach", "name": "Coach", "is_teacher": true },
+        { "id": "babysitter", "name": "Babysitter/Nanny" },
+        { "id": "tutor", "name": "Tutor", "is_teacher": true },
+        { "id": "therapist", "name": "Therapist/Doctor" },
+        { "id": "hairdresser", "name": "Hairdresser/Stylist" },
+        { "id": "housekeeper", "name": "Housekeeper/Cleaner" },
+        { "id": "mail_carrier", "name": "Mail Carrier" },
+        { "id": "building_staff", "name": "Building Staff/Doorman" },
+        { "id": "religious_leader", "name": "Religious Leader" },
+        { "id": "personal_trainer", "name": "Personal Trainer" }
+      ]
+    },
+    {
+      "id": "events",
+      "name": "Events",
+      "icon": "calendar",
+      "sub_types": [
+        { "id": "party_guest", "name": "Party Guest", "show_age": true },
+        { "id": "wedding_couple", "name": "Wedding Couple" },
+        { "id": "baby_shower", "name": "Baby Shower" },
+        { "id": "graduation", "name": "Graduation" },
+        { "id": "housewarming", "name": "Housewarming" },
+        { "id": "retirement", "name": "Retirement" },
+        { "id": "bridal_shower", "name": "Bridal Shower" },
+        { "id": "engagement", "name": "Engagement" }
+      ]
+    },
+    {
+      "id": "gift_stash",
+      "name": "Gift Stash (On Hand)",
+      "icon": "package",
+      "sub_types": [
+        { "id": "kids_party_backup", "name": "Kids Party Backup", "show_age_range": true },
+        { "id": "hostess", "name": "Hostess/Host Gift" },
+        { "id": "wine_stash", "name": "Wine/Spirits" },
+        { "id": "generic", "name": "Generic Gift" },
+        { "id": "regift", "name": "Regift" },
+        { "id": "teacher_bulk", "name": "Teacher/Staff Bulk", "is_teacher": true },
+        { "id": "holiday_generic", "name": "Holiday Generic" }
+      ],
+      "is_inventory": true
+    }
+  ],
+
+  "life_stages": [
+    { "id": "baby", "name": "Baby", "age_range": [0, 1], "show_exact_age": true },
+    { "id": "toddler", "name": "Toddler", "age_range": [2, 4], "show_exact_age": true },
+    { "id": "young_kid", "name": "Young Kid", "age_range": [5, 7], "show_exact_age": true },
+    { "id": "tween", "name": "Tween", "age_range": [8, 12], "show_exact_age": true },
+    { "id": "teen", "name": "Teen", "age_range": [13, 17], "show_exact_age": true },
+    { "id": "young_adult", "name": "Young Adult", "age_range": [18, 25] },
+    { "id": "adult", "name": "Adult", "age_range": [26, 64] },
+    { "id": "senior", "name": "Senior", "age_range": [65, 120] }
+  ],
+
+  "grades": [
+    { "id": "prek", "name": "Pre-K", "typical_age": 4 },
+    { "id": "k", "name": "Kindergarten", "typical_age": 5 },
+    { "id": "1st", "name": "1st Grade", "typical_age": 6 },
+    { "id": "2nd", "name": "2nd Grade", "typical_age": 7 },
+    { "id": "3rd", "name": "3rd Grade", "typical_age": 8 },
+    { "id": "4th", "name": "4th Grade", "typical_age": 9 },
+    { "id": "5th", "name": "5th Grade", "typical_age": 10 },
+    { "id": "6th", "name": "6th Grade", "typical_age": 11 },
+    { "id": "7th", "name": "7th Grade", "typical_age": 12 },
+    { "id": "8th", "name": "8th Grade", "typical_age": 13 },
+    { "id": "9th", "name": "9th Grade (Freshman)", "typical_age": 14 },
+    { "id": "10th", "name": "10th Grade (Sophomore)", "typical_age": 15 },
+    { "id": "11th", "name": "11th Grade (Junior)", "typical_age": 16 },
+    { "id": "12th", "name": "12th Grade (Senior)", "typical_age": 17 },
+    { "id": "college_freshman", "name": "College Freshman", "typical_age": 18 },
+    { "id": "college_sophomore", "name": "College Sophomore", "typical_age": 19 },
+    { "id": "college_junior", "name": "College Junior", "typical_age": 20 },
+    { "id": "college_senior", "name": "College Senior", "typical_age": 21 },
+    { "id": "grad_school", "name": "Grad School", "typical_age": 23 }
+  ],
+
+  "genders": [
+    { "id": "male", "name": "Male" },
+    { "id": "female", "name": "Female" },
+    { "id": "non_binary", "name": "Non-binary" },
+    { "id": "unspecified", "name": "Prefer not to specify" }
+  ],
+
+  "budget_tiers": [
+    { "id": "budget", "name": "Budget-Friendly", "range": [0, 25], "display": "Under $25" },
+    { "id": "moderate", "name": "Moderate", "range": [25, 75], "display": "$25 - $75" },
+    { "id": "premium", "name": "Premium", "range": [75, 150], "display": "$75 - $150" },
+    { "id": "luxury", "name": "Luxury", "range": [150, 500], "display": "$150 - $500" },
+    { "id": "splurge", "name": "Splurge", "range": [500, null], "display": "$500+" },
+    { "id": "no_limit", "name": "No Limit", "range": [0, null], "display": "No budget" }
+  ],
+
+  "gift_styles": [
+    { "id": "practical", "name": "Practical/Useful", "description": "Things they'll actually use", "icon": "tool" },
+    { "id": "experiential", "name": "Experiential", "description": "Events, classes, trips", "icon": "ticket" },
+    { "id": "sentimental", "name": "Sentimental", "description": "Personal, meaningful items", "icon": "heart" },
+    { "id": "funny", "name": "Funny/Playful", "description": "Gag gifts, humor", "icon": "smile" },
+    { "id": "luxurious", "name": "Luxurious", "description": "Premium, indulgent items", "icon": "crown" },
+    { "id": "handmade", "name": "Handmade/Personal", "description": "DIY, custom, artisan", "icon": "hand" },
+    { "id": "tech", "name": "Tech/Gadgets", "description": "Electronics, smart devices", "icon": "smartphone" },
+    { "id": "consumable", "name": "Consumable", "description": "Food, wine, items that get used up", "icon": "coffee" },
+    { "id": "educational", "name": "Educational", "description": "Learning, skills, books", "icon": "book" },
+    { "id": "surprise", "name": "Surprise Me", "description": "Something unexpected", "icon": "gift" }
+  ],
+
+  "avoid_categories": [
+    { "id": "alcohol", "name": "Alcohol", "reason": "Doesn't drink / recovery / religion" },
+    { "id": "food", "name": "Food/Edibles", "reason": "Dietary restrictions / allergies" },
+    { "id": "clothing", "name": "Clothing", "reason": "Sizing issues / personal taste" },
+    { "id": "jewelry", "name": "Jewelry", "reason": "Personal taste / doesn't wear" },
+    { "id": "home_decor", "name": "Home Decor", "reason": "Specific taste / space constraints" },
+    { "id": "pets_related", "name": "Pets-Related", "reason": "No pets / allergies" },
+    { "id": "fragrance", "name": "Fragrance", "reason": "Sensitivities / preferences" },
+    { "id": "candles", "name": "Candles", "reason": "Sensitivities / fire concerns" },
+    { "id": "religious", "name": "Religious Items", "reason": "Different beliefs / secular" },
+    { "id": "political", "name": "Political Items", "reason": "Avoid controversy" },
+    { "id": "experiences", "name": "Experiences/Events", "reason": "Scheduling / mobility" },
+    { "id": "tech", "name": "Tech/Electronics", "reason": "Not tech-savvy / already has" },
+    { "id": "books", "name": "Books", "reason": "Doesn't read / prefers digital" },
+    { "id": "plants", "name": "Plants", "reason": "Can't keep alive / allergies" },
+    { "id": "clutter", "name": "Physical Items (Minimalist)", "reason": "Prefers experiences / no space" },
+    { "id": "gift_cards", "name": "Gift Cards", "reason": "Feels impersonal" }
+  ],
+
+  "occasions": [
+    { "id": "birthday", "name": "Birthday", "has_date": true, "recurring": "yearly" },
+    { "id": "anniversary", "name": "Anniversary", "has_date": true, "recurring": "yearly" },
+    { "id": "christmas", "name": "Christmas", "fixed_date": "12-25", "recurring": "yearly" },
+    { "id": "hanukkah", "name": "Hanukkah", "variable_date": true, "recurring": "yearly" },
+    { "id": "mothers_day", "name": "Mother's Day", "variable_date": true, "recurring": "yearly" },
+    { "id": "fathers_day", "name": "Father's Day", "variable_date": true, "recurring": "yearly" },
+    { "id": "valentines", "name": "Valentine's Day", "fixed_date": "02-14", "recurring": "yearly" },
+    { "id": "easter", "name": "Easter", "variable_date": true, "recurring": "yearly" },
+    { "id": "thanksgiving", "name": "Thanksgiving", "variable_date": true, "recurring": "yearly" },
+    { "id": "graduation", "name": "Graduation", "has_date": true, "recurring": false },
+    { "id": "wedding", "name": "Wedding", "has_date": true, "recurring": false },
+    { "id": "baby_shower", "name": "Baby Shower", "has_date": true, "recurring": false },
+    { "id": "housewarming", "name": "Housewarming", "has_date": true, "recurring": false },
+    { "id": "retirement", "name": "Retirement", "has_date": true, "recurring": false },
+    { "id": "teacher_appreciation", "name": "Teacher Appreciation Week", "variable_date": true, "recurring": "yearly" },
+    { "id": "end_of_year", "name": "End of School Year", "variable_date": true, "recurring": "yearly" },
+    { "id": "holiday_generic", "name": "Holidays (Generic)", "variable_date": true, "recurring": "yearly" },
+    { "id": "just_because", "name": "Just Because", "has_date": false, "recurring": false },
+    { "id": "thank_you", "name": "Thank You", "has_date": false, "recurring": false },
+    { "id": "get_well", "name": "Get Well", "has_date": false, "recurring": false },
+    { "id": "sympathy", "name": "Sympathy", "has_date": false, "recurring": false },
+    { "id": "congratulations", "name": "Congratulations", "has_date": false, "recurring": false },
+    { "id": "custom", "name": "Custom", "has_date": true, "recurring": false }
+  ],
+
+  "reminder_lead_times": [
+    { "id": "1_week", "name": "1 Week", "days": 7 },
+    { "id": "2_weeks", "name": "2 Weeks", "days": 14 },
+    { "id": "3_weeks", "name": "3 Weeks", "days": 21 },
+    { "id": "1_month", "name": "1 Month", "days": 30 },
+    { "id": "6_weeks", "name": "6 Weeks", "days": 42 },
+    { "id": "2_months", "name": "2 Months", "days": 60 }
+  ],
+
+  "size_types": [
+    {
+      "id": "shirt",
+      "name": "Shirt Size",
+      "options": ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL"]
+    },
+    {
+      "id": "pants_waist",
+      "name": "Pants Waist",
+      "options": ["26", "28", "29", "30", "31", "32", "33", "34", "36", "38", "40", "42", "44"]
+    },
+    {
+      "id": "pants_length",
+      "name": "Pants Length",
+      "options": ["28", "29", "30", "31", "32", "33", "34", "36"]
+    },
+    {
+      "id": "dress",
+      "name": "Dress Size",
+      "options": ["0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24"]
+    },
+    {
+      "id": "shoe_mens",
+      "name": "Men's Shoe",
+      "options": ["6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "13", "14", "15"]
+    },
+    {
+      "id": "shoe_womens",
+      "name": "Women's Shoe",
+      "options": ["5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "12"]
+    },
+    {
+      "id": "shoe_kids",
+      "name": "Kids' Shoe",
+      "description": "Sizes ending in Y are youth sizes (typically ages 7+)",
+      "options": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y"]
+    },
+    {
+      "id": "ring",
+      "name": "Ring Size",
+      "options": ["4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "13", "14"]
+    },
+    {
+      "id": "kids_clothing",
+      "name": "Kids Clothing",
+      "options": ["NB", "0-3M", "3-6M", "6-9M", "9-12M", "12M", "18M", "24M", "2T", "3T", "4T", "5T", "XS (4-5)", "S (6-7)", "M (8-10)", "L (12-14)", "XL (16)"]
+    }
+  ],
+
+  "stash_locations": [
+    { "id": "hall_closet", "name": "Hall Closet", "icon": "door-closed" },
+    { "id": "bedroom_closet", "name": "Bedroom Closet", "icon": "door-closed" },
+    { "id": "gift_closet", "name": "Gift Closet/Wrapping Station", "icon": "gift" },
+    { "id": "basement", "name": "Basement", "icon": "home" },
+    { "id": "attic", "name": "Attic", "icon": "home" },
+    { "id": "garage", "name": "Garage", "icon": "warehouse" },
+    { "id": "office", "name": "Home Office", "icon": "briefcase" },
+    { "id": "kids_room", "name": "Kids' Room", "icon": "baby" },
+    { "id": "guest_room", "name": "Guest Room", "icon": "bed" },
+    { "id": "wine_rack", "name": "Wine Rack/Cellar", "icon": "wine" },
+    { "id": "pantry", "name": "Pantry", "icon": "utensils" },
+    { "id": "mudroom", "name": "Mudroom/Entryway", "icon": "door-open" },
+    { "id": "storage_unit", "name": "Storage Unit", "icon": "archive" },
+    { "id": "other", "name": "Other (specify in notes)", "icon": "map-pin" }
+  ]
+}

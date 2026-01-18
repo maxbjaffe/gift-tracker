@@ -1,0 +1,739 @@
+{
+  "version": "1.0.1",
+  "last_updated": "2026-01-18",
+  "changelog": [
+    "1.0.1: Fixed art_collecting ID collision (home_decor now uses 'wall_art'), removed pickleball from tennis keywords, added quick_pick flags for kids party guests"
+  ],
+  "categories": [
+    {
+      "id": "sports_fitness",
+      "name": "Sports & Fitness",
+      "icon": "dumbbell",
+      "subcategories": [
+        {
+          "id": "team_sports",
+          "name": "Team Sports",
+          "interests": [
+            { "id": "football", "name": "Football", "keywords": ["nfl", "fantasy football", "tailgate"] },
+            { "id": "baseball", "name": "Baseball", "keywords": ["mlb", "softball", "little league"] },
+            { "id": "basketball", "name": "Basketball", "keywords": ["nba", "hoops", "march madness"] },
+            { "id": "soccer", "name": "Soccer", "keywords": ["football", "futbol", "mls", "premier league"] },
+            { "id": "hockey", "name": "Hockey", "keywords": ["nhl", "ice hockey", "field hockey"] },
+            { "id": "volleyball", "name": "Volleyball", "keywords": ["beach volleyball"] },
+            { "id": "lacrosse", "name": "Lacrosse", "keywords": ["lax"] },
+            { "id": "rugby", "name": "Rugby", "keywords": [] },
+            { "id": "cricket", "name": "Cricket", "keywords": [] }
+          ]
+        },
+        {
+          "id": "individual_sports",
+          "name": "Individual Sports",
+          "interests": [
+            { "id": "golf", "name": "Golf", "keywords": ["pga", "driving range", "putting"] },
+            { "id": "tennis", "name": "Tennis", "keywords": ["racquet", "us open", "wimbledon"] },
+            { "id": "pickleball", "name": "Pickleball", "keywords": ["paddle", "dink", "kitchen"] },
+            { "id": "running", "name": "Running", "keywords": ["marathon", "jogging", "5k", "trail running"] },
+            { "id": "cycling", "name": "Cycling", "keywords": ["biking", "mountain biking", "road cycling", "peloton"] },
+            { "id": "swimming", "name": "Swimming", "keywords": ["lap swimming", "triathlon"] },
+            { "id": "boxing", "name": "Boxing", "keywords": ["mma", "kickboxing", "martial arts"] },
+            { "id": "martial_arts", "name": "Martial Arts", "keywords": ["karate", "jiu jitsu", "taekwondo", "judo"] },
+            { "id": "gymnastics", "name": "Gymnastics", "keywords": ["tumbling"] },
+            { "id": "track_field", "name": "Track & Field", "keywords": ["sprinting", "jumping", "throwing"] },
+            { "id": "figure_skating", "name": "Figure Skating", "keywords": ["ice skating"] },
+            { "id": "equestrian", "name": "Equestrian", "keywords": ["horseback riding", "horses"] }
+          ]
+        },
+        {
+          "id": "fitness",
+          "name": "Fitness & Gym",
+          "interests": [
+            { "id": "yoga", "name": "Yoga", "keywords": ["vinyasa", "hot yoga", "meditation"] },
+            { "id": "pilates", "name": "Pilates", "keywords": ["reformer"] },
+            { "id": "crossfit", "name": "CrossFit", "keywords": ["wod", "functional fitness"] },
+            { "id": "weightlifting", "name": "Weightlifting", "keywords": ["powerlifting", "bodybuilding", "strength training"] },
+            { "id": "hiit", "name": "HIIT", "keywords": ["interval training", "cardio"] },
+            { "id": "barre", "name": "Barre", "keywords": ["pure barre"] },
+            { "id": "spin", "name": "Spin/Cycling", "keywords": ["soulcycle", "peloton"] },
+            { "id": "dance_fitness", "name": "Dance Fitness", "keywords": ["zumba", "dance cardio"] }
+          ]
+        },
+        {
+          "id": "outdoor_sports",
+          "name": "Outdoor & Adventure",
+          "interests": [
+            { "id": "hiking", "name": "Hiking", "keywords": ["trails", "backpacking", "trekking"] },
+            { "id": "camping", "name": "Camping", "keywords": ["glamping", "tent", "outdoors"] },
+            { "id": "fishing", "name": "Fishing", "keywords": ["fly fishing", "bass fishing", "deep sea"] },
+            { "id": "hunting", "name": "Hunting", "keywords": ["bow hunting", "deer hunting"] },
+            { "id": "skiing", "name": "Skiing", "keywords": ["downhill", "alpine", "ski resort"] },
+            { "id": "snowboarding", "name": "Snowboarding", "keywords": ["shredding"] },
+            { "id": "surfing", "name": "Surfing", "keywords": ["waves", "board"] },
+            { "id": "kayaking", "name": "Kayaking", "keywords": ["canoeing", "paddling"] },
+            { "id": "paddleboarding", "name": "Paddleboarding", "keywords": ["sup", "stand up paddle"] },
+            { "id": "rock_climbing", "name": "Rock Climbing", "keywords": ["bouldering", "climbing gym"] },
+            { "id": "sailing", "name": "Sailing", "keywords": ["boating", "yacht"] },
+            { "id": "scuba", "name": "Scuba Diving", "keywords": ["diving", "snorkeling"] },
+            { "id": "skateboarding", "name": "Skateboarding", "keywords": ["skate"] }
+          ]
+        },
+        {
+          "id": "sports_fan",
+          "name": "Sports Fan",
+          "interests": [
+            { "id": "fantasy_sports", "name": "Fantasy Sports", "keywords": ["fantasy football", "fantasy baseball", "draftkings"] },
+            { "id": "sports_memorabilia", "name": "Sports Memorabilia", "keywords": ["jerseys", "signed", "collectibles"] },
+            { "id": "sports_cards", "name": "Sports Cards", "keywords": ["trading cards", "collecting"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "food_drink",
+      "name": "Food & Drink",
+      "icon": "utensils",
+      "subcategories": [
+        {
+          "id": "cooking",
+          "name": "Cooking & Kitchen",
+          "interests": [
+            { "id": "home_cooking", "name": "Home Cooking", "keywords": ["recipes", "meal prep", "weeknight dinners"] },
+            { "id": "baking", "name": "Baking", "keywords": ["cakes", "cookies", "bread", "pastry"] },
+            { "id": "grilling", "name": "Grilling & BBQ", "keywords": ["smoker", "barbecue", "outdoor cooking", "charcoal"] },
+            { "id": "sous_vide", "name": "Sous Vide", "keywords": ["precision cooking"] },
+            { "id": "instant_pot", "name": "Instant Pot/Pressure Cooking", "keywords": ["slow cooker"] },
+            { "id": "air_fryer", "name": "Air Fryer", "keywords": [] },
+            { "id": "pizza_making", "name": "Pizza Making", "keywords": ["ooni", "pizza oven"] },
+            { "id": "fermentation", "name": "Fermentation", "keywords": ["pickling", "kimchi", "sauerkraut", "kombucha"] },
+            { "id": "canning", "name": "Canning & Preserving", "keywords": ["jam", "preserves"] }
+          ]
+        },
+        {
+          "id": "beverages",
+          "name": "Beverages",
+          "interests": [
+            { "id": "wine", "name": "Wine", "keywords": ["red wine", "white wine", "sommelier", "vineyard"] },
+            { "id": "craft_beer", "name": "Craft Beer", "keywords": ["ipa", "brewery", "microbrews"] },
+            { "id": "whiskey", "name": "Whiskey & Bourbon", "keywords": ["scotch", "rye", "single malt"] },
+            { "id": "cocktails", "name": "Cocktails & Mixology", "keywords": ["bartending", "home bar", "spirits"] },
+            { "id": "coffee", "name": "Coffee", "keywords": ["espresso", "latte", "pour over", "cold brew", "barista"] },
+            { "id": "tea", "name": "Tea", "keywords": ["loose leaf", "matcha", "herbal"] },
+            { "id": "non_alcoholic", "name": "Non-Alcoholic", "keywords": ["mocktails", "sober curious", "na beer"] }
+          ]
+        },
+        {
+          "id": "food_enthusiast",
+          "name": "Food Enthusiast",
+          "interests": [
+            { "id": "foodie", "name": "Foodie/Restaurants", "keywords": ["dining out", "fine dining", "food tours"] },
+            { "id": "cheese", "name": "Cheese", "keywords": ["charcuterie", "cheese board"] },
+            { "id": "chocolate", "name": "Chocolate", "keywords": ["artisan chocolate", "truffles"] },
+            { "id": "spicy_food", "name": "Spicy Food", "keywords": ["hot sauce", "chili", "peppers"] },
+            { "id": "healthy_eating", "name": "Healthy Eating", "keywords": ["organic", "clean eating", "nutrition"] },
+            { "id": "plant_based", "name": "Plant-Based/Vegan", "keywords": ["vegetarian", "vegan"] },
+            { "id": "keto", "name": "Keto/Low-Carb", "keywords": ["paleo", "whole30"] }
+          ]
+        },
+        {
+          "id": "cuisines",
+          "name": "Cuisines",
+          "interests": [
+            { "id": "italian", "name": "Italian", "keywords": ["pasta", "pizza", "mediterranean"] },
+            { "id": "mexican", "name": "Mexican", "keywords": ["tacos", "tex-mex", "latin"] },
+            { "id": "japanese", "name": "Japanese", "keywords": ["sushi", "ramen", "izakaya"] },
+            { "id": "chinese", "name": "Chinese", "keywords": ["dim sum", "szechuan", "cantonese"] },
+            { "id": "indian", "name": "Indian", "keywords": ["curry", "tandoori", "south asian"] },
+            { "id": "thai", "name": "Thai", "keywords": ["pad thai", "curry"] },
+            { "id": "korean", "name": "Korean", "keywords": ["bbq", "kimchi", "bibimbap"] },
+            { "id": "french", "name": "French", "keywords": ["bistro", "patisserie"] },
+            { "id": "greek", "name": "Greek/Mediterranean", "keywords": ["mediterranean", "mezze"] },
+            { "id": "middle_eastern", "name": "Middle Eastern", "keywords": ["lebanese", "persian", "falafel"] },
+            { "id": "southern", "name": "Southern/Soul Food", "keywords": ["comfort food", "bbq"] },
+            { "id": "cajun", "name": "Cajun/Creole", "keywords": ["louisiana", "new orleans"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "icon": "film",
+      "subcategories": [
+        {
+          "id": "movies_tv",
+          "name": "Movies & TV",
+          "interests": [
+            { "id": "movies", "name": "Movies", "keywords": ["cinema", "film buff", "movie night"] },
+            { "id": "tv_streaming", "name": "TV/Streaming", "keywords": ["binge watching", "netflix", "hbo"] },
+            { "id": "documentaries", "name": "Documentaries", "keywords": ["true crime", "nature docs"] },
+            { "id": "anime", "name": "Anime", "keywords": ["manga", "japanese animation"] },
+            { "id": "classic_films", "name": "Classic Films", "keywords": ["old movies", "criterion"] },
+            { "id": "horror", "name": "Horror", "keywords": ["scary movies", "thriller"] },
+            { "id": "sci_fi", "name": "Sci-Fi/Fantasy", "keywords": ["star wars", "star trek", "marvel", "dc"] },
+            { "id": "comedy", "name": "Comedy", "keywords": ["stand-up", "sitcoms"] },
+            { "id": "reality_tv", "name": "Reality TV", "keywords": ["competition shows", "dating shows"] }
+          ]
+        },
+        {
+          "id": "music",
+          "name": "Music (Listening)",
+          "interests": [
+            { "id": "music_general", "name": "Music Lover", "keywords": ["concerts", "live music", "spotify"] },
+            { "id": "vinyl", "name": "Vinyl/Records", "keywords": ["turntable", "record collecting", "audiophile"] },
+            { "id": "concerts", "name": "Concerts & Live Music", "keywords": ["festivals", "shows", "gigs"] },
+            { "id": "rock", "name": "Rock", "keywords": ["classic rock", "alternative", "indie"] },
+            { "id": "pop", "name": "Pop", "keywords": ["top 40"] },
+            { "id": "hip_hop", "name": "Hip-Hop/R&B", "keywords": ["rap"] },
+            { "id": "country", "name": "Country", "keywords": ["country music", "nashville"] },
+            { "id": "jazz", "name": "Jazz", "keywords": ["blues", "soul"] },
+            { "id": "classical", "name": "Classical", "keywords": ["orchestra", "symphony", "opera"] },
+            { "id": "electronic", "name": "Electronic/EDM", "keywords": ["techno", "house", "dj"] }
+          ]
+        },
+        {
+          "id": "gaming",
+          "name": "Gaming",
+          "interests": [
+            { "id": "video_games", "name": "Video Games", "keywords": ["playstation", "xbox", "nintendo", "pc gaming"] },
+            { "id": "board_games", "name": "Board Games", "keywords": ["tabletop", "game night", "strategy games"] },
+            { "id": "card_games", "name": "Card Games", "keywords": ["poker", "magic the gathering", "uno"] },
+            { "id": "puzzles", "name": "Puzzles", "keywords": ["jigsaw", "crossword", "brain teasers"] },
+            { "id": "trivia", "name": "Trivia", "keywords": ["quiz night", "pub trivia"] },
+            { "id": "escape_rooms", "name": "Escape Rooms", "keywords": ["puzzle rooms"] },
+            { "id": "dungeons_dragons", "name": "D&D/RPGs", "keywords": ["tabletop rpg", "role playing"] }
+          ]
+        },
+        {
+          "id": "reading",
+          "name": "Reading",
+          "interests": [
+            { "id": "fiction", "name": "Fiction", "keywords": ["novels", "literary fiction"] },
+            { "id": "non_fiction", "name": "Non-Fiction", "keywords": ["biographies", "history", "science"] },
+            { "id": "mystery", "name": "Mystery/Thriller", "keywords": ["crime fiction", "detective"] },
+            { "id": "romance", "name": "Romance", "keywords": ["love stories"] },
+            { "id": "fantasy_books", "name": "Fantasy/Sci-Fi", "keywords": ["epic fantasy", "space opera"] },
+            { "id": "self_help", "name": "Self-Help/Personal Development", "keywords": ["motivation", "productivity"] },
+            { "id": "business_books", "name": "Business Books", "keywords": ["leadership", "entrepreneurship"] },
+            { "id": "audiobooks", "name": "Audiobooks", "keywords": ["audible", "listening"] },
+            { "id": "book_club", "name": "Book Club", "keywords": ["reading groups"] },
+            { "id": "comics", "name": "Comics/Graphic Novels", "keywords": ["manga", "dc", "marvel"] }
+          ]
+        },
+        {
+          "id": "performing_arts",
+          "name": "Performing Arts",
+          "interests": [
+            { "id": "theater", "name": "Theater", "keywords": ["broadway", "plays", "musicals"] },
+            { "id": "ballet", "name": "Ballet/Dance", "keywords": ["dance performances"] },
+            { "id": "comedy_shows", "name": "Comedy Shows", "keywords": ["stand-up", "improv"] },
+            { "id": "opera", "name": "Opera", "keywords": ["classical singing"] }
+          ]
+        },
+        {
+          "id": "podcasts",
+          "name": "Podcasts",
+          "interests": [
+            { "id": "podcasts_general", "name": "Podcasts", "keywords": ["podcast listener"] },
+            { "id": "true_crime_pods", "name": "True Crime", "keywords": ["murder mystery", "crime stories"] },
+            { "id": "comedy_pods", "name": "Comedy Podcasts", "keywords": ["funny"] },
+            { "id": "interview_pods", "name": "Interview/Conversation", "keywords": ["talk shows"] },
+            { "id": "news_pods", "name": "News & Politics", "keywords": ["current events"] },
+            { "id": "educational_pods", "name": "Educational", "keywords": ["learning", "history"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "creative",
+      "name": "Creative & Hobbies",
+      "icon": "palette",
+      "subcategories": [
+        {
+          "id": "visual_arts",
+          "name": "Visual Arts",
+          "interests": [
+            { "id": "painting", "name": "Painting", "keywords": ["watercolor", "acrylic", "oil painting", "canvas"] },
+            { "id": "drawing", "name": "Drawing", "keywords": ["sketching", "illustration", "pencil"] },
+            { "id": "digital_art", "name": "Digital Art", "keywords": ["graphic design", "procreate", "tablet"] },
+            { "id": "photography", "name": "Photography", "keywords": ["camera", "photos", "portrait", "landscape"] },
+            { "id": "pottery", "name": "Pottery/Ceramics", "keywords": ["clay", "wheel throwing", "kiln"] },
+            { "id": "sculpture", "name": "Sculpture", "keywords": ["3d art", "carving"] },
+            { "id": "calligraphy", "name": "Calligraphy", "keywords": ["lettering", "hand lettering"] },
+            { "id": "printmaking", "name": "Printmaking", "keywords": ["linocut", "screen printing"] }
+          ]
+        },
+        {
+          "id": "music_playing",
+          "name": "Music (Playing)",
+          "interests": [
+            { "id": "guitar", "name": "Guitar", "keywords": ["acoustic", "electric", "bass"] },
+            { "id": "piano", "name": "Piano/Keyboard", "keywords": ["keys", "synthesizer"] },
+            { "id": "drums", "name": "Drums/Percussion", "keywords": ["drumming", "beats"] },
+            { "id": "violin", "name": "Violin/Strings", "keywords": ["cello", "viola", "orchestra"] },
+            { "id": "singing", "name": "Singing", "keywords": ["vocals", "karaoke", "choir"] },
+            { "id": "ukulele", "name": "Ukulele", "keywords": [] },
+            { "id": "dj_production", "name": "DJ/Music Production", "keywords": ["mixing", "beats", "ableton"] }
+          ]
+        },
+        {
+          "id": "crafts",
+          "name": "Crafts",
+          "interests": [
+            { "id": "knitting", "name": "Knitting", "keywords": ["yarn", "needles", "sweaters"] },
+            { "id": "crocheting", "name": "Crocheting", "keywords": ["yarn", "hooks"] },
+            { "id": "sewing", "name": "Sewing", "keywords": ["quilting", "fabric", "machine"] },
+            { "id": "embroidery", "name": "Embroidery", "keywords": ["cross stitch", "needlepoint"] },
+            { "id": "jewelry_making", "name": "Jewelry Making", "keywords": ["beading", "wire wrapping"] },
+            { "id": "candle_making", "name": "Candle Making", "keywords": ["wax", "scents"] },
+            { "id": "soap_making", "name": "Soap Making", "keywords": ["bath bombs"] },
+            { "id": "scrapbooking", "name": "Scrapbooking", "keywords": ["memory keeping", "paper crafts"] },
+            { "id": "origami", "name": "Origami/Paper Crafts", "keywords": ["paper folding"] },
+            { "id": "leatherwork", "name": "Leatherwork", "keywords": ["leather crafting"] },
+            { "id": "macrame", "name": "Macrame", "keywords": ["plant hangers", "wall hangings"] }
+          ]
+        },
+        {
+          "id": "diy_making",
+          "name": "DIY & Making",
+          "interests": [
+            { "id": "woodworking", "name": "Woodworking", "keywords": ["carpentry", "furniture making", "power tools"] },
+            { "id": "metalworking", "name": "Metalworking", "keywords": ["welding", "blacksmithing"] },
+            { "id": "home_improvement", "name": "Home Improvement", "keywords": ["renovation", "remodeling", "diy projects"] },
+            { "id": "electronics_diy", "name": "Electronics/Arduino", "keywords": ["raspberry pi", "soldering", "circuits"] },
+            { "id": "3d_printing", "name": "3D Printing", "keywords": ["maker", "prototyping"] },
+            { "id": "model_building", "name": "Model Building", "keywords": ["model trains", "rc cars", "miniatures"] },
+            { "id": "lego_adult", "name": "LEGO (Adult)", "keywords": ["building", "sets", "moc"] },
+            { "id": "restoration", "name": "Restoration/Upcycling", "keywords": ["refurbishing", "vintage"] }
+          ]
+        },
+        {
+          "id": "writing_creative",
+          "name": "Writing",
+          "interests": [
+            { "id": "creative_writing", "name": "Creative Writing", "keywords": ["fiction", "short stories", "novels"] },
+            { "id": "journaling", "name": "Journaling", "keywords": ["diary", "bullet journal", "planner"] },
+            { "id": "blogging", "name": "Blogging", "keywords": ["content creation", "writing online"] },
+            { "id": "poetry", "name": "Poetry", "keywords": ["poems", "verse"] },
+            { "id": "screenwriting", "name": "Screenwriting", "keywords": ["scripts", "film writing"] }
+          ]
+        },
+        {
+          "id": "gardening",
+          "name": "Gardening",
+          "interests": [
+            { "id": "vegetable_garden", "name": "Vegetable Gardening", "keywords": ["growing food", "organic garden"] },
+            { "id": "flower_garden", "name": "Flower Gardening", "keywords": ["perennials", "annuals", "landscaping"] },
+            { "id": "houseplants", "name": "Houseplants", "keywords": ["indoor plants", "plant parent", "succulents"] },
+            { "id": "herbs", "name": "Herb Garden", "keywords": ["growing herbs", "kitchen garden"] },
+            { "id": "bonsai", "name": "Bonsai", "keywords": ["miniature trees"] },
+            { "id": "landscaping", "name": "Landscaping", "keywords": ["yard", "outdoor design"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tech",
+      "name": "Tech & Gadgets",
+      "icon": "smartphone",
+      "subcategories": [
+        {
+          "id": "gadgets",
+          "name": "Gadgets & Devices",
+          "interests": [
+            { "id": "gadget_lover", "name": "Gadget Lover", "keywords": ["tech enthusiast", "early adopter"] },
+            { "id": "smartphones", "name": "Smartphones", "keywords": ["iphone", "android", "mobile"] },
+            { "id": "tablets", "name": "Tablets", "keywords": ["ipad", "e-reader", "kindle"] },
+            { "id": "wearables", "name": "Wearables", "keywords": ["smartwatch", "apple watch", "fitness tracker"] },
+            { "id": "headphones", "name": "Headphones/Audio", "keywords": ["earbuds", "airpods", "speakers", "audiophile"] },
+            { "id": "cameras_tech", "name": "Cameras", "keywords": ["dslr", "mirrorless", "gopro", "action camera"] },
+            { "id": "drones", "name": "Drones", "keywords": ["quadcopter", "aerial photography"] }
+          ]
+        },
+        {
+          "id": "computing",
+          "name": "Computing",
+          "interests": [
+            { "id": "computers", "name": "Computers", "keywords": ["pc", "mac", "laptop", "desktop"] },
+            { "id": "pc_building", "name": "PC Building", "keywords": ["custom pc", "gaming pc", "components"] },
+            { "id": "programming", "name": "Programming/Coding", "keywords": ["developer", "software", "coding"] },
+            { "id": "ai_tech", "name": "AI/Machine Learning", "keywords": ["artificial intelligence", "chatgpt"] },
+            { "id": "cybersecurity", "name": "Cybersecurity", "keywords": ["hacking", "privacy", "security"] }
+          ]
+        },
+        {
+          "id": "smart_home",
+          "name": "Smart Home",
+          "interests": [
+            { "id": "smart_home_general", "name": "Smart Home", "keywords": ["home automation", "iot"] },
+            { "id": "voice_assistants", "name": "Voice Assistants", "keywords": ["alexa", "google home", "siri"] },
+            { "id": "smart_lighting", "name": "Smart Lighting", "keywords": ["hue", "led", "automation"] },
+            { "id": "home_security", "name": "Home Security", "keywords": ["cameras", "ring", "alarm"] }
+          ]
+        },
+        {
+          "id": "gaming_tech",
+          "name": "Gaming Tech",
+          "interests": [
+            { "id": "console_gaming", "name": "Console Gaming", "keywords": ["playstation", "xbox", "nintendo switch"] },
+            { "id": "pc_gaming", "name": "PC Gaming", "keywords": ["steam", "gaming rig"] },
+            { "id": "vr", "name": "VR/AR", "keywords": ["virtual reality", "oculus", "quest", "metaverse"] },
+            { "id": "retro_gaming", "name": "Retro Gaming", "keywords": ["classic games", "emulators", "arcade"] },
+            { "id": "streaming", "name": "Streaming/Content Creation", "keywords": ["twitch", "youtube", "podcasting"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "style",
+      "name": "Style & Fashion",
+      "icon": "shirt",
+      "subcategories": [
+        {
+          "id": "fashion",
+          "name": "Fashion",
+          "interests": [
+            { "id": "fashion_general", "name": "Fashion", "keywords": ["clothing", "style", "trends"] },
+            { "id": "designer", "name": "Designer/Luxury", "keywords": ["high end", "couture", "premium"] },
+            { "id": "streetwear", "name": "Streetwear", "keywords": ["hypebeast", "supreme", "sneaker culture"] },
+            { "id": "vintage_fashion", "name": "Vintage/Thrift", "keywords": ["secondhand", "retro style"] },
+            { "id": "sustainable_fashion", "name": "Sustainable Fashion", "keywords": ["ethical", "eco-friendly"] },
+            { "id": "athleisure", "name": "Athleisure", "keywords": ["activewear", "loungewear"] }
+          ]
+        },
+        {
+          "id": "accessories",
+          "name": "Accessories",
+          "interests": [
+            { "id": "jewelry", "name": "Jewelry", "keywords": ["necklaces", "earrings", "bracelets", "rings"] },
+            { "id": "watches", "name": "Watches", "keywords": ["timepieces", "luxury watches", "smartwatch"] },
+            { "id": "sneakers", "name": "Sneakers", "keywords": ["shoes", "kicks", "jordans", "trainers"] },
+            { "id": "handbags", "name": "Handbags", "keywords": ["purses", "totes", "designer bags"] },
+            { "id": "sunglasses", "name": "Sunglasses", "keywords": ["eyewear", "shades"] },
+            { "id": "hats", "name": "Hats", "keywords": ["caps", "beanies", "headwear"] },
+            { "id": "scarves", "name": "Scarves/Wraps", "keywords": ["shawls"] }
+          ]
+        },
+        {
+          "id": "grooming",
+          "name": "Grooming & Beauty",
+          "interests": [
+            { "id": "skincare", "name": "Skincare", "keywords": ["skin routine", "serums", "moisturizer"] },
+            { "id": "makeup", "name": "Makeup", "keywords": ["cosmetics", "beauty"] },
+            { "id": "haircare", "name": "Haircare", "keywords": ["hair products", "styling"] },
+            { "id": "fragrance", "name": "Fragrance", "keywords": ["perfume", "cologne", "scents"] },
+            { "id": "beard_grooming", "name": "Beard/Grooming", "keywords": ["shaving", "beard oil", "mens grooming"] },
+            { "id": "nails", "name": "Nails", "keywords": ["manicure", "nail art", "nail polish"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "name": "Home & Living",
+      "icon": "home",
+      "subcategories": [
+        {
+          "id": "home_decor",
+          "name": "Home Decor",
+          "interests": [
+            { "id": "interior_design", "name": "Interior Design", "keywords": ["decorating", "home styling"] },
+            { "id": "minimalist", "name": "Minimalist", "keywords": ["simple", "declutter", "clean lines"] },
+            { "id": "bohemian", "name": "Bohemian", "keywords": ["boho", "eclectic"] },
+            { "id": "modern", "name": "Modern", "keywords": ["contemporary", "mid-century"] },
+            { "id": "farmhouse", "name": "Farmhouse", "keywords": ["rustic", "country"] },
+            { "id": "coastal", "name": "Coastal", "keywords": ["beach house", "nautical"] },
+            { "id": "wall_art", "name": "Wall Art", "keywords": ["wall art", "prints", "gallery", "framed art"] }
+          ]
+        },
+        {
+          "id": "home_goods",
+          "name": "Home Goods",
+          "interests": [
+            { "id": "candles_home", "name": "Candles", "keywords": ["scented candles", "home fragrance"] },
+            { "id": "plants_home", "name": "Plants/Greenery", "keywords": ["houseplants", "plant parent"] },
+            { "id": "organization", "name": "Organization", "keywords": ["storage", "declutter", "containers"] },
+            { "id": "bedding", "name": "Bedding/Linens", "keywords": ["sheets", "pillows", "blankets"] },
+            { "id": "towels_bath", "name": "Bath/Towels", "keywords": ["bathroom", "spa"] }
+          ]
+        },
+        {
+          "id": "kitchen_dining",
+          "name": "Kitchen & Dining",
+          "interests": [
+            { "id": "kitchen_gadgets", "name": "Kitchen Gadgets", "keywords": ["appliances", "tools", "utensils"] },
+            { "id": "cookware", "name": "Cookware", "keywords": ["pots", "pans", "cast iron", "le creuset"] },
+            { "id": "dinnerware", "name": "Dinnerware", "keywords": ["plates", "dishes", "table setting"] },
+            { "id": "barware", "name": "Barware", "keywords": ["glasses", "cocktail tools", "decanters"] },
+            { "id": "coffee_gear", "name": "Coffee Gear", "keywords": ["espresso machine", "french press", "grinder"] }
+          ]
+        },
+        {
+          "id": "entertaining",
+          "name": "Entertaining",
+          "interests": [
+            { "id": "hosting", "name": "Hosting/Entertaining", "keywords": ["dinner parties", "gatherings"] },
+            { "id": "outdoor_living", "name": "Outdoor Living", "keywords": ["patio", "deck", "backyard"] },
+            { "id": "fire_pit", "name": "Fire Pit/Outdoor Fire", "keywords": ["bonfire", "s'mores"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wellness",
+      "name": "Wellness & Self-Care",
+      "icon": "heart",
+      "subcategories": [
+        {
+          "id": "self_care",
+          "name": "Self-Care",
+          "interests": [
+            { "id": "spa_self_care", "name": "Spa/Pampering", "keywords": ["massage", "facial", "relaxation"] },
+            { "id": "bath_rituals", "name": "Bath Rituals", "keywords": ["bath bombs", "bubble bath", "soaking"] },
+            { "id": "aromatherapy", "name": "Aromatherapy", "keywords": ["essential oils", "diffuser", "scents"] },
+            { "id": "massage", "name": "Massage", "keywords": ["massage tools", "muscle recovery"] }
+          ]
+        },
+        {
+          "id": "mental_wellness",
+          "name": "Mental Wellness",
+          "interests": [
+            { "id": "meditation", "name": "Meditation", "keywords": ["mindfulness", "calm", "headspace"] },
+            { "id": "therapy", "name": "Therapy/Mental Health", "keywords": ["self-help", "counseling"] },
+            { "id": "stress_relief", "name": "Stress Relief", "keywords": ["relaxation", "anxiety relief"] },
+            { "id": "gratitude", "name": "Gratitude Practice", "keywords": ["journaling", "positivity"] }
+          ]
+        },
+        {
+          "id": "sleep",
+          "name": "Sleep",
+          "interests": [
+            { "id": "sleep_quality", "name": "Sleep Quality", "keywords": ["sleep tracker", "better sleep"] },
+            { "id": "sleep_accessories", "name": "Sleep Accessories", "keywords": ["sleep mask", "white noise", "weighted blanket"] }
+          ]
+        },
+        {
+          "id": "health",
+          "name": "Health & Nutrition",
+          "interests": [
+            { "id": "supplements", "name": "Supplements/Vitamins", "keywords": ["health supplements", "wellness"] },
+            { "id": "nutrition", "name": "Nutrition", "keywords": ["diet", "healthy eating"] },
+            { "id": "recovery", "name": "Recovery/Physical Therapy", "keywords": ["foam roller", "stretching", "theragun"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "travel",
+      "name": "Travel & Experiences",
+      "icon": "plane",
+      "subcategories": [
+        {
+          "id": "travel_style",
+          "name": "Travel Style",
+          "interests": [
+            { "id": "adventure_travel", "name": "Adventure Travel", "keywords": ["backpacking", "trekking", "expedition"] },
+            { "id": "beach_travel", "name": "Beach/Resort", "keywords": ["tropical", "relaxation", "islands"] },
+            { "id": "city_travel", "name": "City Trips", "keywords": ["urban", "sightseeing", "culture"] },
+            { "id": "road_trips", "name": "Road Trips", "keywords": ["driving", "scenic routes", "cross country"] },
+            { "id": "camping_travel", "name": "Camping/Outdoors", "keywords": ["national parks", "wilderness"] },
+            { "id": "luxury_travel", "name": "Luxury Travel", "keywords": ["five star", "premium", "first class"] },
+            { "id": "budget_travel", "name": "Budget Travel", "keywords": ["backpacker", "hostel", "cheap flights"] },
+            { "id": "cruises", "name": "Cruises", "keywords": ["cruise ship", "sailing vacation"] },
+            { "id": "solo_travel", "name": "Solo Travel", "keywords": ["traveling alone", "independent"] },
+            { "id": "family_travel", "name": "Family Travel", "keywords": ["kid-friendly", "family vacation"] }
+          ]
+        },
+        {
+          "id": "travel_gear",
+          "name": "Travel Gear",
+          "interests": [
+            { "id": "luggage", "name": "Luggage", "keywords": ["suitcase", "carry-on", "away"] },
+            { "id": "travel_accessories", "name": "Travel Accessories", "keywords": ["packing cubes", "adapters", "neck pillow"] },
+            { "id": "travel_tech", "name": "Travel Tech", "keywords": ["portable charger", "noise canceling", "travel router"] }
+          ]
+        },
+        {
+          "id": "experiences",
+          "name": "Experiences",
+          "interests": [
+            { "id": "food_tours", "name": "Food Tours", "keywords": ["culinary travel", "eating tours"] },
+            { "id": "wine_tours", "name": "Wine Tours", "keywords": ["vineyard visits", "wine tasting"] },
+            { "id": "adventure_activities", "name": "Adventure Activities", "keywords": ["zip lining", "bungee", "skydiving"] },
+            { "id": "cultural_experiences", "name": "Cultural Experiences", "keywords": ["museums", "history", "local culture"] },
+            { "id": "classes_workshops", "name": "Classes/Workshops", "keywords": ["cooking class", "art class", "lessons"] },
+            { "id": "spa_retreats", "name": "Spa Retreats", "keywords": ["wellness retreat", "relaxation"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kids",
+      "name": "Kids & Family",
+      "icon": "baby",
+      "subcategories": [
+        {
+          "id": "toys_play",
+          "name": "Toys & Play",
+          "interests": [
+            { "id": "lego", "name": "LEGO", "keywords": ["building blocks", "sets", "bricks"], "quick_pick": true },
+            { "id": "dolls", "name": "Dolls", "keywords": ["barbie", "american girl", "baby dolls"], "quick_pick": true },
+            { "id": "action_figures", "name": "Action Figures", "keywords": ["superheroes", "characters", "figurines"], "quick_pick": true },
+            { "id": "stuffed_animals", "name": "Stuffed Animals", "keywords": ["plush", "teddy bears", "squishmallows"], "quick_pick": true },
+            { "id": "vehicles_toys", "name": "Vehicles", "keywords": ["cars", "trucks", "trains", "hot wheels"], "quick_pick": true },
+            { "id": "building_toys", "name": "Building Toys", "keywords": ["magna-tiles", "blocks", "construction"], "quick_pick": true },
+            { "id": "pretend_play", "name": "Pretend Play", "keywords": ["dress-up", "kitchen", "role play"] },
+            { "id": "outdoor_toys", "name": "Outdoor Toys", "keywords": ["bikes", "scooters", "swings", "sports equipment"], "quick_pick": true },
+            { "id": "board_games_kids", "name": "Board Games (Kids)", "keywords": ["family games", "card games"], "quick_pick": true },
+            { "id": "video_games_kids", "name": "Video Games (Kids)", "keywords": ["nintendo", "minecraft", "roblox"], "quick_pick": true }
+          ]
+        },
+        {
+          "id": "learning",
+          "name": "Learning & Education",
+          "interests": [
+            { "id": "science_kits", "name": "Science Kits", "keywords": ["experiments", "stem", "chemistry"], "quick_pick": true },
+            { "id": "art_supplies_kids", "name": "Arts & Crafts", "keywords": ["coloring", "painting", "craft kits"], "quick_pick": true },
+            { "id": "books_kids", "name": "Books", "keywords": ["picture books", "chapter books", "reading"], "quick_pick": true },
+            { "id": "puzzles_kids", "name": "Puzzles", "keywords": ["jigsaw", "brain teasers"] },
+            { "id": "musical_instruments_kids", "name": "Musical Instruments", "keywords": ["piano", "guitar", "drums", "ukulele"] },
+            { "id": "coding_kids", "name": "Coding/Tech", "keywords": ["programming", "robotics", "stem"] },
+            { "id": "language_learning", "name": "Language Learning", "keywords": ["spanish", "french", "bilingual"] }
+          ]
+        },
+        {
+          "id": "characters",
+          "name": "Characters & Franchises",
+          "interests": [
+            { "id": "disney", "name": "Disney", "keywords": ["frozen", "princesses", "pixar"], "quick_pick": true },
+            { "id": "marvel_kids", "name": "Marvel", "keywords": ["spiderman", "avengers", "superheroes"], "quick_pick": true },
+            { "id": "star_wars_kids", "name": "Star Wars", "keywords": ["mandalorian", "lightsaber", "jedi"], "quick_pick": true },
+            { "id": "pokemon", "name": "Pokemon", "keywords": ["pikachu", "cards", "games"], "quick_pick": true },
+            { "id": "paw_patrol", "name": "Paw Patrol", "keywords": ["nick jr", "preschool"], "quick_pick": true },
+            { "id": "bluey", "name": "Bluey", "keywords": ["aussie", "preschool"], "quick_pick": true },
+            { "id": "harry_potter", "name": "Harry Potter", "keywords": ["hogwarts", "wizarding world"], "quick_pick": true },
+            { "id": "minecraft", "name": "Minecraft", "keywords": ["blocks", "creeper", "gaming"], "quick_pick": true },
+            { "id": "roblox", "name": "Roblox", "keywords": ["gaming", "online"], "quick_pick": true },
+            { "id": "fortnite", "name": "Fortnite", "keywords": ["gaming", "battle royale"] }
+          ]
+        },
+        {
+          "id": "baby",
+          "name": "Baby & Toddler",
+          "interests": [
+            { "id": "baby_gear", "name": "Baby Gear", "keywords": ["stroller", "car seat", "carrier"] },
+            { "id": "baby_clothes", "name": "Baby Clothes", "keywords": ["onesies", "outfits"] },
+            { "id": "nursery", "name": "Nursery", "keywords": ["decor", "furniture", "crib"] },
+            { "id": "baby_toys", "name": "Baby Toys", "keywords": ["rattles", "teethers", "developmental"] },
+            { "id": "feeding", "name": "Feeding", "keywords": ["bottles", "high chair", "bibs"] }
+          ]
+        },
+        {
+          "id": "activities_kids",
+          "name": "Activities",
+          "interests": [
+            { "id": "sports_kids", "name": "Sports", "keywords": ["soccer", "baseball", "basketball", "dance"], "quick_pick": true },
+            { "id": "dance_kids", "name": "Dance", "keywords": ["ballet", "hip hop", "tap"] },
+            { "id": "gymnastics_kids", "name": "Gymnastics", "keywords": ["tumbling", "acrobatics"] },
+            { "id": "swimming_kids", "name": "Swimming", "keywords": ["swim lessons", "pool"], "quick_pick": true },
+            { "id": "scouts", "name": "Scouts", "keywords": ["girl scouts", "boy scouts", "camping"] },
+            { "id": "music_lessons", "name": "Music Lessons", "keywords": ["piano", "violin", "band"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pets",
+      "name": "Pets",
+      "icon": "paw-print",
+      "subcategories": [
+        {
+          "id": "dogs",
+          "name": "Dogs",
+          "interests": [
+            { "id": "dog_lover", "name": "Dog Lover", "keywords": ["puppy", "canine", "pupper"] },
+            { "id": "dog_toys", "name": "Dog Toys", "keywords": ["fetch", "chew toys", "balls"] },
+            { "id": "dog_treats", "name": "Dog Treats", "keywords": ["snacks", "biscuits"] },
+            { "id": "dog_gear", "name": "Dog Gear", "keywords": ["leash", "collar", "harness", "bed"] },
+            { "id": "dog_grooming", "name": "Dog Grooming", "keywords": ["brushes", "shampoo"] }
+          ]
+        },
+        {
+          "id": "cats",
+          "name": "Cats",
+          "interests": [
+            { "id": "cat_lover", "name": "Cat Lover", "keywords": ["kitten", "feline", "kitty"] },
+            { "id": "cat_toys", "name": "Cat Toys", "keywords": ["scratching post", "laser", "feather"] },
+            { "id": "cat_gear", "name": "Cat Gear", "keywords": ["cat tree", "litter", "carrier"] }
+          ]
+        },
+        {
+          "id": "other_pets",
+          "name": "Other Pets",
+          "interests": [
+            { "id": "fish", "name": "Fish/Aquarium", "keywords": ["tank", "aquatic"] },
+            { "id": "birds", "name": "Birds", "keywords": ["parrot", "parakeet", "cage"] },
+            { "id": "reptiles", "name": "Reptiles", "keywords": ["snake", "lizard", "turtle"] },
+            { "id": "small_animals", "name": "Small Animals", "keywords": ["hamster", "guinea pig", "rabbit"] },
+            { "id": "horses", "name": "Horses", "keywords": ["equine", "riding"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "collecting",
+      "name": "Collecting",
+      "icon": "archive",
+      "subcategories": [
+        {
+          "id": "collectibles",
+          "name": "Collectibles",
+          "interests": [
+            { "id": "vinyl_collecting", "name": "Vinyl Records", "keywords": ["records", "albums", "turntable"] },
+            { "id": "book_collecting", "name": "Book Collecting", "keywords": ["first editions", "rare books"] },
+            { "id": "fine_art_collecting", "name": "Fine Art Collecting", "keywords": ["paintings", "prints", "sculptures", "gallery"] },
+            { "id": "antiques", "name": "Antiques", "keywords": ["vintage", "heirlooms", "estate"] },
+            { "id": "coins", "name": "Coins", "keywords": ["numismatics", "rare coins"] },
+            { "id": "stamps", "name": "Stamps", "keywords": ["philately", "postage"] },
+            { "id": "trading_cards", "name": "Trading Cards", "keywords": ["sports cards", "pokemon cards", "magic"] },
+            { "id": "funko", "name": "Funko Pops", "keywords": ["vinyl figures", "collectible figures"] },
+            { "id": "memorabilia", "name": "Memorabilia", "keywords": ["signed items", "movie props", "sports"] },
+            { "id": "sneaker_collecting", "name": "Sneaker Collecting", "keywords": ["kicks", "limited edition", "jordans"] },
+            { "id": "watch_collecting", "name": "Watch Collecting", "keywords": ["timepieces", "horology"] },
+            { "id": "wine_collecting", "name": "Wine Collecting", "keywords": ["cellar", "vintages"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "causes",
+      "name": "Causes & Values",
+      "icon": "globe",
+      "subcategories": [
+        {
+          "id": "social_causes",
+          "name": "Social Causes",
+          "interests": [
+            { "id": "environment", "name": "Environment/Sustainability", "keywords": ["eco-friendly", "green", "climate"] },
+            { "id": "animal_welfare", "name": "Animal Welfare", "keywords": ["rescue", "adoption", "humane"] },
+            { "id": "social_justice", "name": "Social Justice", "keywords": ["equality", "human rights"] },
+            { "id": "education_cause", "name": "Education", "keywords": ["literacy", "schools", "learning"] },
+            { "id": "health_cause", "name": "Health/Medical", "keywords": ["cancer research", "mental health awareness"] },
+            { "id": "hunger", "name": "Hunger/Food Security", "keywords": ["food banks", "feeding"] },
+            { "id": "veterans", "name": "Veterans/Military", "keywords": ["support troops", "wounded warrior"] },
+            { "id": "local_community", "name": "Local Community", "keywords": ["neighborhood", "civic"] }
+          ]
+        },
+        {
+          "id": "lifestyle_values",
+          "name": "Lifestyle Values",
+          "interests": [
+            { "id": "sustainable_living", "name": "Sustainable Living", "keywords": ["zero waste", "eco-conscious"] },
+            { "id": "minimalism_value", "name": "Minimalism", "keywords": ["less is more", "declutter"] },
+            { "id": "buy_local", "name": "Buy Local/Small Business", "keywords": ["shop small", "local makers"] },
+            { "id": "handmade", "name": "Handmade/Artisan", "keywords": ["crafted", "maker"] },
+            { "id": "fair_trade", "name": "Fair Trade", "keywords": ["ethical sourcing", "ethical"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
