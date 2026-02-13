@@ -1,4 +1,3 @@
-// src/app/recipients/[id]/edit/page.tsx - COMPLETELY REWRITTEN to match correct database schema
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,7 +8,52 @@ import type { Recipient } from '@/types/database.types';
 import AvatarSelector from '@/components/AvatarSelector';
 import type { AvatarData } from '@/lib/avatar-utils';
 import { generateDefaultAvatar } from '@/lib/avatar-utils';
-import { calculateAge, suggestAgeRange } from '@/lib/utils/age';
+import { calculateAge } from '@/lib/utils/age';
+import { SmartTagPicker } from '@/components/ui/SmartTagPicker';
+
+// Common store suggestions (not from taxonomy — too varied for a closed list)
+const COMMON_STORES = [
+  { id: 'amazon', name: 'Amazon' },
+  { id: 'target', name: 'Target' },
+  { id: 'walmart', name: 'Walmart' },
+  { id: 'nordstrom', name: 'Nordstrom' },
+  { id: 'costco', name: 'Costco' },
+  { id: 'etsy', name: 'Etsy' },
+  { id: 'rei', name: 'REI' },
+  { id: 'sephora', name: 'Sephora' },
+  { id: 'best_buy', name: 'Best Buy' },
+  { id: 'home_depot', name: 'Home Depot' },
+  { id: 'tj_maxx', name: 'TJ Maxx' },
+  { id: 'marshalls', name: 'Marshalls' },
+  { id: 'bed_bath', name: 'Bed Bath & Beyond' },
+  { id: 'williams_sonoma', name: 'Williams-Sonoma' },
+  { id: 'anthropologie', name: 'Anthropologie' },
+  { id: 'pottery_barn', name: 'Pottery Barn' },
+  { id: 'west_elm', name: 'West Elm' },
+  { id: 'crate_barrel', name: 'Crate & Barrel' },
+  { id: 'ulta', name: 'Ulta Beauty' },
+  { id: 'macys', name: "Macy's" },
+];
+
+// Common restriction suggestions
+const COMMON_RESTRICTIONS = [
+  { id: 'nut_allergy', name: 'Nut Allergy' },
+  { id: 'gluten_free', name: 'Gluten-Free' },
+  { id: 'dairy_free', name: 'Dairy-Free' },
+  { id: 'vegan', name: 'Vegan' },
+  { id: 'vegetarian', name: 'Vegetarian' },
+  { id: 'shellfish_allergy', name: 'Shellfish Allergy' },
+  { id: 'latex_allergy', name: 'Latex Allergy' },
+  { id: 'fragrance_sensitive', name: 'Fragrance Sensitive' },
+  { id: 'no_alcohol', name: 'No Alcohol' },
+  { id: 'sugar_free', name: 'Sugar-Free' },
+];
+
+function toArray(val: unknown): string[] {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string' && val) return val.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+}
 
 export default function EditRecipientPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -21,26 +65,31 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
   const [error, setError] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<AvatarData | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    relationship: '',
-    birthday: '',
-    age_range: '',
-    gender: '',
-    interests: '',
-    hobbies: '',
-    favorite_colors: '',
-    favorite_brands: '',
-    favorite_stores: '',
-    gift_preferences: '',
-    gift_dos: '',
-    gift_donts: '',
-    restrictions: '',
-    items_already_owned: '',
-    max_budget: '',
-    max_purchased_budget: '',
-    notes: '',
-  });
+  // Scalar fields
+  const [name, setName] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [giftPreferences, setGiftPreferences] = useState('');
+  const [itemsAlreadyOwned, setItemsAlreadyOwned] = useState('');
+  const [maxBudget, setMaxBudget] = useState('');
+  const [maxPurchasedBudget, setMaxPurchasedBudget] = useState('');
+  const [notes, setNotes] = useState('');
+
+  // SmartTagPicker fields (single-select)
+  const [relationship, setRelationship] = useState<string[]>([]);
+  const [ageRange, setAgeRange] = useState<string[]>([]);
+  const [gender, setGender] = useState<string[]>([]);
+  const [budgetTier, setBudgetTier] = useState<string[]>([]);
+
+  // SmartTagPicker fields (multi-select)
+  const [interests, setInterests] = useState<string[]>([]);
+  const [hobbies, setHobbies] = useState<string[]>([]);
+  const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
+  const [favoriteBrands, setFavoriteBrands] = useState<string[]>([]);
+  const [favoriteStores, setFavoriteStores] = useState<string[]>([]);
+  const [giftStyles, setGiftStyles] = useState<string[]>([]);
+  const [giftDos, setGiftDos] = useState<string[]>([]);
+  const [giftDonts, setGiftDonts] = useState<string[]>([]);
+  const [restrictions, setRestrictions] = useState<string[]>([]);
 
   useEffect(() => {
     fetchRecipient();
@@ -57,40 +106,37 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
       if (error) throw error;
 
       setRecipient(data);
-      setFormData({
-        name: data.name || '',
-        relationship: data.relationship || '',
-        birthday: data.birthday || '',
-        age_range: data.age_range || '',
-        gender: data.gender || '',
-        interests: Array.isArray(data.interests) ? data.interests.join(', ') : '',
-        hobbies: Array.isArray(data.hobbies) ? data.hobbies.join(', ') : '',
-        favorite_colors: Array.isArray(data.favorite_colors) ? data.favorite_colors.join(', ') : '',
-        favorite_brands: Array.isArray(data.favorite_brands) ? data.favorite_brands.join(', ') : '',
-        favorite_stores: Array.isArray(data.favorite_stores) ? data.favorite_stores.join(', ') : '',
-        gift_preferences: data.gift_preferences || '',
-        gift_dos: Array.isArray(data.gift_dos) ? data.gift_dos.join(', ') : '',
-        gift_donts: Array.isArray(data.gift_donts) ? data.gift_donts.join(', ') : '',
-        restrictions: Array.isArray(data.restrictions) ? data.restrictions.join(', ') : '',
-        items_already_owned: Array.isArray(data.items_already_owned) ? data.items_already_owned.join(', ') : '',
-        max_budget: data.max_budget?.toString() || '',
-        max_purchased_budget: data.max_purchased_budget?.toString() || '',
-        notes: data.notes || '',
-      });
 
-      // Load avatar if exists, otherwise generate default
+      // Scalar fields
+      setName(data.name || '');
+      setBirthday(data.birthday || '');
+      setGiftPreferences(data.gift_preferences || '');
+      setItemsAlreadyOwned(Array.isArray(data.items_already_owned) ? data.items_already_owned.join(', ') : '');
+      setMaxBudget(data.max_budget?.toString() || '');
+      setMaxPurchasedBudget(data.max_purchased_budget?.toString() || '');
+      setNotes(data.notes || '');
+
+      // Single-select fields
+      setRelationship(data.relationship ? [data.relationship] : []);
+      setAgeRange(data.age_range ? [data.age_range] : []);
+      setGender(data.gender ? [data.gender] : []);
+      setBudgetTier([]); // New field, no existing data
+
+      // Multi-select fields
+      setInterests(toArray(data.interests));
+      setHobbies(toArray(data.hobbies));
+      setFavoriteColors(toArray(data.favorite_colors));
+      setFavoriteBrands(toArray(data.favorite_brands));
+      setFavoriteStores(toArray(data.favorite_stores));
+      setGiftStyles([]); // New field
+      setGiftDos(toArray(data.gift_dos));
+      setGiftDonts(toArray(data.gift_donts));
+      setRestrictions(toArray(data.restrictions));
+
+      // Load avatar
       if (data.avatar_type && (data.avatar_type === 'preset' || data.avatar_type === 'emoji')) {
-        // Valid avatar type from new system
-        setAvatar({
-          type: data.avatar_type,
-          data: data.avatar_data || '',
-          background: data.avatar_background || ''
-        });
-      } else if (data.avatar_type === 'ai' || data.avatar_type === 'photo' || data.avatar_type === 'initials') {
-        // Old avatar types - convert to new default preset
-        setAvatar(generateDefaultAvatar());
+        setAvatar({ type: data.avatar_type, data: data.avatar_data || '', background: data.avatar_background || '' });
       } else {
-        // No avatar - generate default
         setAvatar(generateDefaultAvatar());
       }
 
@@ -102,77 +148,51 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
     }
   }
 
+  function handleBirthdayChange(value: string) {
+    setBirthday(value);
+    if (value) {
+      const age = calculateAge(value);
+      if (age !== null) {
+        // Auto-suggest life stage
+        if (age <= 1) setAgeRange(['Baby']);
+        else if (age <= 4) setAgeRange(['Toddler']);
+        else if (age <= 7) setAgeRange(['Young Kid']);
+        else if (age <= 12) setAgeRange(['Tween']);
+        else if (age <= 17) setAgeRange(['Teen']);
+        else if (age <= 25) setAgeRange(['Young Adult']);
+        else if (age <= 64) setAgeRange(['Adult']);
+        else setAgeRange(['Senior']);
+      }
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
     try {
-      // Convert comma-separated strings to arrays
-      const interestsArray = formData.interests
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const hobbiesArray = formData.hobbies
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const favoriteColorsArray = formData.favorite_colors
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const favoriteBrandsArray = formData.favorite_brands
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const favoriteStoresArray = formData.favorite_stores
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const giftDosArray = formData.gift_dos
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const giftDontsArray = formData.gift_donts
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const restrictionsArray = formData.restrictions
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-
-      const itemsAlreadyOwnedArray = formData.items_already_owned
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
+      const itemsArray = itemsAlreadyOwned.split(',').map(s => s.trim()).filter(Boolean);
 
       const updateData = {
-        name: formData.name,
-        relationship: formData.relationship || null,
-        birthday: formData.birthday || null,
-        age_range: formData.age_range || null,
-        gender: formData.gender || null,
-        interests: interestsArray.length > 0 ? interestsArray : null,
-        hobbies: hobbiesArray.length > 0 ? hobbiesArray : null,
-        favorite_colors: favoriteColorsArray.length > 0 ? favoriteColorsArray : null,
-        favorite_brands: favoriteBrandsArray.length > 0 ? favoriteBrandsArray : null,
-        favorite_stores: favoriteStoresArray.length > 0 ? favoriteStoresArray : null,
-        gift_preferences: formData.gift_preferences || null,
-        gift_dos: giftDosArray.length > 0 ? giftDosArray : null,
-        gift_donts: giftDontsArray.length > 0 ? giftDontsArray : null,
-        restrictions: restrictionsArray.length > 0 ? restrictionsArray : null,
-        items_already_owned: itemsAlreadyOwnedArray.length > 0 ? itemsAlreadyOwnedArray : null,
-        max_budget: formData.max_budget ? parseFloat(formData.max_budget) : null,
-        max_purchased_budget: formData.max_purchased_budget ? parseFloat(formData.max_purchased_budget) : null,
-        notes: formData.notes || null,
+        name,
+        relationship: relationship[0] || null,
+        birthday: birthday || null,
+        age_range: ageRange[0] || null,
+        gender: gender[0] || null,
+        interests: interests.length > 0 ? interests : null,
+        hobbies: hobbies.length > 0 ? hobbies : null,
+        favorite_colors: favoriteColors.length > 0 ? favoriteColors : null,
+        favorite_brands: favoriteBrands.length > 0 ? favoriteBrands : null,
+        favorite_stores: favoriteStores.length > 0 ? favoriteStores : null,
+        gift_preferences: giftPreferences || null,
+        gift_dos: giftDos.length > 0 ? giftDos : null,
+        gift_donts: giftDonts.length > 0 ? giftDonts : null,
+        restrictions: restrictions.length > 0 ? restrictions : null,
+        items_already_owned: itemsArray.length > 0 ? itemsArray : null,
+        max_budget: maxBudget ? parseFloat(maxBudget) : null,
+        max_purchased_budget: maxPurchasedBudget ? parseFloat(maxPurchasedBudget) : null,
+        notes: notes || null,
         avatar_type: avatar?.type || null,
         avatar_data: avatar?.data || null,
         avatar_background: avatar?.background || null,
@@ -192,22 +212,6 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
       setError(err.message || 'Failed to update recipient');
       setSaving(false);
     }
-  }
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    const { name, value } = e.target;
-
-    // If birthday is being changed, auto-suggest age range
-    if (name === 'birthday' && value) {
-      const age = calculateAge(value);
-      if (age !== null) {
-        const suggestedRange = suggestAgeRange(age);
-        setFormData(prev => ({ ...prev, [name]: value, age_range: suggestedRange }));
-        return;
-      }
-    }
-
-    setFormData(prev => ({ ...prev, [name]: value }));
   }
 
   if (loading) {
@@ -233,6 +237,8 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
     );
   }
 
+  const currentAge = birthday ? calculateAge(birthday) : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-6 px-4 md:py-8 md:px-6 lg:py-12 lg:px-8">
       <div className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
@@ -250,343 +256,250 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
             </div>
           )}
 
-          {/* Basic Info Section */}
+          {/* Basic Info */}
           <div className="space-y-4 md:space-y-6">
             <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Basic Information</h2>
 
-            {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Name *
-              </label>
+              <label htmlFor="name" className="block text-sm md:text-base font-medium text-gray-700 mb-2">Name *</label>
               <input
                 type="text"
                 id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="e.g., John Doe"
               />
             </div>
 
-            {/* Avatar Selection */}
-            {formData.name && (
+            {name && (
               <div>
-                <label className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                  Avatar
-                </label>
-                <AvatarSelector
-                  name={formData.name}
-                  value={avatar}
-                  onChange={setAvatar}
-                />
+                <label className="block text-sm md:text-base font-medium text-gray-700 mb-2">Avatar</label>
+                <AvatarSelector name={name} value={avatar} onChange={setAvatar} />
               </div>
             )}
 
-            {/* Relationship and Gender */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
-              <div>
-                <label htmlFor="relationship" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                  Relationship
-                </label>
-                <input
-                  type="text"
-                  id="relationship"
-                  name="relationship"
-                  value={formData.relationship}
-                  onChange={handleChange}
-                  className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="e.g., Spouse, Friend, Parent"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="gender" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                  Gender
-                </label>
-                <select
-                  id="gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="w-full h-11 md:h-12 px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="">Select gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Non-binary">Non-binary</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-              </div>
+              <SmartTagPicker
+                label="Relationship"
+                values={relationship}
+                onChange={setRelationship}
+                enumType="relationship"
+                singleSelect
+                placeholder="Select relationship..."
+                color="pink"
+              />
+              <SmartTagPicker
+                label="Gender"
+                values={gender}
+                onChange={setGender}
+                enumType="gender"
+                singleSelect
+                placeholder="Select..."
+                color="teal"
+              />
             </div>
 
-            {/* Birthday and Age Range */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
               <div>
-                <label htmlFor="birthday" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                  Birthday
-                </label>
+                <label htmlFor="birthday" className="block text-sm md:text-base font-medium text-gray-700 mb-2">Birthday</label>
                 <input
                   type="date"
                   id="birthday"
-                  name="birthday"
-                  value={formData.birthday}
-                  onChange={handleChange}
+                  value={birthday}
+                  onChange={(e) => handleBirthdayChange(e.target.value)}
                   className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
-                {formData.birthday && calculateAge(formData.birthday) !== null && (
+                {currentAge !== null && (
                   <p className="mt-2 text-sm text-purple-600 font-medium">
-                    Currently {calculateAge(formData.birthday)} years old
+                    Currently {currentAge} years old
                   </p>
                 )}
               </div>
-
-              <div>
-                <label htmlFor="age_range" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                  Age Range {formData.birthday && '(auto-filled)'}
-                </label>
-                <select
-                  id="age_range"
-                  name="age_range"
-                  value={formData.age_range}
-                  onChange={handleChange}
-                  className="w-full h-11 md:h-12 px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="">Select age range</option>
-                  <option value="0-2">0-2 (Infant/Toddler)</option>
-                  <option value="3-5">3-5 (Preschool)</option>
-                  <option value="6-9">6-9 (Early School Age)</option>
-                  <option value="10-12">10-12 (Preteen)</option>
-                  <option value="13-17">13-17 (Teen)</option>
-                  <option value="18-24">18-24 (Young Adult)</option>
-                  <option value="25-34">25-34 (Adult)</option>
-                  <option value="35-44">35-44 (Adult)</option>
-                  <option value="45-54">45-54 (Adult)</option>
-                  <option value="55-64">55-64 (Adult)</option>
-                  <option value="65+">65+ (Senior)</option>
-                </select>
-              </div>
+              <SmartTagPicker
+                label={`Life Stage${birthday ? ' (auto-filled)' : ''}`}
+                values={ageRange}
+                onChange={setAgeRange}
+                enumType="life_stage"
+                singleSelect
+                placeholder="Select..."
+                color="blue"
+              />
             </div>
           </div>
 
-          {/* Interests & Preferences Section */}
+          {/* Interests & Preferences */}
           <div className="space-y-4 md:space-y-6">
             <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Interests & Preferences</h2>
 
-            {/* Interests */}
-            <div>
-              <label htmlFor="interests" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Interests (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="interests"
-                name="interests"
-                value={formData.interests}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., reading, traveling, photography"
-              />
-            </div>
+            <SmartTagPicker
+              label="Interests"
+              values={interests}
+              onChange={setInterests}
+              allInterests
+              placeholder="Search interests..."
+              color="purple"
+            />
 
-            {/* Hobbies */}
-            <div>
-              <label htmlFor="hobbies" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Hobbies (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="hobbies"
-                name="hobbies"
-                value={formData.hobbies}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., gardening, cooking, gaming"
-              />
-            </div>
+            <SmartTagPicker
+              label="Hobbies"
+              values={hobbies}
+              onChange={setHobbies}
+              allInterests
+              placeholder="Search hobbies..."
+              color="indigo"
+            />
 
-            {/* Favorite Colors */}
-            <div>
-              <label htmlFor="favorite_colors" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Favorite Colors (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="favorite_colors"
-                name="favorite_colors"
-                value={formData.favorite_colors}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., blue, green, purple"
-              />
-            </div>
+            <SmartTagPicker
+              label="Favorite Colors"
+              values={favoriteColors}
+              onChange={setFavoriteColors}
+              enumType="favorite_color"
+              allowCustom
+              placeholder="Select or type colors..."
+              color="rose"
+            />
 
-            {/* Gift Preferences */}
             <div>
               <label htmlFor="gift_preferences" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
                 Gift Preferences (general notes)
               </label>
               <textarea
                 id="gift_preferences"
-                name="gift_preferences"
-                value={formData.gift_preferences}
-                onChange={handleChange}
+                value={giftPreferences}
+                onChange={(e) => setGiftPreferences(e.target.value)}
                 rows={3}
                 className="w-full px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="What types of gifts do they prefer? Any specific styles or themes?"
+                placeholder="What types of gifts do they prefer?"
               />
             </div>
           </div>
 
-          {/* Shopping Preferences Section */}
+          {/* Shopping Preferences */}
           <div className="space-y-4 md:space-y-6">
             <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Shopping Preferences</h2>
 
-            {/* Favorite Stores */}
-            <div>
-              <label htmlFor="favorite_stores" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Favorite Stores (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="favorite_stores"
-                name="favorite_stores"
-                value={formData.favorite_stores}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., Target, Amazon, Nordstrom"
-              />
-            </div>
+            <SmartTagPicker
+              label="Favorite Brands"
+              values={favoriteBrands}
+              onChange={setFavoriteBrands}
+              enumType="favorite_brand"
+              allowCustom
+              placeholder="Search or type brands..."
+              color="amber"
+            />
 
-            {/* Favorite Brands */}
-            <div>
-              <label htmlFor="favorite_brands" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Favorite Brands (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="favorite_brands"
-                name="favorite_brands"
-                value={formData.favorite_brands}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., Apple, Nike, Lego"
-              />
-            </div>
+            <SmartTagPicker
+              label="Favorite Stores"
+              values={favoriteStores}
+              onChange={setFavoriteStores}
+              staticOptions={COMMON_STORES}
+              allowCustom
+              placeholder="Search or type stores..."
+              color="green"
+            />
 
-            {/* Max Budget */}
-            <div>
-              <label htmlFor="max_budget" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Maximum Budget (per gift)
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-2 md:top-3 text-gray-500">$</span>
-                <input
-                  type="number"
-                  id="max_budget"
-                  name="max_budget"
-                  value={formData.max_budget}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  className="w-full min-h-11 md:min-h-12 pl-8 pr-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="100.00"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
+              <SmartTagPicker
+                label="Budget Tier"
+                values={budgetTier}
+                onChange={setBudgetTier}
+                enumType="budget_tier"
+                singleSelect
+                placeholder="Select..."
+                color="green"
+              />
+              <div>
+                <label htmlFor="max_budget" className="block text-sm md:text-base font-medium text-gray-700 mb-1">
+                  Max Budget (per gift)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-2 md:top-3 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    id="max_budget"
+                    value={maxBudget}
+                    onChange={(e) => setMaxBudget(e.target.value)}
+                    step="0.01"
+                    min="0"
+                    className="w-full min-h-11 md:min-h-12 pl-8 pr-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="100.00"
+                  />
+                </div>
               </div>
-              <p className="text-xs md:text-sm text-gray-500 mt-1">
-                Maximum amount to spend on each individual gift
-              </p>
             </div>
 
-            {/* Max Purchased Budget */}
             <div>
               <label htmlFor="max_purchased_budget" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Maximum Total Budget (for all purchased gifts)
+                Max Total Budget (all gifts combined)
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-2 md:top-3 text-gray-500">$</span>
                 <input
                   type="number"
                   id="max_purchased_budget"
-                  name="max_purchased_budget"
-                  value={formData.max_purchased_budget}
-                  onChange={handleChange}
+                  value={maxPurchasedBudget}
+                  onChange={(e) => setMaxPurchasedBudget(e.target.value)}
                   step="0.01"
                   min="0"
                   className="w-full min-h-11 md:min-h-12 pl-8 pr-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="500.00"
                 />
               </div>
-              <p className="text-xs md:text-sm text-gray-500 mt-1">
-                Total budget limit for all purchased gifts combined for this recipient
-              </p>
             </div>
           </div>
 
-          {/* Gift Guidelines Section */}
+          {/* Gift Guidelines */}
           <div className="space-y-4 md:space-y-6">
             <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Gift Guidelines</h2>
 
-            {/* Gift Dos */}
-            <div>
-              <label htmlFor="gift_dos" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Gift Do's - Types of gifts they love (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="gift_dos"
-                name="gift_dos"
-                value={formData.gift_dos}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., books, experiences, handmade items"
-              />
-            </div>
+            <SmartTagPicker
+              label="Gift Styles"
+              values={giftStyles}
+              onChange={setGiftStyles}
+              enumType="gift_style"
+              placeholder="What kind of gifts do they like?"
+              color="purple"
+            />
 
-            {/* Gift Donts */}
-            <div>
-              <label htmlFor="gift_donts" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Gift Don'ts - Types of gifts to avoid (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="gift_donts"
-                name="gift_donts"
-                value={formData.gift_donts}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., clothing, candles, gift cards"
-              />
-            </div>
+            <SmartTagPicker
+              label="Gift Do's"
+              values={giftDos}
+              onChange={setGiftDos}
+              allowCustom
+              placeholder="Type things they love..."
+              color="green"
+            />
 
-            {/* Restrictions */}
-            <div>
-              <label htmlFor="restrictions" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Restrictions & Allergies (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="restrictions"
-                name="restrictions"
-                value={formData.restrictions}
-                onChange={handleChange}
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., nut allergies, gluten-free, vegan"
-              />
-            </div>
+            <SmartTagPicker
+              label="Gift Don'ts"
+              values={giftDonts}
+              onChange={setGiftDonts}
+              enumType="avoid_category"
+              allowCustom
+              placeholder="Select or type things to avoid..."
+              color="rose"
+            />
 
-            {/* Items Already Owned */}
+            <SmartTagPicker
+              label="Restrictions & Allergies"
+              values={restrictions}
+              onChange={setRestrictions}
+              staticOptions={COMMON_RESTRICTIONS}
+              allowCustom
+              placeholder="Select or type restrictions..."
+              color="amber"
+            />
+
             <div>
               <label htmlFor="items_already_owned" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Items Already Owned (comma-separated)
+                Items Already Owned
               </label>
               <textarea
                 id="items_already_owned"
-                name="items_already_owned"
-                value={formData.items_already_owned}
-                onChange={handleChange}
+                value={itemsAlreadyOwned}
+                onChange={(e) => setItemsAlreadyOwned(e.target.value)}
                 rows={3}
                 className="w-full px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="List items they already have to avoid duplicates..."
@@ -594,23 +507,22 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
             </div>
           </div>
 
-          {/* Additional Notes */}
+          {/* Notes */}
           <div>
             <label htmlFor="notes" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
               Additional Notes
             </label>
             <textarea
               id="notes"
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
               rows={4}
               className="w-full px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="Any other important information..."
             />
           </div>
 
-          {/* Action Buttons */}
+          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4">
             <button
               type="submit"

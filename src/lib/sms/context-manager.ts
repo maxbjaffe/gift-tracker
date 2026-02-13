@@ -10,25 +10,7 @@ export interface SMSContext {
   lastMessage: string;
   lastIntent: string;
   pendingClarification: string | null;
-  // Use parsedData for gift handler compatibility
   parsedData: Record<string, unknown>;
-  contextData: {
-    partialConsequence?: {
-      childId?: string;
-      restrictionType?: string;
-      restrictionItem?: string;
-      reason?: string;
-      duration?: number;
-    };
-    partialCommitment?: {
-      childId?: string;
-      commitmentText?: string;
-      category?: string;
-      dueDate?: string;
-    };
-    lastChildMentioned?: string;
-    conversationStep?: 'awaiting_child' | 'awaiting_duration' | 'awaiting_reason' | 'awaiting_confirmation';
-  };
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
@@ -48,7 +30,6 @@ interface SMSContextRow {
   updated_at: string;
 }
 
-// Transform database row to SMSContext
 function transformContext(row: SMSContextRow): SMSContext {
   return {
     id: row.id,
@@ -57,9 +38,7 @@ function transformContext(row: SMSContextRow): SMSContext {
     lastMessage: row.last_message,
     lastIntent: row.last_intent,
     pendingClarification: row.pending_clarification,
-    // parsedData is an alias for contextData for gift handler compatibility
     parsedData: row.context_data || {},
-    contextData: row.context_data as SMSContext['contextData'] || {},
     expiresAt: row.expires_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -67,7 +46,7 @@ function transformContext(row: SMSContextRow): SMSContext {
 }
 
 /**
- * Get or create SMS conversation context
+ * Get SMS conversation context for a phone number
  */
 export async function getSMSContext(phoneNumber: string): Promise<SMSContext | null> {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -80,7 +59,6 @@ export async function getSMSContext(phoneNumber: string): Promise<SMSContext | n
     .single();
 
   if (error && error.code !== 'PGRST116') {
-    // PGRST116 = not found
     console.error('Error fetching SMS context:', error);
     return null;
   }
@@ -149,76 +127,6 @@ export async function clearSMSContext(phoneNumber: string): Promise<boolean> {
   }
 
   return true;
-}
-
-/**
- * Check if user has pending clarification
- */
-export function hasPendingClarification(context: SMSContext | null): boolean {
-  return !!(context?.pendingClarification && context.contextData.conversationStep);
-}
-
-/**
- * Get last mentioned child from context
- */
-export function getLastChildMentioned(context: SMSContext | null): string | null {
-  return context?.contextData.lastChildMentioned || null;
-}
-
-/**
- * Merge clarification response with partial data
- */
-export function mergeClarificationResponse(
-  context: SMSContext,
-  response: string
-): SMSContext['contextData'] {
-  const step = context.contextData.conversationStep;
-  const newData = { ...context.contextData };
-
-  switch (step) {
-    case 'awaiting_child':
-      // User provided child name
-      newData.lastChildMentioned = response;
-      if (context.contextData.partialConsequence) {
-        newData.partialConsequence = {
-          ...context.contextData.partialConsequence,
-          childId: response, // Will be resolved to actual ID later
-        };
-      }
-      if (context.contextData.partialCommitment) {
-        newData.partialCommitment = {
-          ...context.contextData.partialCommitment,
-          childId: response,
-        };
-      }
-      break;
-
-    case 'awaiting_duration':
-      // User provided duration
-      const durationMatch = response.match(/(\d+)/);
-      if (durationMatch && context.contextData.partialConsequence) {
-        newData.partialConsequence = {
-          ...context.contextData.partialConsequence,
-          duration: parseInt(durationMatch[1]),
-        };
-      }
-      break;
-
-    case 'awaiting_reason':
-      // User provided reason
-      if (context.contextData.partialConsequence) {
-        newData.partialConsequence = {
-          ...context.contextData.partialConsequence,
-          reason: response,
-        };
-      }
-      break;
-  }
-
-  // Clear conversation step after merging
-  delete newData.conversationStep;
-
-  return newData;
 }
 
 /**

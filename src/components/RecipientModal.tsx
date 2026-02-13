@@ -13,17 +13,19 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { SmartTagPicker } from '@/components/ui/SmartTagPicker';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
-interface Recipient {
+interface RecipientInput {
   id?: string;
   name: string;
   relationship?: string;
   age_range?: string;
   birthday?: string;
-  interests?: string;
+  gender?: string;
+  interests?: string | string[];
   notes?: string;
 }
 
@@ -31,7 +33,7 @@ interface RecipientModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  recipient?: Recipient | null;
+  recipient?: RecipientInput | null;
 }
 
 export function RecipientModal({
@@ -41,37 +43,39 @@ export function RecipientModal({
   recipient = null,
 }: RecipientModalProps) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Recipient>({
-    name: '',
-    relationship: '',
-    age_range: undefined,
-    birthday: '',
-    interests: '',
-    notes: '',
-  });
+  const [name, setName] = useState('');
+  const [relationship, setRelationship] = useState<string[]>([]);
+  const [ageRange, setAgeRange] = useState<string[]>([]);
+  const [birthday, setBirthday] = useState('');
+  const [gender, setGender] = useState<string[]>([]);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [notes, setNotes] = useState('');
 
   // Reset form when recipient changes or modal opens
   useEffect(() => {
     if (isOpen) {
       if (recipient) {
-        setFormData({
-          id: recipient.id,
-          name: recipient.name || '',
-          relationship: recipient.relationship || '',
-          age_range: recipient.age_range,
-          birthday: recipient.birthday || '',
-          interests: recipient.interests || '',
-          notes: recipient.notes || '',
-        });
+        setName(recipient.name || '');
+        setRelationship(recipient.relationship ? [recipient.relationship] : []);
+        setAgeRange(recipient.age_range ? [recipient.age_range] : []);
+        setBirthday(recipient.birthday || '');
+        setGender(recipient.gender ? [recipient.gender] : []);
+        setInterests(
+          Array.isArray(recipient.interests)
+            ? recipient.interests
+            : recipient.interests
+              ? recipient.interests.split(',').map((s) => s.trim()).filter(Boolean)
+              : []
+        );
+        setNotes(recipient.notes || '');
       } else {
-        setFormData({
-          name: '',
-          relationship: '',
-          age_range: undefined,
-          birthday: '',
-          interests: '',
-          notes: '',
-        });
+        setName('');
+        setRelationship([]);
+        setAgeRange([]);
+        setBirthday('');
+        setGender([]);
+        setInterests([]);
+        setNotes('');
       }
     }
   }, [isOpen, recipient]);
@@ -79,7 +83,7 @@ export function RecipientModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) {
+    if (!name.trim()) {
       toast.error('Name is required');
       return;
     }
@@ -89,7 +93,6 @@ export function RecipientModal({
     try {
       const supabase = createClient();
 
-      // Get current user
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -99,19 +102,18 @@ export function RecipientModal({
         return;
       }
 
-      // Prepare data
       const recipientData = {
         user_id: user.id,
-        name: formData.name.trim(),
-        relationship: formData.relationship?.trim() || null,
-        age_range: formData.age_range || null,
-        birthday: formData.birthday || null,
-        interests: formData.interests?.trim() || null,
-        notes: formData.notes?.trim() || null,
+        name: name.trim(),
+        relationship: relationship[0] || null,
+        age_range: ageRange[0] || null,
+        birthday: birthday || null,
+        gender: gender[0] || null,
+        interests: interests.length > 0 ? interests : null,
+        notes: notes.trim() || null,
       };
 
       if (recipient?.id) {
-        // Update existing recipient
         const { error } = await supabase
           .from('recipients')
           .update(recipientData)
@@ -121,7 +123,6 @@ export function RecipientModal({
         if (error) throw error;
         toast.success('Recipient updated successfully');
       } else {
-        // Create new recipient
         const { error } = await supabase.from('recipients').insert(recipientData);
 
         if (error) throw error;
@@ -139,16 +140,6 @@ export function RecipientModal({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleChange = (
-    field: keyof Recipient,
-    value: string | number | undefined
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   return (
@@ -172,70 +163,71 @@ export function RecipientModal({
             </Label>
             <Input
               id="name"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Sarah"
               required
               disabled={loading}
             />
           </div>
 
-          <div>
-            <Label htmlFor="relationship">Relationship</Label>
-            <Input
-              id="relationship"
-              value={formData.relationship}
-              onChange={(e) => handleChange('relationship', e.target.value)}
-              placeholder="e.g., Sister, Friend, Colleague"
-              disabled={loading}
-            />
-          </div>
+          <SmartTagPicker
+            label="Relationship"
+            values={relationship}
+            onChange={setRelationship}
+            enumType="relationship"
+            singleSelect
+            placeholder="e.g., Sister, Friend"
+            color="pink"
+          />
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="age_range">Age</Label>
-              <Input
-                id="age_range"
-                type="text"
-                value={formData.age_range || ''}
-                onChange={(e) =>
-                  handleChange('age_range', e.target.value)
-                }
-                placeholder="e.g., 25 or 18-25"
-                disabled={loading}
-              />
-            </div>
-
             <div>
               <Label htmlFor="birthday">Birthday</Label>
               <Input
                 id="birthday"
                 type="date"
-                value={formData.birthday}
-                onChange={(e) => handleChange('birthday', e.target.value)}
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
                 disabled={loading}
               />
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="interests">Interests</Label>
-            <Textarea
-              id="interests"
-              value={formData.interests}
-              onChange={(e) => handleChange('interests', e.target.value)}
-              placeholder="e.g., Reading, Photography, Cooking"
-              rows={2}
-              disabled={loading}
+            <SmartTagPicker
+              label="Life Stage"
+              values={ageRange}
+              onChange={setAgeRange}
+              enumType="life_stage"
+              singleSelect
+              placeholder="Select..."
+              color="blue"
             />
           </div>
+
+          <SmartTagPicker
+            label="Gender"
+            values={gender}
+            onChange={setGender}
+            enumType="gender"
+            singleSelect
+            placeholder="Select..."
+            color="teal"
+          />
+
+          <SmartTagPicker
+            label="Interests"
+            values={interests}
+            onChange={setInterests}
+            allInterests
+            placeholder="Search interests..."
+            color="purple"
+          />
 
           <div>
             <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional notes or preferences"
               rows={3}
               disabled={loading}
@@ -253,7 +245,7 @@ export function RecipientModal({
             </Button>
             <Button
               type="submit"
-              disabled={loading || !formData.name.trim()}
+              disabled={loading || !name.trim()}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             >
               {loading ? (
