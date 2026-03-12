@@ -1,6 +1,13 @@
 import { callClaude } from '../claude';
 import { ConversationManager } from './conversation-manager';
 import { CaptureAgent } from './capture-agent';
+import { LookupAgent } from './lookup-agent';
+import { SuggestAgent } from './suggest-agent';
+import { BudgetAgent } from './budget-agent';
+import { StatusAgent } from './status-agent';
+import { OccasionAgent } from './occasion-agent';
+import { EnrichAgent } from './enrich-agent';
+import { InventoryAgent } from './inventory-agent';
 import { detectPersona } from './personas';
 import { BaseAgent } from './base-agent';
 import type { Intent, IntentType, AgentResponse, ConversationContext } from './types';
@@ -21,8 +28,16 @@ export class GiftStashOrchestrator {
   private agents: BaseAgent[];
 
   constructor() {
-    this.agents = [new CaptureAgent()];
-    // Future: LookupAgent, SuggestAgent, BudgetAgent, etc.
+    this.agents = [
+      new CaptureAgent(),
+      new LookupAgent(),
+      new SuggestAgent(),
+      new BudgetAgent(),
+      new StatusAgent(),
+      new OccasionAgent(),
+      new EnrichAgent(),
+      new InventoryAgent(),
+    ];
   }
 
   async handleSMS(
