@@ -27,7 +27,7 @@ export interface SuccessfulGift {
 
 export interface DismissedRecommendation {
   recommendation_name: string;
-  dismissed_at: Date;
+  dismissed_at: string | Date;
 }
 
 export interface RecommendationContext {
@@ -45,7 +45,7 @@ export class RecommendationAnalyticsService {
   async getRecommendationContext(
     recipientId: string,
     ageRange?: string | null,
-    interests?: string | null,
+    interests?: string[] | null,
     relationship?: string | null,
     occasion?: string | null
   ): Promise<RecommendationContext> {
@@ -54,7 +54,7 @@ export class RecommendationAnalyticsService {
     // Run queries in parallel for performance
     const [trending, successful, dismissed] = await Promise.all([
       this.getTrendingGifts(ageRange, relationship, occasion),
-      this.getSuccessfulGiftsForSimilar(ageRange, interests, relationship),
+      this.getSuccessfulGiftsForSimilar(ageRange, interests?.join(', ') ?? null, relationship),
       this.getDismissedRecommendations(recipientId),
     ]);
 
@@ -83,9 +83,9 @@ export class RecommendationAnalyticsService {
 
     try {
       const { data, error } = await supabase.rpc('get_trending_gifts_for_profile', {
-        p_age_range: ageRange || null,
-        p_relationship: relationship || null,
-        p_occasion: occasion || null,
+        p_age_range: ageRange ?? undefined,
+        p_relationship: relationship ?? undefined,
+        p_occasion: occasion ?? undefined,
         p_limit: 15,
       });
 

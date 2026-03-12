@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { GiftStashNav } from '@/components/GiftStashNav';
 import Avatar from '@/components/Avatar';
 import { RecipientModal } from '@/components/RecipientModal';
 import { BulkRecipientModal } from '@/components/BulkRecipientModal';
@@ -46,7 +45,7 @@ export default function RecipientsPage() {
       if (error) {
         logger.error('Error fetching recipients:', error);
       } else {
-        setRecipients(data || []);
+        setRecipients((data || []) as Recipient[]);
       }
     } catch (err) {
       logger.error('Unexpected error:', err);
@@ -74,25 +73,20 @@ export default function RecipientsPage() {
 
   if (loading) {
     return (
-      <>
-        <GiftStashNav />
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 p-4 md:p-6 lg:p-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-giftstash-orange mx-auto"></div>
-              <p className="mt-4 text-sm md:text-base text-gray-600">Loading recipients...</p>
-            </div>
+      <div className="p-4 md:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-giftstash-orange mx-auto"></div>
+            <p className="mt-4 text-sm md:text-base text-gray-600">Loading recipients...</p>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <GiftStashNav />
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 p-4 md:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-2 md:gap-3">
@@ -260,7 +254,7 @@ export default function RecipientsPage() {
         onSuccess={() => {
           fetchRecipients();
         }}
-        recipient={selectedRecipient}
+        recipient={selectedRecipient as any}
       />
 
       {/* Bulk Recipient Modal */}
@@ -272,6 +266,5 @@ export default function RecipientsPage() {
         }}
       />
       </div>
-    </>
   );
 }

@@ -2,6 +2,16 @@
  * Tests for Recipient Matching Engine
  */
 
+// Extend Jest matchers with custom toBeOneOf
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace jest {
+    interface Matchers<R> {
+      toBeOneOf(array: unknown[]): R;
+    }
+  }
+}
+
 import {
   findRecipientMatch,
   normalizeRecipientName,

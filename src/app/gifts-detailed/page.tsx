@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import Link from 'next/link'
 import { Plus, ExternalLink, Lightbulb, ShoppingCart } from 'lucide-react'
 import { GIFT_STATUSES, GIFT_CATEGORIES } from '@/types/database.types'
+import type { AvatarType } from '@/lib/avatar-utils'
 import Avatar from '@/components/Avatar'
 
 export default function GiftsPage() {
@@ -219,10 +220,10 @@ export default function GiftsPage() {
             <Link key={gift.id} href={`/gifts/${gift.id}/edit`} className="block">
               <Card className="p-4 md:p-5 lg:p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
                 {/* Screenshot Preview (from extension) */}
-                {gift.source_metadata?.screenshot && (
+                {(gift.source_metadata as Record<string, any>)?.screenshot && (
                   <div className="mb-3 md:mb-4 -mx-4 md:-mx-5 lg:-mx-6 -mt-4 md:-mt-5 lg:-mt-6">
                     <img
-                      src={gift.source_metadata.screenshot}
+                      src={(gift.source_metadata as Record<string, any>).screenshot}
                       alt={gift.name}
                       className="w-full h-32 md:h-40 object-cover rounded-t-lg"
                     />
@@ -230,7 +231,7 @@ export default function GiftsPage() {
                 )}
 
                 {/* Product Image (from URL or extension) */}
-                {!gift.source_metadata?.screenshot && gift.image_url && (
+                {!(gift.source_metadata as Record<string, any>)?.screenshot && gift.image_url && (
                   <div className="mb-3 md:mb-4 -mx-4 md:-mx-5 lg:-mx-6 -mt-4 md:-mt-5 lg:-mt-6">
                     <img
                       src={gift.image_url}
@@ -274,9 +275,9 @@ export default function GiftsPage() {
                       {gift.recipients.slice(0, 3).map((recipient) => (
                         <div key={recipient.id} className="flex items-center gap-1">
                           <Avatar
-                            type={recipient.avatar_type}
-                            data={recipient.avatar_data}
-                            background={recipient.avatar_background}
+                            type={recipient.avatar_type as AvatarType ?? undefined}
+                            data={recipient.avatar_data ?? undefined}
+                            background={recipient.avatar_background ?? undefined}
                             name={recipient.name}
                             size="xs"
                           />

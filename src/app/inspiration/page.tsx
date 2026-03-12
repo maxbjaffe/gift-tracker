@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import GiftCard from '@/components/GiftCard';
-import { GiftStashNav } from '@/components/GiftStashNav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -158,10 +157,8 @@ export default function InspirationPage() {
   const hasActiveFilters = (category && category !== 'all') || minPrice || maxPrice || (ageRange && ageRange !== 'all') || (occasion && occasion !== 'all');
 
   return (
-    <>
-      <GiftStashNav />
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
-        <div className="container mx-auto px-4 py-8">
+    <div>
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent mb-3">
@@ -347,6 +344,5 @@ export default function InspirationPage() {
         )}
         </div>
       </div>
-    </>
   );
 }

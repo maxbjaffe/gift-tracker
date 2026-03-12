@@ -1,12 +1,9 @@
 import Link from 'next/link';
-import { GiftStashNav } from '@/components/GiftStashNav';
 
 export default function TermsPage() {
   return (
-    <>
-      <GiftStashNav />
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 py-12">
-        <div className="container mx-auto px-4 max-w-4xl">
+    <div className="py-12">
+      <div className="container mx-auto px-4 max-w-4xl">
           <div className="bg-white rounded-xl shadow-md p-8">
             <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-giftstash-orange to-giftstash-blue bg-clip-text text-transparent">
               Terms of Service
@@ -113,6 +110,5 @@ export default function TermsPage() {
           </div>
         </div>
       </div>
-    </>
   );
 }

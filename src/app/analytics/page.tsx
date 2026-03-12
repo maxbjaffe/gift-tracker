@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect } from 'react'
 import { useGifts } from '@/lib/hooks/useGifts'
 import { useRecipients } from '@/lib/hooks/useRecipients'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
-import { GiftStashNav } from '@/components/GiftStashNav'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
@@ -71,7 +70,7 @@ export default function AnalyticsPage() {
     // Monthly spending trend
     const monthlyData = safeGifts.reduce((acc, gift) => {
       const date = gift.purchase_date || gift.created_at
-      const month = new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      const month = new Date(date!).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
       if (!acc[month]) {
         acc[month] = { month, amount: 0, count: 0 }
       }
@@ -101,19 +100,14 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <>
-        <GiftStashNav />
-        <div className="container mx-auto p-4 md:p-6 lg:p-8">
-          <LoadingSpinner type="card" count={4} />
-        </div>
-      </>
+      <div className="container mx-auto p-4 md:p-6 lg:p-8">
+        <LoadingSpinner type="card" count={4} />
+      </div>
     )
   }
 
   return (
-    <>
-      <GiftStashNav />
-      <div className="container mx-auto p-4 md:p-6 lg:p-8">
+    <div className="container mx-auto p-4 md:p-6 lg:p-8">
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold">Analytics & Insights</h1>
         <p className="text-sm md:text-base text-gray-600 mt-2">
@@ -196,7 +190,7 @@ export default function AnalyticsPage() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value: any) => `$${Number(value).toFixed(2)}`} />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
@@ -233,8 +227,8 @@ export default function AnalyticsPage() {
                 <XAxis dataKey="month" tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <Tooltip
-                  formatter={(value: number, name: string) => {
-                    if (name === 'amount') return `$${value.toFixed(2)}`
+                  formatter={(value: any, name: any) => {
+                    if (name === 'amount') return `$${Number(value).toFixed(2)}`
                     return value
                   }}
                 />
@@ -254,7 +248,7 @@ export default function AnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
-                <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                <Tooltip formatter={(value: any) => `$${Number(value).toFixed(2)}`} />
                 <Legend wrapperStyle={{ fontSize: isMobile ? '12px' : '14px' }} />
                 <Bar dataKey="amount" fill="#8b5cf6" name="Amount" />
               </BarChart>
@@ -291,6 +285,5 @@ export default function AnalyticsPage() {
         </div>
       </Card>
       </div>
-    </>
   )
 }

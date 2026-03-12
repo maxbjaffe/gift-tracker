@@ -44,10 +44,10 @@
   "categories": ["productivity", "lifestyle"],
   "shortcuts": [
     {
-      "name": "My Gifts",
-      "short_name": "Gifts",
-      "description": "View all your gift ideas",
-      "url": "/gifts",
+      "name": "Dashboard",
+      "short_name": "Home",
+      "description": "Gift readiness overview",
+      "url": "/dashboard",
       "icons": [
         {
           "src": "/images/GiftStashIcon-192.png",
@@ -56,10 +56,34 @@
       ]
     },
     {
-      "name": "Recipients",
-      "short_name": "Recipients",
-      "description": "View gift recipients",
-      "url": "/recipients",
+      "name": "Chat",
+      "short_name": "Chat",
+      "description": "AI gift assistant",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "/images/GiftStashIcon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "My Stash",
+      "short_name": "Stash",
+      "description": "Gifts on hand",
+      "url": "/stash",
+      "icons": [
+        {
+          "src": "/images/GiftStashIcon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Occasions",
+      "short_name": "Occasions",
+      "description": "Upcoming birthdays & holidays",
+      "url": "/occasions",
       "icons": [
         {
           "src": "/images/GiftStashIcon-192.png",

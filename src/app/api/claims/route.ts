@@ -53,8 +53,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // @ts-ignore - Supabase typing issue with inner join
-    const recipient = giftRecipient.recipients;
+    const recipient = (giftRecipient as any).recipients as {
+      id: string;
+      share_enabled: boolean;
+      share_expires_at: string | null;
+    };
 
     // Check if sharing is enabled
     if (!recipient.share_enabled) {

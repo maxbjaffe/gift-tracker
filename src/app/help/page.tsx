@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { GiftStashNav } from '@/components/GiftStashNav';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -74,10 +73,8 @@ export default function HelpPage() {
   }
 
   return (
-    <>
-      <GiftStashNav />
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50">
-        <div className="container mx-auto p-6 max-w-7xl">
+    <div>
+      <div className="container mx-auto p-6 max-w-7xl">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
@@ -209,6 +206,5 @@ export default function HelpPage() {
           </div>
         </div>
       </div>
-    </>
   );
 }

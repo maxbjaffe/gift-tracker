@@ -201,8 +201,9 @@ export async function handleGiftConfirmation(
       return 'No pending gift to confirm.';
     }
 
+    const parsedData = context.parsedData as Record<string, any>;
     const { pendingGift, awaitingConfirmation, suggestions, awaitingSuggestionSelection } =
-      context.parsedData;
+      parsedData;
 
     // Handle suggestion selection (1, 2, 3, or NEW)
     if (awaitingSuggestionSelection && suggestions) {

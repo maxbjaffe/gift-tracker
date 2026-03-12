@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { GIFT_CATEGORIES } from '@/types/database.types';
 
 type Gift = {
   id: string;

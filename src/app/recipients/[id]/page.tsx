@@ -5,7 +5,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { GiftStashNav } from '@/components/GiftStashNav';
 import Avatar from '@/components/Avatar';
 import PersonalitySurveyModal from '@/components/PersonalitySurveyModal';
 import ProfileSuggestionsModal from '@/components/ProfileSuggestionsModal';
@@ -27,30 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Edit, Share2, FileDown, MessageSquare, Sparkles } from 'lucide-react';
 import { logger } from '@/lib/logger';
-
-interface Recipient {
-  id: string;
-  name: string;
-  relationship: string;
-  birthday: string;
-  age_range: string;
-  interests: string;
-  gift_preferences: string;
-  favorite_stores: string;
-  favorite_brands: string;
-  restrictions: string;
-  wishlist_items: string;
-  max_budget: number;
-  notes: string;
-  avatar_type?: 'ai' | 'emoji' | 'initials' | 'photo' | null;
-  avatar_data?: string | null;
-  avatar_background?: string | null;
-  share_token?: string | null;
-  share_privacy?: string | null;
-  share_enabled?: boolean | null;
-  share_expires_at?: string | null;
-  share_view_count?: number | null;
-}
+import type { Recipient } from '@/types/database.types';
 
 interface Gift {
   id: string;
@@ -109,7 +85,7 @@ export default function RecipientDetailPage() {
       const { data, error } = await supabase
         .from('recipients')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', params.id as string)
         .single();
 
       if (error) {
@@ -303,42 +279,34 @@ export default function RecipientDetailPage() {
 
   if (loading) {
     return (
-      <>
-        <GiftStashNav />
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-sm md:text-base text-gray-600">Loading recipient...</p>
-          </div>
+      <div className="flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-sm md:text-base text-gray-600">Loading recipient...</p>
         </div>
-      </>
+      </div>
     );
   }
 
   if (!recipient) {
     return (
-      <>
-        <GiftStashNav />
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
-          <div className="text-center">
-            <p className="text-lg md:text-xl text-gray-600 mb-4">Recipient not found</p>
-            <Link
-              href="/recipients"
-              className="text-sm md:text-base text-purple-600 hover:text-purple-700 font-medium"
-            >
-              ← Back to Recipients
-            </Link>
-          </div>
+      <div className="flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-lg md:text-xl text-gray-600 mb-4">Recipient not found</p>
+          <Link
+            href="/recipients"
+            className="text-sm md:text-base text-purple-600 hover:text-purple-700 font-medium"
+          >
+            ← Back to Recipients
+          </Link>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <GiftStashNav />
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto">
         {/* Breadcrumbs */}
         <Breadcrumbs
           items={[
@@ -356,7 +324,7 @@ export default function RecipientDetailPage() {
             <div className="flex flex-col md:flex-row justify-between items-start gap-4 md:gap-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6 w-full md:w-auto">
                 <Avatar
-                  type={recipient.avatar_type ?? undefined}
+                  type={(recipient.avatar_type as any) ?? undefined}
                   data={recipient.avatar_data ?? undefined}
                   background={recipient.avatar_background ?? undefined}
                   name={recipient.name}
@@ -729,6 +697,5 @@ export default function RecipientDetailPage() {
         </div>
       )}
       </div>
-    </>
   );
 }

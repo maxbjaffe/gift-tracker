@@ -281,7 +281,6 @@ export const NICKNAME_TO_FORMAL: Record<string, string> = {
   ricky: 'richard',
   rob: 'robert',
   robbie: 'robert',
-  bobby: 'robert',
   rocky: 'rockwell',
   rod: 'rodney',
   roger: 'rodger',

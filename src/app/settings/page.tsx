@@ -54,7 +54,7 @@ export default function SettingsPage() {
       // Get profile data
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('name, phone_number, sms_consent')
+        .select('name, phone_number, sms_onboarded')
         .eq('id', user.id)
         .single();
 
@@ -68,7 +68,7 @@ export default function SettingsPage() {
       if (profile) {
         setName(profile.name || '');
         setPhoneNumber(profile.phone_number || '');
-        setSmsConsent(profile.sms_consent || false);
+        setSmsConsent(profile.sms_onboarded || false);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -114,7 +114,7 @@ export default function SettingsPage() {
             id: user.id,
             name,
             phone_number: phoneNumber || null,
-            sms_consent: phoneNumber ? smsConsent : false,
+            sms_onboarded: phoneNumber ? smsConsent : false,
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'id' }

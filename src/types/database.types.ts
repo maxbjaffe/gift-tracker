@@ -2883,14 +2883,35 @@ export type RecipientBudget = Database['public']['Tables']['recipient_budgets'][
 export type RecipientBudgetInsert = Database['public']['Tables']['recipient_budgets']['Insert']
 export type RecipientBudgetUpdate = Database['public']['Tables']['recipient_budgets']['Update']
 
+// Recipient with junction table fields (from gift_recipients)
+export type RecipientWithJunctionData = Recipient & {
+  status?: string
+  gift_recipient_id?: string
+  notes?: string | null
+  occasion?: string | null
+  occasion_date?: string | null
+  claimed_by_name?: string | null
+  claimed_by_email?: string | null
+  claimed_at?: string | null
+}
+
 // Extended types with relations
 export type GiftWithRecipients = Gift & {
-  recipients?: Recipient[]
+  recipients?: RecipientWithJunctionData[]
 }
 
 export type RecipientWithGifts = Recipient & {
   gifts?: Gift[]
 }
+
+// Gift statuses constant
+export const GIFT_STATUSES = [
+  'idea',
+  'considering',
+  'purchased',
+  'wrapped',
+  'given',
+] as const
 
 // Gift categories constant
 export const GIFT_CATEGORIES = [

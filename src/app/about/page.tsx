@@ -5,7 +5,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { GiftStashNav } from '@/components/GiftStashNav'
 import { Heart, Users, Target, Lightbulb, Code, RefreshCw } from 'lucide-react'
 
 const dayInLifeStories = [
@@ -69,10 +68,7 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
-      {/* Main Navigation */}
-      <GiftStashNav />
-
+    <div>
       {/* Sub Navigation */}
       <nav className="sticky top-16 z-40 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="container px-4 md:px-6">

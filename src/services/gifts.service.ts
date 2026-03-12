@@ -55,9 +55,8 @@ export class GiftService {
         claimed_by_email: gr.claimed_by_email, // Email of person who claimed
         claimed_at: gr.claimed_at // When the gift was claimed
       })).filter(Boolean) || [],
-      recipient_count: gift.gift_recipients?.length || 0,
       gift_recipients: undefined // Remove the junction table data
-    }))
+    })) as GiftWithRecipients[]
   }
 
   async getById(id: string): Promise<Gift> {
@@ -92,8 +91,7 @@ export class GiftService {
     return {
       ...gift,
       recipients,
-      recipient_count: recipients.length
-    }
+    } as GiftWithRecipients
   }
 
   async getByRecipientId(recipientId: string): Promise<Gift[]> {

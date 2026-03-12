@@ -14,8 +14,24 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { Sparkles, Loader2 } from 'lucide-react'
-import { OCCASION_TYPES } from '@/types/database.types'
 import { toast } from 'sonner'
+
+const OCCASION_TYPES = [
+  'birthday',
+  'christmas',
+  'hanukkah',
+  'valentines_day',
+  'mothers_day',
+  'fathers_day',
+  'anniversary',
+  'graduation',
+  'wedding',
+  'baby_shower',
+  'housewarming',
+  'thank_you',
+  'just_because',
+  'other',
+] as const;
 
 interface AISuggestionsDialogProps {
   recipientId: string

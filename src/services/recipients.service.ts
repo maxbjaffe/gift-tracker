@@ -55,8 +55,7 @@ export class RecipientService {
     return {
       ...recipient,
       gifts,
-      gift_count: gifts.length
-    }
+    } as RecipientWithGifts
   }
 
   async create(input: RecipientInsert): Promise<Recipient> {

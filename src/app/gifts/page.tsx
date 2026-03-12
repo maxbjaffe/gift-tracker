@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useRecipients } from '@/lib/hooks/useRecipients';
 import { useGifts } from '@/lib/hooks/useGifts';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { GiftStashNav } from '@/components/GiftStashNav';
 import { GiftDetailsDialog } from '@/components/GiftDetailsDialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +45,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import Avatar from '@/components/Avatar';
+import type { AvatarType } from '@/lib/avatar-utils';
 import { AIRecommendations } from '@/components/AIRecommendations';
 import { RecipientModal } from '@/components/RecipientModal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -377,20 +377,15 @@ export default function UnifiedGiftsPage() {
 
   if (loading) {
     return (
-      <>
-        <GiftStashNav />
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 flex items-center justify-center">
-          <LoadingSpinner type="card" count={3} />
-        </div>
-      </>
+      <div className="flex items-center justify-center">
+        <LoadingSpinner type="card" count={3} />
+      </div>
     );
   }
 
   return (
-    <>
-      <GiftStashNav />
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50">
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
@@ -695,9 +690,9 @@ export default function UnifiedGiftsPage() {
 
                     {/* Thumbnail */}
                     <div className="flex-shrink-0 w-12 h-12 relative rounded overflow-hidden bg-gray-100">
-                      {(gift.source_metadata?.screenshot || gift.image_url) ? (
+                      {((gift.source_metadata as Record<string, any>)?.screenshot || gift.image_url) ? (
                         <Image
-                          src={gift.source_metadata?.screenshot || gift.image_url || ''}
+                          src={(gift.source_metadata as Record<string, any>)?.screenshot || gift.image_url || ''}
                           alt={gift.name}
                           fill
                           sizes="48px"
@@ -709,7 +704,7 @@ export default function UnifiedGiftsPage() {
                           }}
                         />
                       ) : null}
-                      <div className={`fallback-icon w-full h-full flex items-center justify-center ${(gift.source_metadata?.screenshot || gift.image_url) ? 'hidden' : ''}`}>
+                      <div className={`fallback-icon w-full h-full flex items-center justify-center ${((gift.source_metadata as Record<string, any>)?.screenshot || gift.image_url) ? 'hidden' : ''}`}>
                         <Package className="h-6 w-6 text-gray-400" />
                       </div>
                     </div>
@@ -807,9 +802,9 @@ export default function UnifiedGiftsPage() {
                         <div className="flex items-center gap-3">
                           {recipient ? (
                             <Avatar
-                              type={recipient.avatar_type}
-                              data={recipient.avatar_data}
-                              background={recipient.avatar_background}
+                              type={recipient.avatar_type as AvatarType ?? undefined}
+                              data={recipient.avatar_data ?? undefined}
+                              background={recipient.avatar_background ?? undefined}
                               name={recipient.name}
                               size="md"
                             />
@@ -870,10 +865,10 @@ export default function UnifiedGiftsPage() {
                               </div>
 
                               {/* Image */}
-                              {(gift.source_metadata?.screenshot || gift.image_url) && (
+                              {((gift.source_metadata as Record<string, any>)?.screenshot || gift.image_url) && (
                                 <div className="flex-shrink-0 relative h-20 w-20">
                                   <Image
-                                    src={gift.source_metadata?.screenshot || gift.image_url || ''}
+                                    src={(gift.source_metadata as Record<string, any>)?.screenshot || gift.image_url || ''}
                                     alt={gift.name}
                                     width={80}
                                     height={80}
@@ -999,16 +994,16 @@ export default function UnifiedGiftsPage() {
                 onClick={() => setSelectedGiftForDetails(gift)}
               >
                 <div className="relative h-48">
-                  {(gift.source_metadata?.screenshot || gift.image_url) && (
+                  {((gift.source_metadata as Record<string, any>)?.screenshot || gift.image_url) && (
                     <Image
-                      src={gift.source_metadata?.screenshot || gift.image_url || ''}
+                      src={(gift.source_metadata as Record<string, any>)?.screenshot || gift.image_url || ''}
                       alt={gift.name}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
                     />
                   )}
-                  {(!gift.source_metadata?.screenshot && !gift.image_url) && (
+                  {(!(gift.source_metadata as Record<string, any>)?.screenshot && !gift.image_url) && (
                     <div className="w-full h-48 bg-gradient-to-br from-giftstash-orange/10 to-giftstash-blue/10 flex items-center justify-center">
                       <Package className="h-16 w-16 text-giftstash-orange/30" />
                     </div>
@@ -1067,7 +1062,8 @@ export default function UnifiedGiftsPage() {
                     {(() => {
                       const occasions = gift.recipients
                         ?.map(r => r.occasion)
-                        .filter((o, i, arr) => o && arr.indexOf(o) === i);
+                        .filter((o): o is string => !!o && o !== null)
+                        .filter((o, i, arr) => arr.indexOf(o) === i);
                       if (occasions && occasions.length > 0) {
                         return (
                           <>
@@ -1196,6 +1192,5 @@ export default function UnifiedGiftsPage() {
           variant="destructive"
         />
       </div>
-    </>
   );
 }

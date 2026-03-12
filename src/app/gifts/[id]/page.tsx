@@ -63,7 +63,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         .single();
 
       if (giftError) throw giftError;
-      setGift(giftData);
+      setGift(giftData as Gift);
 
       // Fetch linked recipients
       const { data: linkData, error: linkError } = await supabase

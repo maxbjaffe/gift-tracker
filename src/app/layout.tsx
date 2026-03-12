@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { APP_CONFIG, PWA_CONFIG } from '@/lib/app-config'
 import { PWAProvider } from '@/components/pwa/PWAProvider'
+import { AppShell } from '@/components/layout/AppShell'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -71,7 +71,9 @@ export default async function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <PWAProvider>
-          <main>{children}</main>
+          <AppShell>
+            {children}
+          </AppShell>
           <Toaster />
         </PWAProvider>
       </body>
