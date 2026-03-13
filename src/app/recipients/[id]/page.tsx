@@ -25,6 +25,7 @@ import {
 import { MoreVertical, Edit, ExternalLink, Settings, MessageSquare, Sparkles } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { useProfileHub } from '@/lib/hooks/useProfileHub';
+import { ImportantDates, type ImportantDate } from '@/components/ImportantDates';
 import type { Recipient } from '@/types/database.types';
 
 interface Gift {
@@ -533,6 +534,15 @@ export default function RecipientDetailPage() {
               <p className="text-sm text-gray-400 italic">Profile Hub unavailable</p>
             )}
           </div>
+        </div>
+
+        {/* Important Dates Section */}
+        <div className="mb-6 md:mb-8">
+          <ImportantDates
+            recipientId={recipient.id}
+            dates={((recipient as any).important_dates || []) as ImportantDate[]}
+            onUpdate={(newDates) => setRecipient({ ...recipient, important_dates: newDates as any })}
+          />
         </div>
 
         {/* Gift Settings Section (local data) */}

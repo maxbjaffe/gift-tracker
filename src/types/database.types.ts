@@ -1976,6 +1976,7 @@ export type Database = {
           gift_preferences: string | null
           hobbies: string[] | null
           id: string
+          important_dates: Json | null
           interests: string[] | null
           items_already_owned: string[] | null
           max_budget: number | null
@@ -2014,6 +2015,7 @@ export type Database = {
           gift_preferences?: string | null
           hobbies?: string[] | null
           id?: string
+          important_dates?: Json | null
           interests?: string[] | null
           items_already_owned?: string[] | null
           max_budget?: number | null
@@ -2052,6 +2054,7 @@ export type Database = {
           gift_preferences?: string | null
           hobbies?: string[] | null
           id?: string
+          important_dates?: Json | null
           interests?: string[] | null
           items_already_owned?: string[] | null
           max_budget?: number | null

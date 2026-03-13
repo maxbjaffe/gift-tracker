@@ -113,6 +113,47 @@ export function getUpcomingOccasions(
     })
   }
 
+  // Important dates from recipient profiles
+  for (const recipient of recipients) {
+    const importantDates = (recipient as any).important_dates as Array<{ label: string; date: string; repeats: boolean }> | null
+    if (!importantDates || importantDates.length === 0) continue
+
+    for (const entry of importantDates) {
+      const entryDate = parseLocalDate(entry.date)
+      let targetDate: Date
+
+      if (entry.repeats) {
+        // Calculate next occurrence like birthdays
+        targetDate = new Date(today.getFullYear(), entryDate.getMonth(), entryDate.getDate())
+        if (targetDate < today) {
+          targetDate.setFullYear(today.getFullYear() + 1)
+        }
+      } else {
+        targetDate = entryDate
+      }
+
+      const daysUntil = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      if (daysUntil < -7 || daysUntil > daysAhead) continue
+
+      const assignedGifts = gifts.filter(g =>
+        g.recipients?.some(r => r.id === recipient.id)
+      )
+
+      occasions.push({
+        recipientId: recipient.id,
+        recipientName: recipient.name,
+        relationship: recipient.relationship,
+        occasionType: 'custom',
+        occasionName: `${recipient.name} — ${entry.label}`,
+        date: targetDate,
+        daysUntil,
+        urgencyTier: getUrgencyTier(daysUntil),
+        giftStatus: bestGiftStatus(assignedGifts, recipient.id),
+        assignedGifts,
+      })
+    }
+  }
+
   // Gift-recipient occasion dates (custom occasions)
   for (const gift of gifts) {
     if (!gift.recipients) continue
