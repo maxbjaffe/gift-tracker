@@ -11,6 +11,7 @@ import { UnclaimGiftModal } from '@/components/UnclaimGiftModal';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
+import { formatBirthday } from '@/lib/utils/age';
 
 type Recipient = Database['public']['Tables']['recipients']['Row'];
 type Gift = Database['public']['Tables']['gifts']['Row'];
@@ -208,7 +209,7 @@ export default function SharePage() {
 
           {recipient.birthday && (
             <p className="text-gray-600 text-sm">
-              🎂 Birthday: {new Date(recipient.birthday).toLocaleDateString()}
+              🎂 Birthday: {formatBirthday(recipient.birthday)}
             </p>
           )}
         </div>

@@ -295,7 +295,7 @@ function generatePDFHTML(recipient: any, giftRecipients: any[], origin: string):
   <div class="info-box">
     <h3>Recipient Information</h3>
     ${recipient.relationship ? `<div class="info-row"><span class="info-label">Relationship:</span><span>${recipient.relationship}</span></div>` : ''}
-    ${recipient.birthday ? `<div class="info-row"><span class="info-label">Birthday:</span><span>${new Date(recipient.birthday).toLocaleDateString()}</span></div>` : ''}
+    ${recipient.birthday ? `<div class="info-row"><span class="info-label">Birthday:</span><span>${(() => { const [y,m,d] = recipient.birthday.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(); })()}</span></div>` : ''}
     ${recipient.age_range ? `<div class="info-row"><span class="info-label">Age:</span><span>${recipient.age_range}</span></div>` : ''}
     ${recipient.interests ? `<div class="info-row"><span class="info-label">Interests:</span><span>${recipient.interests}</span></div>` : ''}
     ${recipient.max_budget ? `<div class="info-row"><span class="info-label">Budget:</span><span>$${recipient.max_budget.toFixed(2)}</span></div>` : ''}

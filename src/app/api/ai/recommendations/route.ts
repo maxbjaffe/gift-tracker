@@ -63,7 +63,7 @@ Recipient Information:
 - Name: ${recipient.name}
 - Relationship: ${recipient.relationship || 'Not specified'}
 - Age Range: ${recipient.age_range || 'Not specified'}
-- Birthday: ${recipient.birthday ? new Date(recipient.birthday).toLocaleDateString() : 'Not specified'}
+- Birthday: ${recipient.birthday ? (() => { const [y,m,d] = recipient.birthday.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(); })() : 'Not specified'}
 - Interests: ${recipient.interests && recipient.interests.length > 0 ? recipient.interests.join(', ') : 'Not specified'}
 - Notes: ${recipient.notes || 'None'}
 

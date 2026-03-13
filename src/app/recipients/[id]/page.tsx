@@ -13,7 +13,7 @@ import { AssignedGiftsManager } from '@/components/AssignedGiftsManager';
 import { ShareButton } from '@/components/ShareButton';
 import { ExportPDFButton } from '@/components/ExportPDFButton';
 import { createClient } from '@/lib/supabase/client';
-import { formatAgeDisplay } from '@/lib/utils/age';
+import { formatAgeDisplay, formatBirthday } from '@/lib/utils/age';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Button } from '@/components/ui/button';
 import {
@@ -345,7 +345,7 @@ export default function RecipientDetailPage() {
                   </p>
                   {recipient.birthday && (
                     <p className="text-xs md:text-sm text-gray-500 mt-2">
-                      🎂 Birthday: {new Date(recipient.birthday).toLocaleDateString()}
+                      🎂 Birthday: {formatBirthday(recipient.birthday)}
                     </p>
                   )}
                 </div>

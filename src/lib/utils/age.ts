@@ -1,6 +1,16 @@
 // Utility functions for age calculations
 
 /**
+ * Parse a "YYYY-MM-DD" string as local midnight.
+ * `new Date("YYYY-MM-DD")` is parsed as UTC, which shifts back one day
+ * in US Eastern time. Splitting avoids the timezone trap.
+ */
+export function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/**
  * Calculate exact age from birthday
  * @param birthday - Date string in YYYY-MM-DD format
  * @returns Age in years
@@ -8,7 +18,7 @@
 export function calculateAge(birthday: string | null | undefined): number | null {
   if (!birthday) return null;
 
-  const birthDate = new Date(birthday);
+  const birthDate = parseLocalDate(birthday);
   const today = new Date();
 
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -72,7 +82,7 @@ export function suggestAgeRange(age: number): string {
 export function formatBirthday(birthday: string | null | undefined): string | null {
   if (!birthday) return null;
 
-  const date = new Date(birthday);
+  const date = parseLocalDate(birthday);
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
