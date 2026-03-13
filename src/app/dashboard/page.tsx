@@ -114,7 +114,7 @@ export default function DashboardPage() {
   const recipientMap = Object.fromEntries(
     safeRecipients.map(r => [r.id, r])
   )
-  const occasions = getUpcomingOccasions(safeRecipients, safeGifts, 60)
+  const occasions = getUpcomingOccasions(safeRecipients, safeGifts, 150)
   const greeting = getGreeting()
   const nudge = getGreetingNudge(occasions)
 

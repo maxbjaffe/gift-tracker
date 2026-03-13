@@ -56,7 +56,7 @@ function bestGiftStatus(gifts: GiftWithRecipients[], recipientId: string): GiftS
 export function getUpcomingOccasions(
   recipients: Recipient[],
   gifts: GiftWithRecipients[],
-  daysAhead: number = 60
+  daysAhead: number = 150
 ): UpcomingOccasion[] {
   const occasions: UpcomingOccasion[] = []
   const today = new Date()

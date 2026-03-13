@@ -59,7 +59,7 @@ function buildChatPrefix(occasion: UpcomingOccasion): string {
 
 export function ComingUpHero({ occasions, recipientMap }: ComingUpHeroProps) {
   const holidayMap = useMemo(() => {
-    const holidays = getUpcomingHolidays(90)
+    const holidays = getUpcomingHolidays(150)
     return new Map(holidays.map(h => [h.name, h]))
   }, [])
 
@@ -68,7 +68,7 @@ export function ComingUpHero({ occasions, recipientMap }: ComingUpHeroProps) {
       <div className="bg-white/60 rounded-2xl shadow-sm p-8 text-center">
         <div className="text-5xl mb-3">🎉</div>
         <h2 className="text-lg font-bold text-gray-900 mb-1">All clear!</h2>
-        <p className="text-sm text-gray-500 mb-4">No occasions in the next 60 days</p>
+        <p className="text-sm text-gray-500 mb-4">No occasions in the next 5 months</p>
         <Link
           href="/recipients/new"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-giftstash-orange to-giftstash-blue text-white text-sm font-medium hover:opacity-90 transition-opacity"

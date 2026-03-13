@@ -45,7 +45,7 @@ function groupByWeek(occasions: UpcomingOccasion[]): { label: string; occasions:
 
   // Group remaining by week
   let weekStart = 8
-  while (weekStart <= 60) {
+  while (weekStart <= 150) {
     const weekEnd = weekStart + 6
     const weekOccasions = occasions.filter(o => o.daysUntil >= weekStart && o.daysUntil <= weekEnd)
     if (weekOccasions.length > 0) {
@@ -131,7 +131,7 @@ export default function OccasionsPage() {
     )
   }
 
-  const occasions = getUpcomingOccasions(recipients || [], gifts || [], 60)
+  const occasions = getUpcomingOccasions(recipients || [], gifts || [], 150)
   const weekGroups = groupByWeek(occasions)
 
   return (
@@ -139,7 +139,7 @@ export default function OccasionsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Occasions</h1>
-          <p className="text-sm text-gray-500 mt-1">Next 60 days</p>
+          <p className="text-sm text-gray-500 mt-1">Next 5 months</p>
         </div>
         <CalendarDays className="w-6 h-6 text-gray-400" />
       </div>
