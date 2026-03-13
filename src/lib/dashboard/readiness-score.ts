@@ -1,6 +1,7 @@
 // src/lib/dashboard/readiness-score.ts
 import type { Recipient, GiftWithRecipients } from '@/types/database.types'
 import { getUpcomingHolidays, type Holiday } from '@/lib/utils/holidays'
+import { parseLocalDate } from '@/lib/utils/age'
 
 export type UrgencyTier = 'overdue' | 'today' | 'this_week' | 'this_month' | 'later'
 export type GiftStatus = 'none' | 'idea' | 'purchased' | 'wrapped' | 'given'
@@ -66,7 +67,7 @@ export function getUpcomingOccasions(
   for (const recipient of recipients) {
     if (!recipient.birthday) continue
 
-    const birthday = new Date(recipient.birthday)
+    const birthday = parseLocalDate(recipient.birthday)
     const thisYearDate = new Date(today.getFullYear(), birthday.getMonth(), birthday.getDate())
 
     if (thisYearDate < today) {
