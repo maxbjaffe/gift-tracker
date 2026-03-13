@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { ComingUpHero } from '@/components/dashboard/ComingUpHero'
 import { StashOverview } from '@/components/dashboard/StashOverview'
 import { GiftInspiration } from '@/components/dashboard/GiftInspiration'
+import { DashboardChat } from '@/components/dashboard/DashboardChat'
 import { getUpcomingOccasions } from '@/lib/dashboard/readiness-score'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -125,16 +126,23 @@ export default function DashboardPage() {
         {nudge}
       </p>
 
-      {/* Two-column on desktop */}
-      <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6">
-        {/* Left column: occasions + stash */}
-        <div className="space-y-6">
+      {/* Two-column on desktop, single-column on mobile */}
+      <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-[1fr_340px] lg:gap-6">
+        {/* Left col items */}
+        <div className="lg:col-start-1 lg:row-start-1">
           <ComingUpHero occasions={occasions} recipientMap={recipientMap} />
+        </div>
+        <div className="lg:col-start-1 lg:row-start-2">
           <StashOverview gifts={safeGifts} recipients={safeRecipients} occasions={occasions} />
         </div>
 
-        {/* Right column: inspiration — sticky on desktop */}
-        <div className="mt-6 lg:mt-0 lg:sticky lg:top-6 lg:self-start">
+        {/* Chat — right column on desktop (spans all rows, sticky), between stash & inspiration on mobile */}
+        <div className="lg:col-start-2 lg:row-start-1 lg:row-end-4 lg:sticky lg:top-6 lg:self-start">
+          <DashboardChat />
+        </div>
+
+        {/* Inspiration — left col bottom on desktop, last on mobile */}
+        <div className="lg:col-start-1 lg:row-start-3">
           <GiftInspiration recipients={safeRecipients} />
         </div>
       </div>
