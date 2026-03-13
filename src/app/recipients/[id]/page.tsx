@@ -1,5 +1,3 @@
-// src/app/recipients/[id]/page.tsx - UPDATED to pass price_range and where_to_buy
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -24,8 +22,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Edit, Share2, FileDown, MessageSquare, Sparkles } from 'lucide-react';
+import { MoreVertical, Edit, ExternalLink, Settings, MessageSquare, Sparkles } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { useProfileHub } from '@/lib/hooks/useProfileHub';
 import type { Recipient } from '@/types/database.types';
 
 interface Gift {
@@ -71,6 +70,12 @@ export default function RecipientDetailPage() {
   const [profileSuggestions, setProfileSuggestions] = useState<any>(null);
   const [applyingSuggestions, setApplyingSuggestions] = useState(false);
   const [showChatDialog, setShowChatDialog] = useState(false);
+
+  // Profile Hub data
+  const { profile: profileHub, loading: profileHubLoading } = useProfileHub(
+    params.id as string,
+    recipient
+  );
 
   useEffect(() => {
     if (params.id) {
@@ -347,14 +352,31 @@ export default function RecipientDetailPage() {
               </div>
 
               <div className="flex flex-row gap-2 w-full sm:w-auto">
+                {profileHub && (
+                  <a
+                    href={profileHub.profileHubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full h-button-md"
+                      aria-label="Edit profile in Profile Hub"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </a>
+                )}
                 <Link href={`/recipients/${recipient.id}/edit`} className="flex-1 sm:flex-none">
                   <Button
                     variant="outline"
                     className="w-full h-button-md"
-                    aria-label="Edit recipient profile"
+                    aria-label="Edit gift settings"
                   >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
+                    <Settings className="h-4 w-4 mr-2" />
+                    Gift Settings
                   </Button>
                 </Link>
 
@@ -398,20 +420,164 @@ export default function RecipientDetailPage() {
               </div>
             </div>
 
-            {/* Quick Info */}
-            <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-              {recipient.interests && (
-                <div>
-                  <h3 className="text-sm md:text-base font-semibold text-gray-700 mb-2">Interests</h3>
-                  <p className="text-sm md:text-base text-gray-600">{recipient.interests}</p>
-                </div>
+          </div>
+        </div>
+
+        {/* About Section (from Profile Hub) */}
+        <div className="mb-6 md:mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg md:text-xl font-bold text-gray-900">About</h2>
+              {profileHub && (
+                <a
+                  href={profileHub.profileHubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs md:text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                >
+                  Edit in Profile Hub <ExternalLink className="h-3 w-3" />
+                </a>
               )}
+            </div>
+            {profileHubLoading ? (
+              <div className="space-y-3 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div className="flex gap-2 flex-wrap">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-6 w-16 bg-gray-200 rounded-full" />
+                  ))}
+                </div>
+              </div>
+            ) : profileHub ? (
+              <div className="space-y-4">
+                {profileHub.interests.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Interests</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {profileHub.interests.map((item) => (
+                        <span key={item} className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {profileHub.hobbies.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Hobbies</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {profileHub.hobbies.map((item) => (
+                        <span key={item} className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {profileHub.favorite_colors.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Favorite Colors</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {profileHub.favorite_colors.map((item) => (
+                        <span key={item} className="px-2 py-0.5 bg-rose-100 text-rose-800 rounded-full text-xs font-medium">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {profileHub.favorite_brands.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Favorite Brands</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {profileHub.favorite_brands.map((item) => (
+                        <span key={item} className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {profileHub.favorite_stores.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Favorite Stores</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {profileHub.favorite_stores.map((item) => (
+                        <span key={item} className="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {profileHub.personality_type && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">Personality</h3>
+                    <p className="text-sm text-gray-600">{profileHub.personality_type}</p>
+                  </div>
+                )}
+                {(profileHub.school || profileHub.grade) && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">School</h3>
+                    <p className="text-sm text-gray-600">
+                      {[profileHub.school, profileHub.grade && `Grade ${profileHub.grade}`].filter(Boolean).join(' - ')}
+                    </p>
+                  </div>
+                )}
+                {profileHub.interests.length === 0 && profileHub.hobbies.length === 0 && !profileHub.personality_type && (
+                  <p className="text-sm text-gray-400 italic">
+                    No profile data yet.{' '}
+                    <a
+                      href={profileHub.profileHubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-purple-600 hover:text-purple-700 not-italic font-medium"
+                    >
+                      Add info in Profile Hub
+                    </a>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 italic">Profile Hub unavailable</p>
+            )}
+          </div>
+        </div>
+
+        {/* Gift Settings Section (local data) */}
+        <div className="mb-6 md:mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg md:text-xl font-bold text-gray-900">Gift Settings</h2>
+              <Link
+                href={`/recipients/${recipient.id}/edit`}
+                className="text-xs md:text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+              >
+                Edit <Settings className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recipient.max_budget && (
                 <div>
-                  <h3 className="text-sm md:text-base font-semibold text-gray-700 mb-2">Max Budget</h3>
-                  <p className="text-xl md:text-2xl font-bold text-green-600">
-                    ${recipient.max_budget.toFixed(2)}
-                  </p>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Max Budget (per gift)</h3>
+                  <p className="text-xl font-bold text-green-600">${recipient.max_budget.toFixed(2)}</p>
+                </div>
+              )}
+              {recipient.gift_preferences && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Gift Preferences</h3>
+                  <p className="text-sm text-gray-600">{recipient.gift_preferences}</p>
+                </div>
+              )}
+              {recipient.gift_dos && recipient.gift_dos.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Gift Do&apos;s</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recipient.gift_dos.map((item) => (
+                      <span key={item} className="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {recipient.gift_donts && recipient.gift_donts.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Gift Don&apos;ts</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recipient.gift_donts.map((item) => (
+                      <span key={item} className="px-2 py-0.5 bg-rose-100 text-rose-800 rounded-full text-xs font-medium">{item}</span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

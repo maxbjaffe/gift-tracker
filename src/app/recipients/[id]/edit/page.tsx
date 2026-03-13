@@ -3,37 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { Recipient } from '@/types/database.types';
 import AvatarSelector from '@/components/AvatarSelector';
 import type { AvatarData } from '@/lib/avatar-utils';
 import { generateDefaultAvatar } from '@/lib/avatar-utils';
-import { calculateAge } from '@/lib/utils/age';
 import { SmartTagPicker } from '@/components/ui/SmartTagPicker';
-
-// Common store suggestions (not from taxonomy — too varied for a closed list)
-const COMMON_STORES = [
-  { id: 'amazon', name: 'Amazon' },
-  { id: 'target', name: 'Target' },
-  { id: 'walmart', name: 'Walmart' },
-  { id: 'nordstrom', name: 'Nordstrom' },
-  { id: 'costco', name: 'Costco' },
-  { id: 'etsy', name: 'Etsy' },
-  { id: 'rei', name: 'REI' },
-  { id: 'sephora', name: 'Sephora' },
-  { id: 'best_buy', name: 'Best Buy' },
-  { id: 'home_depot', name: 'Home Depot' },
-  { id: 'tj_maxx', name: 'TJ Maxx' },
-  { id: 'marshalls', name: 'Marshalls' },
-  { id: 'bed_bath', name: 'Bed Bath & Beyond' },
-  { id: 'williams_sonoma', name: 'Williams-Sonoma' },
-  { id: 'anthropologie', name: 'Anthropologie' },
-  { id: 'pottery_barn', name: 'Pottery Barn' },
-  { id: 'west_elm', name: 'West Elm' },
-  { id: 'crate_barrel', name: 'Crate & Barrel' },
-  { id: 'ulta', name: 'Ulta Beauty' },
-  { id: 'macys', name: "Macy's" },
-];
+import { useProfileHub } from '@/lib/hooks/useProfileHub';
 
 // Common restriction suggestions
 const COMMON_RESTRICTIONS = [
@@ -65,31 +42,20 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
   const [error, setError] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<AvatarData | null>(null);
 
-  // Scalar fields
-  const [name, setName] = useState('');
-  const [birthday, setBirthday] = useState('');
+  // Gift-specific fields
   const [giftPreferences, setGiftPreferences] = useState('');
   const [itemsAlreadyOwned, setItemsAlreadyOwned] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
   const [maxPurchasedBudget, setMaxPurchasedBudget] = useState('');
   const [notes, setNotes] = useState('');
-
-  // SmartTagPicker fields (single-select)
-  const [relationship, setRelationship] = useState<string[]>([]);
-  const [ageRange, setAgeRange] = useState<string[]>([]);
-  const [gender, setGender] = useState<string[]>([]);
   const [budgetTier, setBudgetTier] = useState<string[]>([]);
-
-  // SmartTagPicker fields (multi-select)
-  const [interests, setInterests] = useState<string[]>([]);
-  const [hobbies, setHobbies] = useState<string[]>([]);
-  const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
-  const [favoriteBrands, setFavoriteBrands] = useState<string[]>([]);
-  const [favoriteStores, setFavoriteStores] = useState<string[]>([]);
   const [giftStyles, setGiftStyles] = useState<string[]>([]);
   const [giftDos, setGiftDos] = useState<string[]>([]);
   const [giftDonts, setGiftDonts] = useState<string[]>([]);
   const [restrictions, setRestrictions] = useState<string[]>([]);
+
+  // Profile Hub for the read-only header
+  const { profile: profileHub } = useProfileHub(params.id, recipient);
 
   useEffect(() => {
     fetchRecipient();
@@ -107,28 +73,14 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
 
       setRecipient(data);
 
-      // Scalar fields
-      setName(data.name || '');
-      setBirthday(data.birthday || '');
+      // Gift-specific fields
       setGiftPreferences(data.gift_preferences || '');
       setItemsAlreadyOwned(Array.isArray(data.items_already_owned) ? data.items_already_owned.join(', ') : '');
       setMaxBudget(data.max_budget?.toString() || '');
       setMaxPurchasedBudget(data.max_purchased_budget?.toString() || '');
       setNotes(data.notes || '');
-
-      // Single-select fields
-      setRelationship(data.relationship ? [data.relationship] : []);
-      setAgeRange(data.age_range ? [data.age_range] : []);
-      setGender(data.gender ? [data.gender] : []);
-      setBudgetTier([]); // New field, no existing data
-
-      // Multi-select fields
-      setInterests(toArray(data.interests));
-      setHobbies(toArray(data.hobbies));
-      setFavoriteColors(toArray(data.favorite_colors));
-      setFavoriteBrands(toArray(data.favorite_brands));
-      setFavoriteStores(toArray(data.favorite_stores));
-      setGiftStyles([]); // New field
+      setBudgetTier([]);
+      setGiftStyles([]);
       setGiftDos(toArray(data.gift_dos));
       setGiftDonts(toArray(data.gift_donts));
       setRestrictions(toArray(data.restrictions));
@@ -148,24 +100,6 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
     }
   }
 
-  function handleBirthdayChange(value: string) {
-    setBirthday(value);
-    if (value) {
-      const age = calculateAge(value);
-      if (age !== null) {
-        // Auto-suggest life stage
-        if (age <= 1) setAgeRange(['Baby']);
-        else if (age <= 4) setAgeRange(['Toddler']);
-        else if (age <= 7) setAgeRange(['Young Kid']);
-        else if (age <= 12) setAgeRange(['Tween']);
-        else if (age <= 17) setAgeRange(['Teen']);
-        else if (age <= 25) setAgeRange(['Young Adult']);
-        else if (age <= 64) setAgeRange(['Adult']);
-        else setAgeRange(['Senior']);
-      }
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -175,16 +109,6 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
       const itemsArray = itemsAlreadyOwned.split(',').map(s => s.trim()).filter(Boolean);
 
       const updateData = {
-        name,
-        relationship: relationship[0] || null,
-        birthday: birthday || null,
-        age_range: ageRange[0] || null,
-        gender: gender[0] || null,
-        interests: interests.length > 0 ? interests : null,
-        hobbies: hobbies.length > 0 ? hobbies : null,
-        favorite_colors: favoriteColors.length > 0 ? favoriteColors : null,
-        favorite_brands: favoriteBrands.length > 0 ? favoriteBrands : null,
-        favorite_stores: favoriteStores.length > 0 ? favoriteStores : null,
         gift_preferences: giftPreferences || null,
         gift_dos: giftDos.length > 0 ? giftDos : null,
         gift_donts: giftDonts.length > 0 ? giftDonts : null,
@@ -218,7 +142,7 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="text-gray-600">Loading recipient details...</div>
+          <div className="text-gray-600">Loading...</div>
         </div>
       </div>
     );
@@ -237,8 +161,6 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
     );
   }
 
-  const currentAge = birthday ? calculateAge(birthday) : null;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-6 px-4 md:py-8 md:px-6 lg:py-12 lg:px-8">
       <div className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
@@ -246,7 +168,24 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
           <Link href={`/recipients/${params.id}`} className="text-purple-600 hover:text-purple-700 mb-4 inline-block text-sm md:text-base">
             ← Back to Recipient
           </Link>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">Edit Recipient</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">Gift Settings</h1>
+          {recipient && (
+            <div className="mt-2 flex items-center gap-3">
+              <p className="text-sm md:text-base text-gray-600">
+                {recipient.name} {recipient.relationship && `(${recipient.relationship})`}
+              </p>
+              {profileHub && (
+                <a
+                  href={profileHub.profileHubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                >
+                  Edit general info in Profile Hub <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
@@ -256,149 +195,17 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
             </div>
           )}
 
-          {/* Basic Info */}
+          {/* Avatar */}
+          {recipient && (
+            <div className="space-y-4 md:space-y-6">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Avatar</h2>
+              <AvatarSelector name={recipient.name} value={avatar} onChange={setAvatar} />
+            </div>
+          )}
+
+          {/* Budget */}
           <div className="space-y-4 md:space-y-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Basic Information</h2>
-
-            <div>
-              <label htmlFor="name" className="block text-sm md:text-base font-medium text-gray-700 mb-2">Name *</label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="e.g., John Doe"
-              />
-            </div>
-
-            {name && (
-              <div>
-                <label className="block text-sm md:text-base font-medium text-gray-700 mb-2">Avatar</label>
-                <AvatarSelector name={name} value={avatar} onChange={setAvatar} />
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
-              <SmartTagPicker
-                label="Relationship"
-                values={relationship}
-                onChange={setRelationship}
-                enumType="relationship"
-                singleSelect
-                placeholder="Select relationship..."
-                color="pink"
-              />
-              <SmartTagPicker
-                label="Gender"
-                values={gender}
-                onChange={setGender}
-                enumType="gender"
-                singleSelect
-                placeholder="Select..."
-                color="teal"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
-              <div>
-                <label htmlFor="birthday" className="block text-sm md:text-base font-medium text-gray-700 mb-2">Birthday</label>
-                <input
-                  type="date"
-                  id="birthday"
-                  value={birthday}
-                  onChange={(e) => handleBirthdayChange(e.target.value)}
-                  className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-                {currentAge !== null && (
-                  <p className="mt-2 text-sm text-purple-600 font-medium">
-                    Currently {currentAge} years old
-                  </p>
-                )}
-              </div>
-              <SmartTagPicker
-                label={`Life Stage${birthday ? ' (auto-filled)' : ''}`}
-                values={ageRange}
-                onChange={setAgeRange}
-                enumType="life_stage"
-                singleSelect
-                placeholder="Select..."
-                color="blue"
-              />
-            </div>
-          </div>
-
-          {/* Interests & Preferences */}
-          <div className="space-y-4 md:space-y-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Interests & Preferences</h2>
-
-            <SmartTagPicker
-              label="Interests"
-              values={interests}
-              onChange={setInterests}
-              allInterests
-              placeholder="Search interests..."
-              color="purple"
-            />
-
-            <SmartTagPicker
-              label="Hobbies"
-              values={hobbies}
-              onChange={setHobbies}
-              allInterests
-              placeholder="Search hobbies..."
-              color="indigo"
-            />
-
-            <SmartTagPicker
-              label="Favorite Colors"
-              values={favoriteColors}
-              onChange={setFavoriteColors}
-              enumType="favorite_color"
-              allowCustom
-              placeholder="Select or type colors..."
-              color="rose"
-            />
-
-            <div>
-              <label htmlFor="gift_preferences" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
-                Gift Preferences (general notes)
-              </label>
-              <textarea
-                id="gift_preferences"
-                value={giftPreferences}
-                onChange={(e) => setGiftPreferences(e.target.value)}
-                rows={3}
-                className="w-full px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="What types of gifts do they prefer?"
-              />
-            </div>
-          </div>
-
-          {/* Shopping Preferences */}
-          <div className="space-y-4 md:space-y-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Shopping Preferences</h2>
-
-            <SmartTagPicker
-              label="Favorite Brands"
-              values={favoriteBrands}
-              onChange={setFavoriteBrands}
-              enumType="favorite_brand"
-              allowCustom
-              placeholder="Search or type brands..."
-              color="amber"
-            />
-
-            <SmartTagPicker
-              label="Favorite Stores"
-              values={favoriteStores}
-              onChange={setFavoriteStores}
-              staticOptions={COMMON_STORES}
-              allowCustom
-              placeholder="Search or type stores..."
-              color="green"
-            />
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Budget</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
               <SmartTagPicker
@@ -450,9 +257,23 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
             </div>
           </div>
 
-          {/* Gift Guidelines */}
+          {/* Gift Preferences */}
           <div className="space-y-4 md:space-y-6">
             <h2 className="text-lg md:text-xl font-semibold text-gray-900 border-b pb-2">Gift Guidelines</h2>
+
+            <div>
+              <label htmlFor="gift_preferences" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
+                Gift Preferences (general notes)
+              </label>
+              <textarea
+                id="gift_preferences"
+                value={giftPreferences}
+                onChange={(e) => setGiftPreferences(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="What types of gifts do they prefer?"
+              />
+            </div>
 
             <SmartTagPicker
               label="Gift Styles"

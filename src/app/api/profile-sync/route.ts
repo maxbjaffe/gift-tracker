@@ -13,8 +13,6 @@ const FIELD_MAP: Record<string, string> = {
   favorite_colors: "favorite_colors",
   favorite_brands: "favorite_brands",
   favorite_stores: "favorite_stores",
-  gift_dos: "gift_dos",
-  gift_donts: "gift_donts",
   restrictions: "restrictions",
   personality_type: "personality_type",
   personality_description: "personality_description",

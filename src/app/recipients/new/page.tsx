@@ -137,6 +137,26 @@ export default function NewRecipientPage() {
 
       if (submitError) throw submitError;
 
+      // Fire-and-forget: create linked Profile Hub profile
+      if (data?.id) {
+        fetch('/api/profile-hub', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            relationship: formData.relationship || null,
+            date_of_birth: formData.birthday || null,
+            gender: formData.gender || null,
+            interests: interestsArray || [],
+            hobbies: giftCategoriesArray || [],
+            favorite_colors: favoriteColorsArray || [],
+            favorite_stores: favoriteStoresArray || [],
+            favorite_brands: favoriteBrandsArray || [],
+            giftstash_recipient_id: data.id,
+          }),
+        }).catch((err) => console.error('[Profile Hub] Auto-create failed:', err));
+      }
+
       router.push('/recipients');
     } catch (err) {
       console.error('Error creating recipient:', err);
