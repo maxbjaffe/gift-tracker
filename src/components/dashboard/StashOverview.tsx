@@ -2,23 +2,18 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, ChevronDown, ChevronUp, AlertTriangle, CheckCircle, Lightbulb, Gift as GiftIcon } from 'lucide-react'
+import { Package, ChevronDown, ChevronUp, Gift as GiftIcon } from 'lucide-react'
 import { groupGiftsByStashProfile, type StashProfileType } from '@/lib/dashboard/stash-data'
 import { BucketCard } from './BucketCard'
+import Avatar from '@/components/Avatar'
 import type { GiftWithRecipients, Recipient } from '@/types/database.types'
+import type { UpcomingOccasion } from '@/lib/dashboard/readiness-score'
 import Link from 'next/link'
 
 interface StashOverviewProps {
   gifts: GiftWithRecipients[]
   recipients: Recipient[]
-}
-
-const CHIP_CONFIG: Record<StashProfileType, { emoji: string; label: string; bg: string }> = {
-  kids_party: { emoji: '🎈', label: "Kids' Party", bg: 'bg-purple-100 text-purple-700' },
-  teacher:    { emoji: '🎓', label: 'Teacher',     bg: 'bg-blue-100 text-blue-700' },
-  host:       { emoji: '🏡', label: 'Host',        bg: 'bg-amber-100 text-amber-700' },
-  general:    { emoji: '📦', label: 'General',     bg: 'bg-teal-100 text-teal-700' },
-  specific:   { emoji: '🎯', label: 'Assigned',    bg: 'bg-orange-100 text-orange-700' },
+  occasions: UpcomingOccasion[]
 }
 
 const BUCKET_GRADIENT: Record<StashProfileType, { gradient: string; border: string; icon: typeof Package }> = {
@@ -29,9 +24,44 @@ const BUCKET_GRADIENT: Record<StashProfileType, { gradient: string; border: stri
   general:    { gradient: 'bg-gradient-to-r from-teal-500 to-emerald-500', border: 'border-teal-400',  icon: Package },
 }
 
-export function StashOverview({ gifts, recipients }: StashOverviewProps) {
+interface PersonCoverage {
+  recipientId: string
+  recipientName: string
+  recipient: Recipient | null
+  occasionName: string
+  daysUntil: number
+  covered: boolean
+  gifts: GiftWithRecipients[]
+}
+
+export function StashOverview({ gifts, recipients, occasions }: StashOverviewProps) {
   const router = useRouter()
-  const [expanded, setExpanded] = useState(false)
+  const [showAll, setShowAll] = useState(false)
+
+  const recipientMap = useMemo(
+    () => Object.fromEntries(recipients.map(r => [r.id, r])),
+    [recipients]
+  )
+
+  // Per-person coverage: for each non-holiday upcoming occasion, check if they have purchased/wrapped gifts
+  const coverage = useMemo<PersonCoverage[]>(() => {
+    return occasions
+      .filter(o => o.recipientId !== '__holiday__')
+      .map(o => {
+        const readyGifts = o.assignedGifts.filter(g =>
+          g.status === 'purchased' || g.status === 'wrapped'
+        )
+        return {
+          recipientId: o.recipientId,
+          recipientName: o.recipientName,
+          recipient: recipientMap[o.recipientId] || null,
+          occasionName: o.occasionType === 'birthday' ? 'Birthday' : o.occasionName.split(' — ')[1] || o.occasionName,
+          daysUntil: o.daysUntil,
+          covered: readyGifts.length > 0,
+          gifts: readyGifts,
+        }
+      })
+  }, [occasions, recipientMap])
 
   const onHandGifts = useMemo(
     () => gifts.filter(g => g.status === 'purchased' || g.status === 'wrapped'),
@@ -44,6 +74,8 @@ export function StashOverview({ gifts, recipients }: StashOverviewProps) {
   )
 
   const totalCount = onHandGifts.length
+  const coveredCount = coverage.filter(c => c.covered).length
+  const uncoveredCount = coverage.filter(c => !c.covered).length
 
   return (
     <div className="bg-white/60 rounded-2xl shadow-sm p-4">
@@ -54,65 +86,87 @@ export function StashOverview({ gifts, recipients }: StashOverviewProps) {
           <h2 className="font-semibold text-gray-900">Your Stash</h2>
         </div>
         <span className="bg-orange-100 text-orange-700 rounded-full px-2.5 py-0.5 text-xs font-bold">
-          {totalCount}
+          {totalCount} on hand
         </span>
       </div>
 
-      {/* Chips row */}
-      {groups.length > 0 && (
-        <div className="flex gap-2 flex-wrap mt-3">
-          {groups.map(group => {
-            const config = CHIP_CONFIG[group.profileType]
-            return (
-              <span
-                key={group.profileType}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg}`}
-              >
-                {config.emoji} {config.label}: {group.gifts.length}
-              </span>
-            )
-          })}
+      {/* Per-person coverage rows */}
+      {coverage.length > 0 && (
+        <div className="mt-3 space-y-1.5">
+          {coverage.map((person, i) => (
+            <div
+              key={`${person.recipientId}-${i}`}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-xl ${person.covered ? 'bg-green-50/80' : 'bg-amber-50/80'}`}
+            >
+              {person.recipient ? (
+                <Avatar
+                  type={person.recipient.avatar_type as any}
+                  data={person.recipient.avatar_data || undefined}
+                  background={person.recipient.avatar_background || undefined}
+                  name={person.recipientName}
+                  size="xs"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm flex-shrink-0">
+                  {person.recipientName[0]}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium text-gray-900">{person.recipientName}</span>
+                <span className="text-xs text-gray-400 ml-1.5">{person.occasionName} &middot; {person.daysUntil}d</span>
+              </div>
+              {person.covered ? (
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <span className="text-xs font-medium text-green-700">{person.gifts[0].name}</span>
+                  {person.gifts.length > 1 && (
+                    <span className="text-[10px] text-green-600">+{person.gifts.length - 1}</span>
+                  )}
+                  <span className="text-green-600 text-sm">&#10003;</span>
+                </div>
+              ) : (
+                <Link
+                  href={`/chat?prefix=${encodeURIComponent(`Gift ideas for ${person.recipientName}'s ${person.occasionName}: `)}`}
+                  className="text-xs font-medium text-amber-700 hover:text-amber-900 flex-shrink-0"
+                >
+                  Find a gift &rarr;
+                </Link>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Status callout */}
-      <div className="mt-3">
-        {totalCount === 0 ? (
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200">
-            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span className="text-sm text-amber-800 flex-1">Your stash is empty — stock up for surprise moments!</span>
-            <Link
-              href="/stash"
-              className="text-xs font-semibold text-amber-700 hover:text-amber-900 whitespace-nowrap"
-            >
-              Browse →
-            </Link>
-          </div>
-        ) : totalCount < 5 ? (
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200">
-            <Lightbulb className="w-4 h-4 text-gray-500 flex-shrink-0" />
-            <span className="text-sm text-gray-600">{totalCount} gift{totalCount !== 1 ? 's' : ''} on hand</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-green-50 border border-green-200">
-            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-            <span className="text-sm text-green-800">You&apos;re covered! {totalCount} gifts ready for any occasion</span>
-          </div>
-        )}
-      </div>
+      {/* Summary line */}
+      {coverage.length > 0 && (
+        <div className="mt-2.5 text-xs text-gray-500">
+          {uncoveredCount === 0
+            ? `All ${coveredCount} upcoming occasions covered`
+            : `${coveredCount} covered, ${uncoveredCount} still need a gift`}
+        </div>
+      )}
 
-      {/* Expand toggle */}
+      {/* Empty stash warning */}
+      {totalCount === 0 && coverage.length === 0 && (
+        <div className="mt-3 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200">
+          <span className="text-sm text-amber-800 flex-1">Your stash is empty — stock up for surprise moments!</span>
+          <Link href="/stash" className="text-xs font-semibold text-amber-700 hover:text-amber-900 whitespace-nowrap">
+            Browse &rarr;
+          </Link>
+        </div>
+      )}
+
+      {/* Expandable bucket detail */}
       {groups.length > 0 && (
         <>
           <button
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => setShowAll(!showAll)}
             className="flex items-center gap-1 mt-3 text-xs text-gray-500 hover:text-giftstash-orange transition-colors"
           >
-            {expanded ? 'Hide details' : 'See all →'}
-            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            {showAll ? 'Hide details' : 'See all stash items'}
+            {showAll ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
 
-          {expanded && (
+          {showAll && (
             <div className="mt-3 space-y-3">
               {groups.map(group => {
                 const config = BUCKET_GRADIENT[group.profileType]

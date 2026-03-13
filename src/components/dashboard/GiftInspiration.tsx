@@ -15,62 +15,13 @@ interface GiftIdea {
 }
 
 const GIFT_IDEAS: GiftIdea[] = [
-  {
-    title: 'Personalized Photo Book',
-    category: 'Sentimental',
-    ageRange: 'All ages',
-    priceRange: '$20-$50',
-    occasion: 'Birthdays, Anniversaries, Holidays',
-    emoji: '📸',
-  },
-  {
-    title: 'Subscription Box Service',
-    category: 'Experience',
-    ageRange: '18+',
-    priceRange: '$15-$50/mo',
-    occasion: 'Birthdays, Just Because',
-    emoji: '📦',
-  },
-  {
-    title: 'Smart Home Device',
-    category: 'Tech',
-    ageRange: '16+',
-    priceRange: '$30-$100',
-    occasion: 'Holidays, Housewarming',
-    emoji: '🏠',
-  },
-  {
-    title: 'Cooking or Baking Set',
-    category: 'Hobbies',
-    ageRange: '12+',
-    priceRange: '$25-$75',
-    occasion: 'Birthdays, Holidays',
-    emoji: '👨‍🍳',
-  },
-  {
-    title: 'Cozy Comfort Bundle',
-    category: 'Comfort',
-    ageRange: 'All ages',
-    priceRange: '$30-$60',
-    occasion: 'Holidays, Get Well Soon',
-    emoji: '🕯️',
-  },
-  {
-    title: 'Fitness Tracker or Smartwatch',
-    category: 'Health & Fitness',
-    ageRange: '13+',
-    priceRange: '$30-$150',
-    occasion: 'New Year, Birthdays',
-    emoji: '⌚',
-  },
-  {
-    title: 'Craft or DIY Kit',
-    category: 'Creative',
-    ageRange: '8+',
-    priceRange: '$15-$45',
-    occasion: 'Birthdays, Just Because',
-    emoji: '🎨',
-  },
+  { title: 'Personalized Photo Book', category: 'Sentimental', ageRange: 'All ages', priceRange: '$20-$50', occasion: 'Birthdays, Anniversaries, Holidays', emoji: '📸' },
+  { title: 'Subscription Box Service', category: 'Experience', ageRange: '18+', priceRange: '$15-$50/mo', occasion: 'Birthdays, Just Because', emoji: '📦' },
+  { title: 'Smart Home Device', category: 'Tech', ageRange: '16+', priceRange: '$30-$100', occasion: 'Holidays, Housewarming', emoji: '🏠' },
+  { title: 'Cooking or Baking Set', category: 'Hobbies', ageRange: '12+', priceRange: '$25-$75', occasion: 'Birthdays, Holidays', emoji: '👨‍🍳' },
+  { title: 'Cozy Comfort Bundle', category: 'Comfort', ageRange: 'All ages', priceRange: '$30-$60', occasion: 'Holidays, Get Well Soon', emoji: '🕯️' },
+  { title: 'Fitness Tracker or Smartwatch', category: 'Health & Fitness', ageRange: '13+', priceRange: '$30-$150', occasion: 'New Year, Birthdays', emoji: '⌚' },
+  { title: 'Craft or DIY Kit', category: 'Creative', ageRange: '8+', priceRange: '$15-$45', occasion: 'Birthdays, Just Because', emoji: '🎨' },
 ]
 
 function shuffleAndPick(arr: GiftIdea[], count: number): GiftIdea[] {
@@ -90,13 +41,13 @@ function findMatchingRecipients(idea: GiftIdea, recipients: Recipient[]): string
 }
 
 export function GiftInspiration({ recipients }: { recipients: Recipient[] }) {
-  const [picks, setPicks] = useState<GiftIdea[]>(() => shuffleAndPick(GIFT_IDEAS, 4))
+  const [picks, setPicks] = useState<GiftIdea[]>(() => shuffleAndPick(GIFT_IDEAS, 6))
   const [spinning, setSpinning] = useState(false)
 
   const handleRefresh = useCallback(() => {
     setSpinning(true)
     setTimeout(() => {
-      setPicks(shuffleAndPick(GIFT_IDEAS, 4))
+      setPicks(shuffleAndPick(GIFT_IDEAS, 6))
       setSpinning(false)
     }, 300)
   }, [])
@@ -126,40 +77,40 @@ export function GiftInspiration({ recipients }: { recipients: Recipient[] }) {
           Fresh Ideas
         </button>
       </div>
-      <p className="text-xs text-gray-500 mt-1">Curated picks based on your people</p>
+      <p className="text-xs text-gray-500 mt-1">Curated picks for your people</p>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 gap-3 mt-3">
+      {/* Compact horizontal cards */}
+      <div className="mt-3 space-y-2">
         {picks.map(idea => {
           const matches = recipientMatches.get(idea.title) || []
           return (
             <div
               key={idea.title}
-              className="rounded-xl overflow-hidden bg-white/60 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+              className="flex items-center gap-3 bg-white/60 rounded-xl px-3 py-2.5 shadow-sm hover:shadow-md transition-shadow"
             >
-              {/* Image area */}
-              <div className="aspect-[4/3] bg-gradient-to-br from-orange-100 to-blue-100 flex items-center justify-center">
-                <span className="text-4xl">{idea.emoji}</span>
+              {/* Emoji icon */}
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-100 to-blue-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">{idea.emoji}</span>
               </div>
-              {/* Content */}
-              <div className="p-2.5">
-                <h3 className="text-xs font-semibold text-gray-900 line-clamp-2">{idea.title}</h3>
-                <p className="text-sm font-bold text-giftstash-orange mt-0.5">{idea.priceRange}</p>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 inline-block mt-1">
-                  {idea.category}
-                </span>
-                {matches.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1.5">
-                    {matches.map(name => (
-                      <span
-                        key={name}
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700"
-                      >
-                        {name}
-                      </span>
-                    ))}
-                  </div>
-                )}
+              {/* Details */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-gray-900 truncate">{idea.title}</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <span className="text-sm font-bold text-giftstash-orange">{idea.priceRange}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                    {idea.category}
+                  </span>
+                  {matches.map(name => (
+                    <span
+                      key={name}
+                      className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium"
+                    >
+                      For {name}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           )
@@ -171,7 +122,7 @@ export function GiftInspiration({ recipients }: { recipients: Recipient[] }) {
         href="/inspiration"
         className="text-xs text-gray-500 hover:text-giftstash-orange mt-3 text-center block transition-colors"
       >
-        Browse all ideas →
+        Browse all ideas &rarr;
       </Link>
     </div>
   )
