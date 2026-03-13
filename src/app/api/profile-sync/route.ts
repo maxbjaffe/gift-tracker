@@ -18,6 +18,9 @@ const FIELD_MAP: Record<string, string> = {
   personality_description: "personality_description",
   gender: "gender",
   clothing_sizes: "clothing_sizes",
+  avatar_type: "avatar_type",
+  avatar_value: "avatar_data",
+  avatar_background: "avatar_background",
 };
 
 export async function POST(request: NextRequest) {
