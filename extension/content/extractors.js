@@ -3,17 +3,39 @@
 /**
  * Get an image element's viewport position for screenshot cropping.
  * Returns {x, y, width, height} relative to viewport, accounting for devicePixelRatio.
+ * Adds padding and walks up to the image's container to capture the full visual area.
  */
 function getImageRect(imgEl) {
   if (!imgEl) return null;
-  const rect = imgEl.getBoundingClientRect();
-  if (rect.width < 50 || rect.height < 50) return null; // Skip tiny elements
+
+  // Walk up to find a meaningful container (often the image sits inside a
+  // wrapper div that represents the full product image area)
+  let targetEl = imgEl;
+  const parent = imgEl.parentElement;
+  if (parent) {
+    const parentRect = parent.getBoundingClientRect();
+    const imgRect = imgEl.getBoundingClientRect();
+    // If the parent is a tight wrapper around the image, use it instead
+    // (catches cases where the img is clipped by overflow:hidden on the parent)
+    if (parentRect.width >= imgRect.width && parentRect.height >= imgRect.height &&
+        parentRect.width <= imgRect.width * 1.5) {
+      targetEl = parent;
+    }
+  }
+
+  const rect = targetEl.getBoundingClientRect();
+  if (rect.width < 50 || rect.height < 50) return null;
+
   const dpr = window.devicePixelRatio || 1;
+  // Add 15% padding on each side to avoid tight cropping
+  const padX = Math.round(rect.width * 0.15);
+  const padY = Math.round(rect.height * 0.15);
+
   return {
-    x: Math.round(rect.left * dpr),
-    y: Math.round(rect.top * dpr),
-    width: Math.round(rect.width * dpr),
-    height: Math.round(rect.height * dpr),
+    x: Math.round(Math.max(0, rect.left - padX) * dpr),
+    y: Math.round(Math.max(0, rect.top - padY) * dpr),
+    width: Math.round((rect.width + padX * 2) * dpr),
+    height: Math.round((rect.height + padY * 2) * dpr),
   };
 }
 
