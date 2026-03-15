@@ -28,11 +28,24 @@ function extractAmazonProduct() {
     }
   }
 
-  // Extract main product image
+  // Extract main product image — be specific to avoid Prime badges/logos
   let image = null;
-  const mainImage = document.querySelector('#landingImage, #imgBlkFront, .a-dynamic-image');
+  const mainImage = document.querySelector(
+    '#landingImage, ' +
+    '#imgBlkFront, ' +
+    '#main-image, ' +
+    '#imgTagWrapperId img, ' +
+    '#imageBlock img.a-dynamic-image, ' +
+    '#altImages + * img, ' +
+    'img[data-old-hires]'
+  );
   if (mainImage) {
-    image = mainImage.src || mainImage.dataset.oldHires || mainImage.dataset.src;
+    // Prefer high-res versions stored in data attributes
+    image = mainImage.dataset.oldHires || mainImage.dataset.src || mainImage.src;
+    // Filter out tiny images (logos/badges) — product images are usually 300px+
+    if (image && mainImage.naturalWidth > 0 && mainImage.naturalWidth < 100) {
+      image = null;
+    }
   }
 
   // Extract description/features

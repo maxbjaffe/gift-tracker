@@ -153,7 +153,19 @@ function populateRecipientSelect() {
 function displayProduct() {
   if (!currentProduct) return;
 
-  document.getElementById('productImage').src = currentProduct.image || '';
+  const imgEl = document.getElementById('productImage');
+  if (currentProduct.image) {
+    imgEl.src = currentProduct.image;
+    // If the product image fails to load, fall back to screenshot when available
+    imgEl.onerror = () => {
+      if (screenshot) {
+        imgEl.src = screenshot;
+      }
+    };
+  } else {
+    imgEl.src = '';
+  }
+
   document.getElementById('productTitle').textContent = currentProduct.title || 'Unknown Product';
   document.getElementById('productPrice').textContent = currentProduct.price
     ? `$${currentProduct.price.toFixed(2)}`
@@ -168,6 +180,12 @@ async function capturePageScreenshot() {
     if (response.screenshot) {
       screenshot = response.screenshot;
       displayScreenshot();
+
+      // If product has no image or a bad one, use screenshot as fallback
+      const imgEl = document.getElementById('productImage');
+      if (!currentProduct?.image || !imgEl.src || imgEl.naturalWidth === 0) {
+        imgEl.src = screenshot;
+      }
     }
   } catch (error) {
     console.error('Error capturing screenshot:', error);
@@ -296,7 +314,8 @@ async function saveGift() {
 
     const client = await window.supabaseClient.getClient();
 
-    // Prepare gift data
+    // Prepare gift data — use screenshot as fallback image
+    const bestImage = currentProduct.image || screenshot || null;
     const giftData = {
       user_id: currentUser.id,
       name: currentProduct.title,
@@ -304,10 +323,16 @@ async function saveGift() {
       current_price: currentProduct.price,
       category: category || null,
       url: currentProduct.url,
-      image_url: currentProduct.image,
+      image_url: bestImage,
       store: currentProduct.site || currentProduct.store,
       brand: currentProduct.brand,
-      status: 'idea'
+      status: 'idea',
+      source_metadata: {
+        source: 'chrome_extension',
+        screenshot: screenshot || null,
+        extracted_image: currentProduct.image || null,
+        site: currentProduct.site || null,
+      }
     };
 
     // Create gift
