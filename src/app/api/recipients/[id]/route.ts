@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { syncToProfileHubAsync } from '@/lib/profile-hub-sync';
 
 // GET /api/recipients/[id] - Get a single recipient
 export async function GET(
@@ -121,6 +122,28 @@ export async function PUT(
       .single();
 
     if (error) throw error;
+
+    // Fire-and-forget sync to Profile Hub
+    if (recipient) {
+      syncToProfileHubAsync(id, {
+        name,
+        relationship,
+        birthday,
+        interests,
+        hobbies,
+        favorite_colors,
+        favorite_stores,
+        favorite_brands,
+        gift_dos,
+        gift_donts,
+        restrictions,
+        gender: body.gender,
+        personality_type: body.personality_type,
+        personality_description: body.personality_description,
+        clothing_sizes: body.clothing_sizes,
+        grade: body.grade,
+      });
+    }
 
     return NextResponse.json({
       success: true,

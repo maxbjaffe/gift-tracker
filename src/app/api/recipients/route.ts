@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { syncToProfileHubAsync } from '@/lib/profile-hub-sync';
 
 // GET /api/recipients - List all recipients for the authenticated user
 export async function GET(request: NextRequest) {
@@ -108,6 +109,26 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    // Fire-and-forget sync to Profile Hub
+    if (recipient) {
+      syncToProfileHubAsync(recipient.id, {
+        name,
+        relationship,
+        birthday,
+        interests,
+        hobbies,
+        favorite_colors,
+        favorite_stores,
+        favorite_brands,
+        restrictions,
+        gender: body.gender,
+        personality_type: body.personality_type,
+        personality_description: body.personality_description,
+        clothing_sizes: body.clothing_sizes,
+        grade: body.grade,
+      });
+    }
 
     return NextResponse.json({
       success: true,

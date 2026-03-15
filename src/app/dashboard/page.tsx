@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, useState } from 'react'
 import { useRecipients } from '@/lib/hooks/useRecipients'
 import { useGifts } from '@/lib/hooks/useGifts'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
@@ -12,7 +12,7 @@ import { getUpcomingOccasions } from '@/lib/dashboard/readiness-score'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Plus, Sparkles } from 'lucide-react'
+import { Plus, Sparkles, Users, Gift, Share2, X } from 'lucide-react'
 
 function getGreeting(): string {
   const hour = new Date().getHours()
@@ -36,10 +36,57 @@ function getGreetingNudge(occasions: ReturnType<typeof getUpcomingOccasions>): s
   return `${name} is in ${first.daysUntil} days.`
 }
 
+const ONBOARDING_KEY = 'giftstash-onboarding-dismissed'
+
+function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
+  const steps = [
+    { icon: Users, label: 'Add people', desc: 'Who are you shopping for?', href: '/recipients/new' },
+    { icon: Gift, label: 'Capture ideas', desc: 'Save gifts via web, SMS, or chat', href: '/chat' },
+    { icon: Share2, label: 'Track & share', desc: 'Share wishlists, prevent duplicates', href: '/stash' },
+  ]
+
+  return (
+    <Card className="mb-5 p-4 bg-gradient-to-r from-orange-50 to-blue-50 border-orange-200/50 relative">
+      <button
+        onClick={onDismiss}
+        className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label="Dismiss"
+      >
+        <X className="w-4 h-4" />
+      </button>
+      <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-3">Quick Start</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {steps.map((step, i) => (
+          <Link
+            key={i}
+            href={step.href}
+            className="flex items-start gap-2.5 p-2.5 rounded-lg bg-white/70 hover:bg-white transition-colors group"
+          >
+            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+              <step.icon className="w-4 h-4 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">{step.label}</p>
+              <p className="text-xs text-gray-500">{step.desc}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
 export default function DashboardPage() {
   const { recipients, loading: recipientsLoading, refetch: refetchRecipients } = useRecipients()
   const { gifts, loading: giftsLoading, refetch: refetchGifts } = useGifts()
   const seedAttempted = useRef(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShowOnboarding(!localStorage.getItem(ONBOARDING_KEY))
+    }
+  }, [])
 
   useEffect(() => {
     const seedSampleData = async () => {
@@ -125,6 +172,14 @@ export default function DashboardPage() {
         <span className="font-semibold text-gray-900">{greeting}</span>{' '}
         {nudge}
       </p>
+
+      {/* Onboarding */}
+      {showOnboarding && (
+        <OnboardingBanner onDismiss={() => {
+          setShowOnboarding(false)
+          localStorage.setItem(ONBOARDING_KEY, 'true')
+        }} />
+      )}
 
       {/* Two-column on desktop, single-column on mobile */}
       <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-[1fr_340px] lg:gap-6">

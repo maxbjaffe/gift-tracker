@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { GIFT_CATEGORIES } from '@/types/database.types';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 
 type Gift = {
   id: string;
@@ -158,9 +159,11 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-6 px-4 md:py-8 md:px-6 lg:py-12 lg:px-8">
       <div className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
         <div className="mb-6 md:mb-8">
-          <Link href={`/gifts/${params.id}`} className="text-purple-600 hover:text-purple-700 mb-4 inline-block text-sm md:text-base">
-            ← Back to Gift
-          </Link>
+          <Breadcrumbs items={[
+            { label: 'Gifts', href: '/gifts' },
+            { label: gift?.name || 'Gift', href: `/gifts/${params.id}` },
+            { label: 'Edit' },
+          ]} />
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">Edit Gift</h1>
         </div>
 

@@ -9,13 +9,13 @@ import { BucketCard } from '@/components/dashboard/BucketCard'
 import { groupGiftsByStashProfile, type StashProfileType } from '@/lib/dashboard/stash-data'
 import { Plus, Package, Users, GraduationCap, Home, Gift } from 'lucide-react'
 
-const FILTER_CHIPS: { value: StashProfileType | 'all'; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'kids_party', label: "Kids' Party" },
-  { value: 'teacher', label: 'Teacher' },
-  { value: 'host', label: 'Host' },
-  { value: 'general', label: 'General' },
-  { value: 'specific', label: 'Assigned' },
+const FILTER_CHIPS: { value: StashProfileType | 'all'; label: string; description: string }[] = [
+  { value: 'all', label: 'All', description: 'All gifts on hand' },
+  { value: 'specific', label: 'Assigned', description: 'Gifts for a specific person' },
+  { value: 'kids_party', label: "Kids' Party", description: 'Birthday parties, playdates' },
+  { value: 'teacher', label: 'Teacher', description: 'Teacher appreciation, holidays' },
+  { value: 'host', label: 'Host', description: 'Hostess gifts, thank-yous' },
+  { value: 'general', label: 'General', description: 'Grab bag, last-minute, regifts' },
 ]
 
 const PROFILE_GRADIENTS: Record<StashProfileType, { gradient: string; border: string; icon: typeof Package }> = {
@@ -80,6 +80,7 @@ export default function StashPage() {
           <button
             key={chip.value}
             onClick={() => setFilter(chip.value)}
+            title={chip.description}
             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               filter === chip.value
                 ? 'bg-orange-500 text-white'

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { GiftRecipientsManager } from '@/components/GiftRecipientsManager';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 
 type Gift = {
   id: string;
@@ -212,9 +213,11 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6 md:mb-8 space-y-4 md:space-y-6">
-          <Link href="/gifts" className="text-sm md:text-base text-purple-600 hover:text-purple-700 inline-block">
-            ← Back to Gifts
-          </Link>
+          <Breadcrumbs items={[
+            { label: 'Dashboard', href: '/dashboard' },
+            { label: 'Gifts', href: '/gifts' },
+            { label: gift.name },
+          ]} />
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 md:gap-6">
             <div className="flex-1 min-w-0">
