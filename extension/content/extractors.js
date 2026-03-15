@@ -27,9 +27,9 @@ function getImageRect(imgEl) {
   if (rect.width < 50 || rect.height < 50) return null;
 
   const dpr = window.devicePixelRatio || 1;
-  // Add 15% padding on each side to avoid tight cropping
-  const padX = Math.round(rect.width * 0.15);
-  const padY = Math.round(rect.height * 0.15);
+  // Add 25% padding on each side — generous to avoid any clipping
+  const padX = Math.round(rect.width * 0.25);
+  const padY = Math.round(rect.height * 0.25);
 
   return {
     x: Math.round(Math.max(0, rect.left - padX) * dpr),

@@ -1,12 +1,21 @@
 // src/app/gifts/[id]/page.tsx - UPDATED with Edit/Delete functionality
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { GiftRecipientsManager } from '@/components/GiftRecipientsManager';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+type SourceMetadata = {
+  source?: string;
+  screenshot?: string;
+  cropped_image?: string;
+  extracted_image?: string;
+  site?: string;
+};
 
 type Gift = {
   id: string;
@@ -19,6 +28,7 @@ type Gift = {
   category: string | null;
   description: string | null;
   image_url: string | null;
+  source_metadata: SourceMetadata | null;
   status: string;
   occasion: string | null;
   occasion_date: string | null;
@@ -208,6 +218,33 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
     (recipient) => !linkedRecipients.some((linked) => linked.id === recipient.id)
   );
 
+  // Collect all available images with labels
+  const allImages = useMemo(() => {
+    const images: { url: string; label: string }[] = [];
+    const meta = gift?.source_metadata;
+    const seen = new Set<string>();
+
+    const add = (url: string | null | undefined, label: string) => {
+      if (url && !seen.has(url)) {
+        seen.add(url);
+        images.push({ url, label });
+      }
+    };
+
+    // Primary image first
+    add(gift?.image_url, 'Product Image');
+    // Then extracted image (may be same as image_url)
+    add(meta?.extracted_image, 'Extracted');
+    // Cropped product image from screenshot
+    add(meta?.cropped_image, 'Cropped');
+    // Full page screenshot
+    add(meta?.screenshot, 'Screenshot');
+
+    return images;
+  }, [gift]);
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
@@ -261,14 +298,49 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
           {/* Left Column - Gift Details */}
           <div className="space-y-4 md:space-y-6">
-            {/* Image */}
-            {gift.image_url && (
+            {/* Image Gallery */}
+            {allImages.length > 0 && (
               <div className="bg-white rounded-xl shadow-sm p-3 md:p-4">
-                <img
-                  src={gift.image_url}
-                  alt={gift.name}
-                  className="w-full h-48 md:h-64 object-cover rounded-lg"
-                />
+                <div className="relative">
+                  <img
+                    src={allImages[activeImageIndex]?.url}
+                    alt={gift.name}
+                    className="w-full h-48 md:h-64 object-contain rounded-lg bg-gray-50"
+                  />
+                  {allImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setActiveImageIndex((activeImageIndex - 1 + allImages.length) % allImages.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 shadow flex items-center justify-center hover:bg-white transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4 text-gray-700" />
+                      </button>
+                      <button
+                        onClick={() => setActiveImageIndex((activeImageIndex + 1) % allImages.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 shadow flex items-center justify-center hover:bg-white transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4 text-gray-700" />
+                      </button>
+                    </>
+                  )}
+                </div>
+                {allImages.length > 1 && (
+                  <div className="flex gap-2 mt-2 justify-center">
+                    {allImages.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveImageIndex(i)}
+                        className={`px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                          i === activeImageIndex
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        }`}
+                      >
+                        {img.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
