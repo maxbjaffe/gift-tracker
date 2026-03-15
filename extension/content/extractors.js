@@ -411,32 +411,148 @@ function extractBarnesNobleProduct() {
 }
 
 /**
- * Main detector - tries all extractors based on current site
+ * Generic fallback extractor using meta tags and JSON-LD structured data.
+ * Works on virtually any e-commerce site since these are SEO standards.
+ */
+function extractGenericProduct() {
+  // Try JSON-LD structured data first (most reliable)
+  let jsonLd = null;
+  const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+  for (const script of scripts) {
+    try {
+      const data = JSON.parse(script.textContent);
+      // Handle arrays of JSON-LD objects
+      const items = Array.isArray(data) ? data : [data];
+      for (const item of items) {
+        if (item['@type'] === 'Product' || item['@type']?.includes?.('Product')) {
+          jsonLd = item;
+          break;
+        }
+        // Check @graph arrays (common pattern)
+        if (item['@graph']) {
+          const product = item['@graph'].find(g =>
+            g['@type'] === 'Product' || g['@type']?.includes?.('Product')
+          );
+          if (product) { jsonLd = product; break; }
+        }
+      }
+      if (jsonLd) break;
+    } catch (e) { /* skip invalid JSON */ }
+  }
+
+  // Extract from JSON-LD
+  let title = jsonLd?.name || null;
+  let price = null;
+  let image = null;
+  let description = jsonLd?.description || null;
+  let brand = null;
+
+  if (jsonLd) {
+    // Price from JSON-LD offers
+    const offers = jsonLd.offers;
+    if (offers) {
+      const offer = Array.isArray(offers) ? offers[0] : offers;
+      price = parseFloat(offer.price) || parseFloat(offer.lowPrice) || null;
+    }
+
+    // Image from JSON-LD
+    if (jsonLd.image) {
+      image = Array.isArray(jsonLd.image) ? jsonLd.image[0] : jsonLd.image;
+      if (typeof image === 'object') image = image.url || image.contentUrl || null;
+    }
+
+    // Brand from JSON-LD
+    if (jsonLd.brand) {
+      brand = typeof jsonLd.brand === 'string' ? jsonLd.brand : jsonLd.brand.name || null;
+    }
+  }
+
+  // Fill gaps with Open Graph meta tags
+  const getMeta = (property) => {
+    const el = document.querySelector(`meta[property="${property}"], meta[name="${property}"]`);
+    return el?.content || null;
+  };
+
+  title = title || getMeta('og:title') || document.title;
+  image = image || getMeta('og:image');
+  description = description || getMeta('og:description') || getMeta('description');
+  if (!price) {
+    const ogPrice = getMeta('product:price:amount') || getMeta('og:price:amount');
+    if (ogPrice) price = parseFloat(ogPrice) || null;
+  }
+
+  // Need at least a title to consider it a product page
+  if (!title) return null;
+
+  // Heuristic: if no price and no JSON-LD product, probably not a product page
+  if (!price && !jsonLd) return null;
+
+  // Clean up title — remove site name suffixes like " | Amazon.com" or " - Best Buy"
+  title = title.replace(/\s*[\|\-–—]\s*[^|\-–—]+$/, '').trim();
+
+  // Determine store name from hostname
+  const hostname = window.location.hostname.replace(/^www\./, '');
+  const storeName = hostname.split('.')[0];
+  const store = storeName.charAt(0).toUpperCase() + storeName.slice(1);
+
+  return {
+    url: window.location.href.split('?')[0],
+    title,
+    price,
+    image,
+    description: description ? description.substring(0, 300) : null,
+    brand,
+    site: storeName,
+    store,
+  };
+}
+
+/**
+ * Main detector - tries site-specific extractor first, then generic fallback.
+ * Merges results so generic can fill gaps left by site-specific selectors.
  */
 function detectProduct() {
   const hostname = window.location.hostname;
 
+  let siteResult = null;
   if (hostname.includes('amazon.com')) {
-    return extractAmazonProduct();
+    siteResult = extractAmazonProduct();
   } else if (hostname.includes('target.com')) {
-    return extractTargetProduct();
+    siteResult = extractTargetProduct();
   } else if (hostname.includes('walmart.com')) {
-    return extractWalmartProduct();
+    siteResult = extractWalmartProduct();
   } else if (hostname.includes('etsy.com')) {
-    return extractEtsyProduct();
+    siteResult = extractEtsyProduct();
   } else if (hostname.includes('bestbuy.com')) {
-    return extractBestBuyProduct();
+    siteResult = extractBestBuyProduct();
   } else if (hostname.includes('ebay.com')) {
-    return extractEbayProduct();
+    siteResult = extractEbayProduct();
   } else if (hostname.includes('wayfair.com')) {
-    return extractWayfairProduct();
+    siteResult = extractWayfairProduct();
   } else if (hostname.includes('sephora.com')) {
-    return extractSephoraProduct();
+    siteResult = extractSephoraProduct();
   } else if (hostname.includes('barnesandnoble.com')) {
-    return extractBarnesNobleProduct();
+    siteResult = extractBarnesNobleProduct();
   }
 
-  return null;
+  const genericResult = extractGenericProduct();
+
+  // If site-specific found nothing, use generic
+  if (!siteResult) return genericResult;
+
+  // If both exist, let generic fill in any gaps from site-specific
+  if (genericResult) {
+    return {
+      ...siteResult,
+      title: siteResult.title || genericResult.title,
+      price: siteResult.price || genericResult.price,
+      image: siteResult.image || genericResult.image,
+      description: siteResult.description || genericResult.description,
+      brand: siteResult.brand || genericResult.brand,
+    };
+  }
+
+  return siteResult;
 }
 
 // Export for use in detector

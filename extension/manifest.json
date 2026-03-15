@@ -10,16 +10,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://*.amazon.com/*",
-    "https://*.target.com/*",
-    "https://*.walmart.com/*",
-    "https://*.etsy.com/*",
-    "https://*.bestbuy.com/*",
-    "https://*.ebay.com/*",
-    "https://*.wayfair.com/*",
-    "https://*.sephora.com/*",
-    "https://*.barnesandnoble.com/*",
-    "https://*.anthropic.com/*"
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background/service-worker.js",
@@ -28,15 +19,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.amazon.com/*",
-        "https://*.target.com/*",
-        "https://*.walmart.com/*",
-        "https://*.etsy.com/*",
-        "https://*.bestbuy.com/*",
-        "https://*.ebay.com/*",
-        "https://*.wayfair.com/*",
-        "https://*.sephora.com/*",
-        "https://*.barnesandnoble.com/*"
+        "https://*/*"
       ],
       "js": ["content/extractors.js", "content/detector.js"],
       "run_at": "document_idle"

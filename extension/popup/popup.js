@@ -3,7 +3,7 @@
 // Configuration - these will be set during initial setup
 const SUPABASE_URL = 'https://xjeemfudbujwqrnkuwvb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqZWVtZnVkYnVqd3Fybmt1d3ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2NTk1MTksImV4cCI6MjA3ODIzNTUxOX0.dYx5Lx5fAxHYjL1A1LIZ4u49nUzDUNoYr0LHItxQLtI';
-const APP_URL = 'https://gift-tracker-black.vercel.app';
+const APP_URL = 'https://giftstash.app';
 
 // State
 let currentUser = null;
@@ -317,7 +317,11 @@ async function saveGift() {
         recipient_id: recipientId
       });
 
-    if (linkError) throw linkError;
+    if (linkError) {
+      // Clean up the orphaned gift row so we don't get duplicates
+      await client.from('gifts').delete().eq('id', gift.id);
+      throw linkError;
+    }
 
     // Show success
     const recipientName = recipients.find(r => r.id === recipientId)?.name || 'recipient';
