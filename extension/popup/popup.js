@@ -9,7 +9,8 @@ const APP_URL = 'https://giftstash.app';
 let currentUser = null;
 let recipients = [];
 let currentProduct = null;
-let screenshot = null;
+let screenshot = null;       // Full page screenshot
+let croppedProductImage = null; // Cropped product image from screenshot
 
 // DOM Elements
 const loading = document.getElementById('loading');
@@ -156,9 +157,11 @@ function displayProduct() {
   const imgEl = document.getElementById('productImage');
   if (currentProduct.image) {
     imgEl.src = currentProduct.image;
-    // If the product image fails to load, fall back to screenshot when available
+    // If the product image fails to load, fall back to cropped image then screenshot
     imgEl.onerror = () => {
-      if (screenshot) {
+      if (croppedProductImage) {
+        imgEl.src = croppedProductImage;
+      } else if (screenshot) {
         imgEl.src = screenshot;
       }
     };
@@ -178,20 +181,20 @@ async function capturePageScreenshot() {
     const response = await chrome.runtime.sendMessage({ type: 'CAPTURE_SCREENSHOT' });
 
     if (response.screenshot) {
-      // If we have the product image's position, crop the screenshot to just that area
-      const rect = currentProduct?.imageRect;
-      if (rect && rect.width > 50 && rect.height > 50) {
-        screenshot = await cropScreenshot(response.screenshot, rect);
-      } else {
-        screenshot = response.screenshot;
-      }
-
+      // Keep the full page screenshot
+      screenshot = response.screenshot;
       displayScreenshot();
 
-      // If product has no image or a bad one, use cropped screenshot as fallback
+      // Separately crop just the product image area
+      const rect = currentProduct?.imageRect;
+      if (rect && rect.width > 50 && rect.height > 50) {
+        croppedProductImage = await cropScreenshot(response.screenshot, rect);
+      }
+
+      // If product has no good image, use the cropped product image as fallback
       const imgEl = document.getElementById('productImage');
       if (!currentProduct?.image || !imgEl.src || imgEl.naturalWidth === 0) {
-        imgEl.src = screenshot;
+        imgEl.src = croppedProductImage || screenshot;
       }
     }
   } catch (error) {
@@ -253,6 +256,7 @@ function setupEventListeners() {
   // Remove screenshot
   document.getElementById('removeScreenshot').addEventListener('click', () => {
     screenshot = null;
+    croppedProductImage = null;
     document.getElementById('screenshotSection').classList.add('hidden');
   });
 
@@ -352,8 +356,8 @@ async function saveGift() {
 
     const client = await window.supabaseClient.getClient();
 
-    // Prepare gift data — use screenshot as fallback image
-    const bestImage = currentProduct.image || screenshot || null;
+    // Prepare gift data — use cropped product image as fallback, then full screenshot
+    const bestImage = currentProduct.image || croppedProductImage || screenshot || null;
     const giftData = {
       user_id: currentUser.id,
       name: currentProduct.title,
@@ -368,6 +372,7 @@ async function saveGift() {
       source_metadata: {
         source: 'chrome_extension',
         screenshot: screenshot || null,
+        cropped_image: croppedProductImage || null,
         extracted_image: currentProduct.image || null,
         site: currentProduct.site || null,
       }
