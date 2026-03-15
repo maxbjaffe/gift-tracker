@@ -92,24 +92,55 @@ function extractAmazonProduct() {
     }
   }
 
-  // Extract main product image — be specific to avoid Prime badges/logos
+  // Extract main product image — multiple strategies
   let image = null;
-  const mainImage = document.querySelector(
-    '#landingImage, ' +
-    '#imgBlkFront, ' +
-    '#main-image, ' +
-    '#imgTagWrapperId img, ' +
-    '#imageBlock img.a-dynamic-image, ' +
-    '#altImages + * img, ' +
-    'img[data-old-hires]'
-  );
-  if (mainImage) {
-    // Prefer high-res versions stored in data attributes
-    image = mainImage.dataset.oldHires || mainImage.dataset.src || mainImage.src;
-    // Filter out tiny images (logos/badges) — product images are usually 300px+
-    if (image && mainImage.naturalWidth > 0 && mainImage.naturalWidth < 100) {
-      image = null;
+  let mainImageEl = null;
+
+  // Strategy 1: Parse data-a-dynamic-image JSON (most reliable on Amazon)
+  // This attribute contains a JSON map of image URLs → [width, height]
+  const dynamicImageEl = document.querySelector('img[data-a-dynamic-image]');
+  if (dynamicImageEl) {
+    try {
+      const dynamicImages = JSON.parse(dynamicImageEl.dataset.aDynamicImage);
+      // Pick the largest image from the map
+      let bestUrl = null;
+      let bestSize = 0;
+      for (const [url, dims] of Object.entries(dynamicImages)) {
+        const size = Array.isArray(dims) ? dims[0] * dims[1] : 0;
+        if (size > bestSize) {
+          bestSize = size;
+          bestUrl = url;
+        }
+      }
+      if (bestUrl) {
+        image = bestUrl;
+        mainImageEl = dynamicImageEl;
+      }
+    } catch (e) { /* invalid JSON, try next strategy */ }
+  }
+
+  // Strategy 2: data-old-hires attribute (high-res source)
+  if (!image) {
+    const hiresEl = document.querySelector('#landingImage[data-old-hires], #imgBlkFront[data-old-hires], img[data-old-hires]');
+    if (hiresEl && hiresEl.dataset.oldHires) {
+      image = hiresEl.dataset.oldHires;
+      mainImageEl = hiresEl;
     }
+  }
+
+  // Strategy 3: Standard image selectors
+  if (!image) {
+    const imgEl = document.querySelector('#landingImage, #imgBlkFront, #main-image, #imgTagWrapperId img');
+    if (imgEl && imgEl.src && !imgEl.src.includes('sprite') && !imgEl.src.includes('prime')) {
+      image = imgEl.src;
+      mainImageEl = imgEl;
+    }
+  }
+
+  // Strategy 4: Upgrade Amazon image URL to large size
+  // Amazon image URLs use size suffixes like ._AC_SX300_ — swap to ._AC_SL1500_ for large
+  if (image && image.includes('m.media-amazon.com')) {
+    image = image.replace(/\._[A-Z]{2}_[A-Z]{2}\d+_/, '._AC_SL1500_');
   }
 
   // Extract description/features
@@ -142,7 +173,7 @@ function extractAmazonProduct() {
   }
 
   // Get the image element's position for screenshot cropping
-  const imageRect = mainImage ? getImageRect(mainImage) : null;
+  const imageRect = mainImageEl ? getImageRect(mainImageEl) : null;
 
   return {
     url: window.location.href.split('?')[0], // Clean URL
