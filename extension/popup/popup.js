@@ -96,14 +96,24 @@ function showView(viewName) {
 
 async function loadCurrentProduct() {
   const result = await chrome.storage.local.get(['currentProduct', 'currentUrl']);
-
-  // Verify we're still on the same URL
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-  if (result.currentProduct && result.currentUrl === tab.url) {
+  // Compare base URLs (ignore query params — sites like Target change them)
+  const stripQuery = (url) => url?.split('?')[0] || '';
+
+  if (result.currentProduct && stripQuery(result.currentUrl) === stripQuery(tab.url)) {
     currentProduct = result.currentProduct;
   } else {
+    // No stored data — try asking the content script directly
     currentProduct = null;
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, { type: 'GET_PRODUCT_DATA' });
+      if (response?.productData) {
+        currentProduct = response.productData;
+      }
+    } catch (e) {
+      console.log('GiftStash: Could not query content script', e);
+    }
   }
 }
 

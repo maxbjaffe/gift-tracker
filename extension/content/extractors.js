@@ -92,45 +92,75 @@ function extractASIN() {
  * Extract product data from Target
  */
 function extractTargetProduct() {
-  const productTitle = document.querySelector('[data-test="product-title"], h1');
-  if (!productTitle || !window.location.pathname.includes('/p/')) return null;
+  if (!window.location.pathname.includes('/p/')) return null;
+
+  // Target is a React SPA — try multiple selector strategies
+  const productTitle = document.querySelector(
+    '[data-test="product-title"], ' +
+    'h1[data-test="product-title"], ' +
+    '[data-test="@web/ProductTitle/ProductTitle"] h1, ' +
+    '#pdp-product-title-id, ' +
+    'h1.Heading'
+  );
+
+  // If no title element or empty text, let the generic extractor handle it
+  const titleText = productTitle?.textContent?.trim();
+  if (!titleText) return null;
 
   let price = null;
-  const priceElement = document.querySelector('[data-test="product-price"]');
+  const priceElement = document.querySelector(
+    '[data-test="product-price"], ' +
+    '[data-test="product-price"] span, ' +
+    '[data-test="@web/ProductPrice/ProductPrice"] span'
+  );
   if (priceElement) {
     const priceText = priceElement.textContent.replace(/[^0-9.]/g, '');
     price = parseFloat(priceText) || null;
   }
 
   let image = null;
-  const mainImage = document.querySelector('[data-test="image-gallery-item"] img, picture img');
+  // Prefer the main product image carousel, not thumbnails
+  const mainImage = document.querySelector(
+    '[data-test="image-gallery-item-0"] img, ' +
+    '[data-test="image-gallery-item"] img, ' +
+    'button[data-test="image-gallery-item-0"] img, ' +
+    '[data-test="@web/ProductImage"] img, ' +
+    'picture source[type="image/webp"]'
+  );
   if (mainImage) {
-    image = mainImage.src;
+    image = mainImage.srcset?.split(',')[0]?.trim()?.split(' ')[0] || mainImage.src;
   }
 
   let description = null;
-  const descElement = document.querySelector('[data-test="item-details-description"]');
+  const descElement = document.querySelector(
+    '[data-test="item-details-description"], ' +
+    '[data-test="product-description"]'
+  );
   if (descElement) {
     description = descElement.textContent.trim().substring(0, 200);
   }
 
-  // Extract brand
   let brand = null;
-  const brandElement = document.querySelector('[data-test="product-brand"], h2 a, .ProductDetailsStyles__BrandName');
+  const brandElement = document.querySelector(
+    '[data-test="product-brand"] a, ' +
+    '[data-test="@web/ProductBrand"] a'
+  );
   if (brandElement) {
     brand = brandElement.textContent.trim();
   }
 
-  // Extract category from breadcrumbs
   let category = null;
-  const breadcrumbs = document.querySelectorAll('[data-test="breadcrumb-item"]');
+  const breadcrumbs = document.querySelectorAll(
+    '[data-test="breadcrumb-item"], ' +
+    '[data-test="@web/Breadcrumb/BreadcrumbItem"]'
+  );
   if (breadcrumbs.length > 0) {
     category = breadcrumbs[breadcrumbs.length - 1].textContent.trim();
   }
 
   return {
     url: window.location.href.split('?')[0],
-    title: productTitle.textContent.trim(),
+    title: titleText,
     price,
     image,
     description,
@@ -483,9 +513,6 @@ function extractGenericProduct() {
 
   // Need at least a title to consider it a product page
   if (!title) return null;
-
-  // Heuristic: if no price and no JSON-LD product, probably not a product page
-  if (!price && !jsonLd) return null;
 
   // Clean up title — remove site name suffixes like " | Amazon.com" or " - Best Buy"
   title = title.replace(/\s*[\|\-–—]\s*[^|\-–—]+$/, '').trim();

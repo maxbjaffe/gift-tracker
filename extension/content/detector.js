@@ -24,39 +24,51 @@ function detectAndNotify() {
     clearTimeout(detectionTimeout);
   }
 
-  // Wait a bit for page to fully load
-  detectionTimeout = setTimeout(() => {
-    console.log('🎁 Gift Tracker: Attempting detection...');
-    console.log('🎁 Gift Tracker: window.detectProduct exists?', typeof window.detectProduct === 'function');
+  // Try detection multiple times — SPAs like Target render asynchronously
+  let attempts = 0;
+  const maxAttempts = 3;
+  const delays = [500, 1500, 3000]; // Escalating delays
 
-    if (typeof window.detectProduct === 'function') {
-      const detected = window.detectProduct();
-      console.log('🎁 Gift Tracker: Detection result:', detected);
+  function tryDetect() {
+    attempts++;
+    console.log(`🎁 Gift Tracker: Attempting detection (attempt ${attempts}/${maxAttempts})...`);
 
-      if (detected && JSON.stringify(detected) !== JSON.stringify(productData)) {
+    if (typeof window.detectProduct !== 'function') {
+      console.error('🎁 Gift Tracker: ❌ window.detectProduct is not available');
+      return;
+    }
+
+    const detected = window.detectProduct();
+    console.log('🎁 Gift Tracker: Detection result:', detected);
+
+    if (detected && detected.title) {
+      // Got a good result — check if it's better than what we had
+      if (JSON.stringify(detected) !== JSON.stringify(productData)) {
         productData = detected;
         console.log('🎁 Gift Tracker: ✅ Product detected!', productData);
 
-        // Store product data in chrome.storage for popup to access
         chrome.storage.local.set({
           currentProduct: productData,
           currentUrl: window.location.href
         });
 
-        // Show page action badge
         chrome.runtime.sendMessage({
           type: 'PRODUCT_DETECTED',
           payload: productData
         }).catch(err => {
           console.log('🎁 Gift Tracker: Could not send message to background', err);
         });
-      } else if (!detected) {
-        console.log('🎁 Gift Tracker: ❌ No product detected on this page');
       }
+    } else if (attempts < maxAttempts) {
+      // Retry with longer delay for SPAs that render slowly
+      console.log(`🎁 Gift Tracker: Retrying in ${delays[attempts]}ms...`);
+      detectionTimeout = setTimeout(tryDetect, delays[attempts]);
     } else {
-      console.error('🎁 Gift Tracker: ❌ window.detectProduct is not available');
+      console.log('🎁 Gift Tracker: ❌ No product detected after all attempts');
     }
-  }, 1000);
+  }
+
+  detectionTimeout = setTimeout(tryDetect, delays[0]);
 }
 
 // Detect on load
