@@ -1,6 +1,48 @@
 // Product data extractors for different e-commerce sites
 
 /**
+ * Get an image element's viewport position for screenshot cropping.
+ * Returns {x, y, width, height} relative to viewport, accounting for devicePixelRatio.
+ */
+function getImageRect(imgEl) {
+  if (!imgEl) return null;
+  const rect = imgEl.getBoundingClientRect();
+  if (rect.width < 50 || rect.height < 50) return null; // Skip tiny elements
+  const dpr = window.devicePixelRatio || 1;
+  return {
+    x: Math.round(rect.left * dpr),
+    y: Math.round(rect.top * dpr),
+    width: Math.round(rect.width * dpr),
+    height: Math.round(rect.height * dpr),
+  };
+}
+
+/**
+ * Find the best product image element on the page.
+ * Used as a fallback when site-specific extractors don't find one.
+ */
+function findBestProductImage() {
+  // Look for large, prominent images likely to be the product
+  const candidates = Array.from(document.querySelectorAll('img'))
+    .filter(img => {
+      const rect = img.getBoundingClientRect();
+      // Must be visible, reasonably large, and in the top portion of the page
+      return rect.width >= 150 && rect.height >= 150 &&
+             rect.top >= 0 && rect.top < window.innerHeight &&
+             rect.left >= 0 &&
+             !img.src.includes('logo') && !img.src.includes('sprite') &&
+             !img.src.includes('badge') && !img.src.includes('prime');
+    })
+    .sort((a, b) => {
+      // Prefer largest visible image
+      const aRect = a.getBoundingClientRect();
+      const bRect = b.getBoundingClientRect();
+      return (bRect.width * bRect.height) - (aRect.width * aRect.height);
+    });
+  return candidates[0] || null;
+}
+
+/**
  * Extract product data from Amazon
  */
 function extractAmazonProduct() {
@@ -77,6 +119,9 @@ function extractAmazonProduct() {
     }
   }
 
+  // Get the image element's position for screenshot cropping
+  const imageRect = mainImage ? getImageRect(mainImage) : null;
+
   return {
     url: window.location.href.split('?')[0], // Clean URL
     title: productTitle.textContent.trim(),
@@ -87,6 +132,7 @@ function extractAmazonProduct() {
     category,
     site: 'amazon',
     store: 'Amazon',
+    imageRect,
     metadata: {
       asin: extractASIN(),
     },
@@ -171,6 +217,8 @@ function extractTargetProduct() {
     category = breadcrumbs[breadcrumbs.length - 1].textContent.trim();
   }
 
+  const imageRect = mainImage ? getImageRect(mainImage) : null;
+
   return {
     url: window.location.href.split('?')[0],
     title: titleText,
@@ -181,6 +229,7 @@ function extractTargetProduct() {
     category,
     site: 'target',
     store: 'Target',
+    imageRect,
   };
 }
 
@@ -535,6 +584,14 @@ function extractGenericProduct() {
   const storeName = hostname.split('.')[0];
   const store = storeName.charAt(0).toUpperCase() + storeName.slice(1);
 
+  // Find the best product image element for screenshot cropping
+  const bestImgEl = findBestProductImage();
+  const imageRect = bestImgEl ? getImageRect(bestImgEl) : null;
+  // If we didn't get an image URL but found an element, use its src
+  if (!image && bestImgEl) {
+    image = bestImgEl.src;
+  }
+
   return {
     url: window.location.href.split('?')[0],
     title,
@@ -544,6 +601,7 @@ function extractGenericProduct() {
     brand,
     site: storeName,
     store,
+    imageRect,
   };
 }
 
@@ -589,6 +647,7 @@ function detectProduct() {
       image: siteResult.image || genericResult.image,
       description: siteResult.description || genericResult.description,
       brand: siteResult.brand || genericResult.brand,
+      imageRect: siteResult.imageRect || genericResult.imageRect,
     };
   }
 

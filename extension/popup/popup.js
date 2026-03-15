@@ -178,10 +178,17 @@ async function capturePageScreenshot() {
     const response = await chrome.runtime.sendMessage({ type: 'CAPTURE_SCREENSHOT' });
 
     if (response.screenshot) {
-      screenshot = response.screenshot;
+      // If we have the product image's position, crop the screenshot to just that area
+      const rect = currentProduct?.imageRect;
+      if (rect && rect.width > 50 && rect.height > 50) {
+        screenshot = await cropScreenshot(response.screenshot, rect);
+      } else {
+        screenshot = response.screenshot;
+      }
+
       displayScreenshot();
 
-      // If product has no image or a bad one, use screenshot as fallback
+      // If product has no image or a bad one, use cropped screenshot as fallback
       const imgEl = document.getElementById('productImage');
       if (!currentProduct?.image || !imgEl.src || imgEl.naturalWidth === 0) {
         imgEl.src = screenshot;
@@ -191,6 +198,37 @@ async function capturePageScreenshot() {
     console.error('Error capturing screenshot:', error);
     // Non-critical, continue without screenshot
   }
+}
+
+/**
+ * Crop a screenshot data URL to just the product image region.
+ */
+function cropScreenshot(dataUrl, rect) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      // Clamp to image bounds
+      const sx = Math.max(0, Math.min(rect.x, img.width));
+      const sy = Math.max(0, Math.min(rect.y, img.height));
+      const sw = Math.min(rect.width, img.width - sx);
+      const sh = Math.min(rect.height, img.height - sy);
+
+      if (sw < 50 || sh < 50) {
+        // Region too small, return full screenshot
+        resolve(dataUrl);
+        return;
+      }
+
+      canvas.width = sw;
+      canvas.height = sh;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+      resolve(canvas.toDataURL('image/jpeg', 0.9));
+    };
+    img.onerror = () => resolve(dataUrl); // Fallback to full screenshot
+    img.src = dataUrl;
+  });
 }
 
 function displayScreenshot() {
