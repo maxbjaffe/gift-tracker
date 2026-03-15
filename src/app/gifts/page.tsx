@@ -65,6 +65,7 @@ export default function UnifiedGiftsPage() {
   const [viewMode, setViewMode] = useState<'recipients' | 'grid' | 'list'>('list');
   const [selectedGiftForDetails, setSelectedGiftForDetails] = useState<any | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<{ giftId: string; status: StatusType; recipientNames: string[] } | null>(null);
 
   const loading = recipientsLoading || giftsLoading;
 
@@ -1086,7 +1087,15 @@ export default function UnifiedGiftsPage() {
                       return (
                         <button
                           key={status}
-                          onClick={() => updateGiftStatus(gift.id, status)}
+                          onClick={() => {
+                            const recipientCount = gift.recipients?.length || 0;
+                            if (recipientCount > 1) {
+                              const names = gift.recipients?.map((r: any) => r.name).filter(Boolean) || [];
+                              setPendingStatusChange({ giftId: gift.id, status, recipientNames: names });
+                            } else {
+                              updateGiftStatus(gift.id, status);
+                            }
+                          }}
                           className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
                             hasStatus
                               ? getStatusColor(status)
@@ -1190,6 +1199,22 @@ export default function UnifiedGiftsPage() {
           confirmText="Delete"
           cancelText="Cancel"
           variant="destructive"
+        />
+
+        {/* Multi-recipient status change confirmation */}
+        <ConfirmDialog
+          open={!!pendingStatusChange}
+          onOpenChange={(open) => { if (!open) setPendingStatusChange(null); }}
+          onConfirm={() => {
+            if (pendingStatusChange) {
+              updateGiftStatus(pendingStatusChange.giftId, pendingStatusChange.status);
+              setPendingStatusChange(null);
+            }
+          }}
+          title={`Update status for all ${pendingStatusChange?.recipientNames.length || 0} recipients?`}
+          description={`This will mark this gift as "${pendingStatusChange?.status}" for ${pendingStatusChange?.recipientNames.join(', ')}. To update individually, use the "By Recipient" view.`}
+          confirmText="Update All"
+          cancelText="Cancel"
         />
       </div>
   );

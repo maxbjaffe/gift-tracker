@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { GIFT_CATEGORIES } from '@/types/database.types';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Users } from 'lucide-react';
 
 function NewGiftPageContent() {
   const router = useRouter();
@@ -18,6 +20,8 @@ function NewGiftPageContent() {
   const [extractionFailed, setExtractionFailed] = useState(false);
   const [detectedStore, setDetectedStore] = useState('');
   const [fromShare, setFromShare] = useState(false);
+  const [allRecipients, setAllRecipients] = useState<{ id: string; name: string; relationship: string | null }[]>([]);
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState<Set<string>>(new Set());
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,6 +39,14 @@ function NewGiftPageContent() {
     occasion_date: '',
     notes: '',
   });
+
+  // Fetch recipients for picker
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from('recipients').select('id, name, relationship').order('name').then(({ data }) => {
+      setAllRecipients(data || []);
+    });
+  }, []);
 
   // Pre-fill form from URL params (from share target or extension)
   useEffect(() => {
@@ -241,7 +253,18 @@ function NewGiftPageContent() {
 
       if (insertError) throw insertError;
 
-      console.log('Gift created successfully:', data);
+      // Link selected recipients
+      if (data && selectedRecipientIds.size > 0) {
+        const links = Array.from(selectedRecipientIds).map(recipientId => ({
+          gift_id: data.id,
+          recipient_id: recipientId,
+          status: formData.status,
+          occasion: formData.occasion || null,
+          occasion_date: formData.occasion_date || null,
+        }));
+        await supabase.from('gift_recipients').insert(links);
+      }
+
       router.push('/gifts');
     } catch (err) {
       console.error('Error creating gift:', err);
@@ -255,12 +278,10 @@ function NewGiftPageContent() {
       <div className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6 md:mb-8">
-          <button
-            onClick={() => router.push('/gifts')}
-            className="text-purple-600 hover:text-purple-700 font-medium mb-4 flex items-center gap-2 text-sm md:text-base"
-          >
-            ← Back to Gifts
-          </button>
+          <Breadcrumbs items={[
+            { label: 'Gifts', href: '/gifts' },
+            { label: 'Add New Gift' },
+          ]} />
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Add New Gift</h1>
           <p className="text-sm md:text-base text-gray-600">Add a gift idea or purchase to track</p>
         </div>
@@ -557,6 +578,50 @@ function NewGiftPageContent() {
                   />
                 </div>
               </div>
+
+              {/* Who is this for? */}
+              {allRecipients.length > 0 && (
+                <div>
+                  <label className="block text-sm md:text-base font-medium text-gray-700 mb-2">
+                    <span className="flex items-center gap-1.5">
+                      <Users className="w-4 h-4" />
+                      Who is this for?
+                    </span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">Select one or more people (optional — you can assign later)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {allRecipients.map((r) => {
+                      const selected = selectedRecipientIds.has(r.id);
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedRecipientIds(prev => {
+                              const next = new Set(prev);
+                              if (next.has(r.id)) next.delete(r.id);
+                              else next.add(r.id);
+                              return next;
+                            });
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+                            selected
+                              ? 'bg-orange-500 text-white border-orange-500'
+                              : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400'
+                          }`}
+                        >
+                          {r.name}
+                          {r.relationship && (
+                            <span className={`ml-1 text-xs ${selected ? 'text-white/70' : 'text-gray-400'}`}>
+                              ({r.relationship})
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Occasion and Occasion Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6">

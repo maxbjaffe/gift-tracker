@@ -25,6 +25,7 @@ interface AssignedGift {
     category: string | null
     status: string
   }
+  otherRecipients?: { id: string; name: string }[]
 }
 
 interface AssignedGiftsManagerProps {
@@ -68,7 +69,32 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setAssignedGifts(data || [])
+
+      // Fetch other recipients for each gift to show "also for" badges
+      const giftIds = (data || []).map((d: AssignedGift) => d.gift_id)
+      let otherRecipientsMap: Record<string, { id: string; name: string }[]> = {}
+      if (giftIds.length > 0) {
+        const { data: allLinks } = await supabase
+          .from('gift_recipients')
+          .select('gift_id, recipient_id, recipients:recipients(id, name)')
+          .in('gift_id', giftIds)
+          .neq('recipient_id', recipientId)
+
+        if (allLinks) {
+          for (const link of allLinks) {
+            const r = link.recipients as unknown as { id: string; name: string }
+            if (!r) continue
+            if (!otherRecipientsMap[link.gift_id]) otherRecipientsMap[link.gift_id] = []
+            otherRecipientsMap[link.gift_id].push({ id: r.id, name: r.name })
+          }
+        }
+      }
+
+      const enriched = (data || []).map((d: AssignedGift) => ({
+        ...d,
+        otherRecipients: otherRecipientsMap[d.gift_id] || [],
+      }))
+      setAssignedGifts(enriched)
     } catch (error) {
       console.error('Error loading assigned gifts:', error)
       toast.error('Failed to load gifts')
@@ -323,6 +349,12 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                                 <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
                                   Idea
                                 </Badge>
+
+                                {assignment.otherRecipients && assignment.otherRecipients.length > 0 && (
+                                  <Badge variant="outline" className="text-xs text-orange-600 border-orange-300 bg-orange-50">
+                                    Also for {assignment.otherRecipients.map(r => r.name).join(', ')}
+                                  </Badge>
+                                )}
                               </div>
 
                               {/* Dates */}
@@ -471,6 +503,12 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                                 <Badge variant="default" className="text-xs bg-green-600">
                                   ✓ Purchased
                                 </Badge>
+
+                                {assignment.otherRecipients && assignment.otherRecipients.length > 0 && (
+                                  <Badge variant="outline" className="text-xs text-orange-600 border-orange-300 bg-orange-50">
+                                    Also for {assignment.otherRecipients.map(r => r.name).join(', ')}
+                                  </Badge>
+                                )}
                               </div>
 
                               {/* Dates */}

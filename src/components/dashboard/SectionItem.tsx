@@ -44,9 +44,13 @@ export function SectionItem({ gift, borderColor, onClick, rightAction, compact }
           </span>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <StatusBadge status={status} />
-            {recipients.length > 0 && (
+            {recipients.length > 1 ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-200 text-orange-800 font-semibold" title={recipients.map(r => r.name).join(', ')}>
+                For {recipients.length}: {recipients.map(r => r.name).join(', ')}
+              </span>
+            ) : recipients.length === 1 && (
               <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium">
-                {recipients.map(r => r.name).join(', ')}
+                {recipients[0].name}
               </span>
             )}
             {price != null && price > 0 && (

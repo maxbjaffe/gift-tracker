@@ -59,7 +59,11 @@ export function BucketCard({
 
       {collapsed && items.length > 0 && (
         <div className="px-4 py-2 text-xs text-gray-500 truncate border-b border-gray-100">
-          {items[0].name}{items.length > 1 ? ` + ${items.length - 1} more` : ''}
+          {items[0].name}
+          {(items[0].recipients?.length || 0) > 1 && (
+            <span className="text-orange-600 font-medium"> ({items[0].recipients!.length} people)</span>
+          )}
+          {items.length > 1 ? ` + ${items.length - 1} more` : ''}
         </div>
       )}
 
