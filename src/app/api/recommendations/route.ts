@@ -1,4 +1,4 @@
-// src/app/api/recommendations/route.ts - FIXED VERSION
+// src/app/api/recommendations/route.ts
 
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
@@ -8,6 +8,110 @@ import { logger } from '@/lib/logger';
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+// Lightweight GET endpoint for auto-loading recommendations
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const recipientId = searchParams.get('recipientId');
+    const count = Math.min(parseInt(searchParams.get('count') || '5', 10), 10);
+
+    if (!recipientId) {
+      return NextResponse.json({ error: 'recipientId is required' }, { status: 400 });
+    }
+
+    const { data: recipient, error: recipientError } = await supabase
+      .from('recipients')
+      .select('*')
+      .eq('id', recipientId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (recipientError || !recipient) {
+      return NextResponse.json({ error: 'Recipient not found' }, { status: 404 });
+    }
+
+    // Get recommendation context (feedback, trending, etc.)
+    const { recommendationAnalyticsService } = await import('@/lib/recommendation-analytics.service');
+    const context = await recommendationAnalyticsService.getRecommendationContext(
+      recipientId,
+      recipient.age_range,
+      recipient.interests,
+      recipient.relationship
+    );
+
+    const prompt = buildLightweightPrompt(recipient, context, count);
+
+    const message = await anthropic.messages.create({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const textContent = message.content.find((block) => block.type === 'text');
+    if (!textContent || textContent.type !== 'text') {
+      throw new Error('No text response from Claude');
+    }
+
+    let recommendations;
+    try {
+      const responseText = textContent.text;
+      const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) ||
+                       responseText.match(/```\n?([\s\S]*?)\n?```/) ||
+                       responseText.match(/\[[\s\S]*\]/);
+      const jsonStr = jsonMatch ? jsonMatch[1] || jsonMatch[0] : responseText;
+      recommendations = JSON.parse(jsonStr);
+      if (!Array.isArray(recommendations)) throw new Error('Response is not an array');
+    } catch (parseError) {
+      logger.error('Failed to parse AI response:', parseError);
+      return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 });
+    }
+
+    // Enhance with images and shopping links
+    const { fetchProductImage } = await import('@/lib/imageService');
+
+    recommendations = await Promise.all(recommendations.map(async (rec: any) => {
+      if (!rec.estimated_price && rec.price_range) {
+        const match = rec.price_range.match(/\$?(\d+(?:\.\d{2})?)/);
+        if (match && match[1]) rec.estimated_price = parseFloat(match[1]);
+      }
+
+      const searchQuery = rec.search_query || rec.title;
+      rec.amazon_link = `https://www.amazon.com/s?k=${encodeURIComponent(searchQuery)}`;
+      rec.google_shopping_link = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(searchQuery)}`;
+
+      try {
+        const imageKeywords = rec.image_keywords || rec.category || rec.title;
+        const imageResult = await fetchProductImage(imageKeywords, rec.title, rec.amazon_link);
+        rec.image_url = imageResult.url;
+        rec.image_thumb = imageResult.thumbnail;
+        rec.image_source = imageResult.source;
+      } catch {
+        const imageResult = await fetchProductImage(rec.category || 'gift', rec.title);
+        rec.image_url = imageResult.url;
+        rec.image_thumb = imageResult.thumbnail;
+        rec.image_source = 'placeholder';
+      }
+
+      return rec;
+    }));
+
+    return NextResponse.json({ success: true, recommendations });
+  } catch (error: any) {
+    logger.error('Error generating lightweight recommendations:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to generate recommendations' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -304,6 +408,37 @@ Return ONLY a valid JSON array. No markdown, no code blocks, no other text:
     "image_keywords": "HIGHLY SPECIFIC keywords including brand, model, color (e.g., 'sony wh1000xm5 black wireless headphones', 'lego architecture statue liberty 21042')"
   }
 ]
+
+Return ONLY the JSON array. No other text.`;
+}
+
+function buildLightweightPrompt(recipient: any, context: any, count: number): string {
+  const age = recipient.age_range || 'Not specified';
+  const interests = recipient.interests || 'Not specified';
+  const budget = recipient.max_budget ? `$${recipient.max_budget}` : 'No limit';
+  const preferences = recipient.gift_preferences || 'None specified';
+  const restrictions = recipient.restrictions || 'None';
+
+  const dismissedText = context.dismissedRecommendations.length > 0
+    ? context.dismissedRecommendations.map((d: any) => d.recommendation_name).join(', ')
+    : 'None';
+
+  return `Generate exactly ${count} specific, personalized gift ideas as a JSON array.
+
+RECIPIENT: ${recipient.name} (${recipient.relationship}, age ${age})
+INTERESTS: ${interests}
+BUDGET: Up to ${budget}
+PREFERENCES: ${preferences}
+RESTRICTIONS: ${restrictions}
+AVOID: ${dismissedText}
+
+RULES:
+1. Use REAL brand names and product names (e.g., "Sony WH-1000XM5" not "wireless headphones")
+2. Stay within budget. Match interests precisely.
+3. Never suggest items from the AVOID list.
+
+Return ONLY a valid JSON array:
+[{"title":"Product Name","brand":"Brand","description":"1-2 sentences","price_range":"$XX-$YY","reasoning":"Why this fits","where_to_buy":"Store names","category":"Category","search_query":"Amazon search term","image_keywords":"specific brand model keywords"}]
 
 Return ONLY the JSON array. No other text.`;
 }

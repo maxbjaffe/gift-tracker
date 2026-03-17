@@ -6,7 +6,7 @@ import { useGifts } from '@/lib/hooks/useGifts'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
 import { ComingUpHero } from '@/components/dashboard/ComingUpHero'
 import { StashOverview } from '@/components/dashboard/StashOverview'
-import { GiftInspiration } from '@/components/dashboard/GiftInspiration'
+import { GiftResearch } from '@/components/dashboard/GiftResearch'
 import { DashboardChat } from '@/components/dashboard/DashboardChat'
 import { getUpcomingOccasions } from '@/lib/dashboard/readiness-score'
 import { Card } from '@/components/ui/card'
@@ -198,7 +198,7 @@ export default function DashboardPage() {
 
         {/* Inspiration — left col bottom on desktop, last on mobile */}
         <div className="lg:col-start-1 lg:row-start-3">
-          <GiftInspiration recipients={safeRecipients} />
+          <GiftResearch recipients={safeRecipients} occasions={occasions} />
         </div>
       </div>
     </div>
