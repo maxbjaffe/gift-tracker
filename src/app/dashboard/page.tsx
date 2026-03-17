@@ -117,7 +117,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 lg:p-8">
+      <div className="p-3 md:p-4 lg:p-6">
         <LoadingSpinner type="card" count={4} />
       </div>
     )
@@ -128,7 +128,7 @@ export default function DashboardPage() {
 
   if (safeRecipients.length === 0 && safeGifts.length === 0) {
     return (
-      <div className="p-4 md:p-6 lg:p-8">
+      <div className="p-3 md:p-4 lg:p-6">
         <div className="text-center py-16">
           <Card className="max-w-2xl mx-auto p-12 bg-white/60">
             <div className="text-6xl mb-6">🎁</div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
   const nudge = getGreetingNudge(occasions)
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
+    <div className="p-3 md:p-4 lg:p-6 max-w-7xl mx-auto">
       {/* Greeting */}
       <p className="text-sm text-gray-600 mb-5">
         <span className="font-semibold text-gray-900">{greeting}</span>{' '}

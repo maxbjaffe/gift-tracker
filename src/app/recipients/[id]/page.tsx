@@ -151,8 +151,8 @@ export default function RecipientDetailPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-3 md:p-4 lg:p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Breadcrumbs */}
         <Breadcrumbs
           items={[
@@ -236,49 +236,46 @@ export default function RecipientDetailPage() {
           </div>
         </div>
 
-        {/* 2-column layout: left (person info) + right (budget, gifts, AI recs) */}
-        <div className="lg:grid lg:grid-cols-[1fr_400px] lg:gap-6 space-y-6 lg:space-y-0">
-          {/* Left column */}
-          <div>
-            <PersonInfoCard
-              recipient={recipient}
-              profileHub={profileHub}
-              profileHubLoading={profileHubLoading}
-              onDatesUpdate={(newDates) => setRecipient({ ...recipient, important_dates: newDates as any })}
+        {/* Top row: Person Info (left) + Budget (right) */}
+        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6 space-y-4 lg:space-y-0 mb-6">
+          <PersonInfoCard
+            recipient={recipient}
+            profileHub={profileHub}
+            profileHubLoading={profileHubLoading}
+            onDatesUpdate={(newDates) => setRecipient({ ...recipient, important_dates: newDates as any })}
+          />
+          <div className="lg:self-start">
+            <BudgetTracker recipient={recipient} />
+          </div>
+        </div>
+
+        {/* Bottom row: Assigned Gifts (left) + AI Recommendations (right) — equal columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Assigned Gifts */}
+          <div className="bg-white rounded-2xl shadow-sm p-4 md:p-5">
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Assigned Gifts</h2>
+            <div className="flex gap-2 mb-3">
+              <AssignGiftsDialog
+                recipientId={recipient.id}
+                recipientName={recipient.name}
+                onAssignmentComplete={() => {}}
+              />
+              <Link
+                href={`/gifts/new?recipient=${recipient.id}`}
+                className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium whitespace-nowrap"
+              >
+                + Create Gift
+              </Link>
+            </div>
+            <AssignedGiftsManager
+              recipientId={recipient.id}
+              recipientName={recipient.name}
+              onUpdate={() => {}}
             />
           </div>
 
-          {/* Right column (sticky on desktop) */}
-          <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-            {/* Budget Summary */}
-            <BudgetTracker recipient={recipient} />
-
-            {/* Assigned Gifts */}
-            <div className="bg-white rounded-2xl shadow-sm p-4 md:p-5">
-              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Assigned Gifts</h2>
-              <div className="flex gap-2 mb-3">
-                <AssignGiftsDialog
-                  recipientId={recipient.id}
-                  recipientName={recipient.name}
-                  onAssignmentComplete={() => {}}
-                />
-                <Link
-                  href={`/gifts/new?recipient=${recipient.id}`}
-                  className="px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs font-medium whitespace-nowrap"
-                >
-                  + Create Gift
-                </Link>
-              </div>
-              <AssignedGiftsManager
-                recipientId={recipient.id}
-                recipientName={recipient.name}
-                onUpdate={() => {}}
-              />
-            </div>
-
-            {/* AI Recommendations (auto-loaded) */}
-            <AutoRecommendations recipientId={recipient.id} />
-          </div>
+          {/* AI Recommendations (auto-loaded) */}
+          <AutoRecommendations recipientId={recipient.id} />
         </div>
       </div>
 

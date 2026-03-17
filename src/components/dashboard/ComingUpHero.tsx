@@ -190,52 +190,55 @@ export function ComingUpHero({ occasions, recipientMap }: ComingUpHeroProps) {
         ].filter(g => g.items.length > 0)
 
         return (
-          <div className="mt-3 space-y-2">
-            {groups.map(group => (
-              <div key={group.title}>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                  {group.emoji} {group.title}
-                </p>
-                <div className="space-y-1">
-                  {group.items.map((occasion, i) => {
-                    const oEmoji = getOccasionEmoji(occasion, holidayMap)
-                    const oUrgency = getUrgencyMeta(occasion.daysUntil)
-                    const oStatus = getStatusPill(occasion.giftStatus)
-                    const oIsHoliday = occasion.recipientId === '__holiday__'
+          <div className="mt-3">
+            {/* Side-by-side grid for categories on desktop */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {groups.map(group => (
+                <div key={group.title} className="min-w-0">
+                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                    {group.emoji} {group.title}
+                  </p>
+                  <div className="space-y-1">
+                    {group.items.map((occasion, i) => {
+                      const oEmoji = getOccasionEmoji(occasion, holidayMap)
+                      const oUrgency = getUrgencyMeta(occasion.daysUntil)
+                      const oStatus = getStatusPill(occasion.giftStatus)
+                      const oIsHoliday = occasion.recipientId === '__holiday__'
 
-                    return (
-                      <Link
-                        key={`${occasion.recipientId}-${occasion.occasionName}-${i}`}
-                        href={`/chat?prefix=${encodeURIComponent(buildChatPrefix(occasion))}`}
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg hover:shadow-sm transition-all ${oUrgency.chipBg}`}
-                      >
-                        <span className="text-base flex-shrink-0">{oEmoji}</span>
-                        <span className="text-xs font-medium text-gray-900 truncate flex-1">
-                          {oIsHoliday ? occasion.occasionName : occasion.recipientName}
-                          {!oIsHoliday && occasion.occasionType === 'custom' && (
-                            <span className="text-gray-500 font-normal"> — {occasion.occasionName.split(' — ')[1] || ''}</span>
-                          )}
-                        </span>
-                        <span className="text-xs text-gray-500 flex-shrink-0">
-                          {occasion.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                        <span className={`text-[10px] font-bold flex-shrink-0 ${occasion.daysUntil <= 7 ? 'text-orange-500' : 'text-gray-600'}`}>
-                          {occasion.daysUntil < 0 ? `${Math.abs(occasion.daysUntil)}d ago` : occasion.daysUntil === 0 ? 'Today' : `${occasion.daysUntil}d`}
-                        </span>
-                        {occasion.occasionType !== 'holiday' && (
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${oStatus.bg}`}>
-                            {oStatus.label}
+                      return (
+                        <Link
+                          key={`${occasion.recipientId}-${occasion.occasionName}-${i}`}
+                          href={`/chat?prefix=${encodeURIComponent(buildChatPrefix(occasion))}`}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:shadow-sm transition-all ${oUrgency.chipBg}`}
+                        >
+                          <span className="text-sm flex-shrink-0">{oEmoji}</span>
+                          <span className="text-xs font-medium text-gray-900 truncate flex-1">
+                            {oIsHoliday ? occasion.occasionName : occasion.recipientName}
+                            {!oIsHoliday && occasion.occasionType === 'custom' && (
+                              <span className="text-gray-500 font-normal"> — {occasion.occasionName.split(' — ')[1] || ''}</span>
+                            )}
                           </span>
-                        )}
-                      </Link>
-                    )
-                  })}
+                          <span className="text-[10px] text-gray-500 flex-shrink-0">
+                            {occasion.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className={`text-[10px] font-bold flex-shrink-0 ${occasion.daysUntil <= 7 ? 'text-orange-500' : 'text-gray-600'}`}>
+                            {occasion.daysUntil < 0 ? `${Math.abs(occasion.daysUntil)}d ago` : occasion.daysUntil === 0 ? 'Today' : `${occasion.daysUntil}d`}
+                          </span>
+                          {occasion.occasionType !== 'holiday' && (
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${oStatus.bg}`}>
+                              {oStatus.label}
+                            </span>
+                          )}
+                        </Link>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <Link
               href="/occasions"
-              className="block text-center text-xs text-gray-400 hover:text-orange-500 transition-colors pt-1"
+              className="block text-center text-xs text-gray-400 hover:text-orange-500 transition-colors pt-2"
             >
               View full calendar &rarr;
             </Link>
