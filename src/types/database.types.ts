@@ -1994,6 +1994,7 @@ export type Database = {
           share_privacy: string | null
           share_token: string | null
           share_view_count: number | null
+          target_quantity: number | null
           updated_at: string | null
           user_id: string | null
           wishlist_items: Json | null
@@ -2034,6 +2035,7 @@ export type Database = {
           share_privacy?: string | null
           share_token?: string | null
           share_view_count?: number | null
+          target_quantity?: number | null
           updated_at?: string | null
           user_id?: string | null
           wishlist_items?: Json | null
@@ -2074,6 +2076,7 @@ export type Database = {
           share_privacy?: string | null
           share_token?: string | null
           share_view_count?: number | null
+          target_quantity?: number | null
           updated_at?: string | null
           user_id?: string | null
           wishlist_items?: Json | null

@@ -44,7 +44,24 @@ export default function RecipientDetailPage() {
   const [applyingSuggestions, setApplyingSuggestions] = useState(false);
   const [showChatDialog, setShowChatDialog] = useState(false);
 
+  const [onHandCount, setOnHandCount] = useState<number>(0);
+
   const isGenericProfile = recipient?.profile_type && recipient.profile_type !== 'person';
+
+  // Fetch on-hand count for generic profiles
+  useEffect(() => {
+    if (!recipient || !isGenericProfile) return;
+    const fetchCount = async () => {
+      const supabase = createClient();
+      const { count, error } = await supabase
+        .from('gift_recipients')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', recipient.id)
+        .in('status', ['purchased', 'wrapped']);
+      if (!error && count !== null) setOnHandCount(count);
+    };
+    fetchCount();
+  }, [recipient, isGenericProfile]);
 
   // Profile Hub data — skip for generic profiles
   const { profile: profileHub, loading: profileHubLoading } = useProfileHub(
@@ -189,6 +206,12 @@ export default function RecipientDetailPage() {
                       </>
                   }
                 </p>
+                {isGenericProfile && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {onHandCount} of {recipient.target_quantity ?? 1} on hand
+                    {recipient.max_budget != null && ` · $${recipient.max_budget} per gift`}
+                  </p>
+                )}
                 {!isGenericProfile && recipient.birthday && (
                   <p className="text-xs text-gray-500 mt-1">
                     Birthday: {formatBirthday(recipient.birthday)}

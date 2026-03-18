@@ -1,0 +1,1 @@
+ALTER TABLE recipients ADD COLUMN IF NOT EXISTS target_quantity INT DEFAULT 1;

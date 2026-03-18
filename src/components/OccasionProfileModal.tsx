@@ -28,6 +28,7 @@ interface ExistingProfile {
   name: string
   profile_type: string
   max_budget: number | null
+  target_quantity: number | null
   notes: string | null
   interests: string[] | null
   gift_dos: string[] | null
@@ -56,6 +57,7 @@ export function OccasionProfileModal({
   // Form fields
   const [name, setName] = useState('')
   const [budget, setBudget] = useState('')
+  const [quantity, setQuantity] = useState('1')
   const [notes, setNotes] = useState('')
 
   // Reset when modal opens/closes
@@ -67,12 +69,14 @@ export function OccasionProfileModal({
         setStep(2)
         setName(existingProfile.name || '')
         setBudget(existingProfile.max_budget?.toString() || '')
+        setQuantity(existingProfile.target_quantity?.toString() || '1')
         setNotes(existingProfile.notes || '')
       } else {
         setStep(1)
         setSelectedPreset(null)
         setName('')
         setBudget('')
+        setQuantity('1')
         setNotes('')
       }
     }
@@ -82,6 +86,7 @@ export function OccasionProfileModal({
     setSelectedPreset(preset)
     setName(preset.defaultName)
     setBudget(preset.suggestedBudget.toString())
+    setQuantity(preset.suggestedQuantity.toString())
     setNotes(preset.defaultNotes)
     setStep(2)
   }
@@ -107,6 +112,7 @@ export function OccasionProfileModal({
         profile_type: selectedPreset.type,
         relationship: selectedPreset.label,
         max_budget: budget ? parseFloat(budget) : null,
+        target_quantity: quantity ? parseInt(quantity, 10) : 1,
         notes: notes.trim() || null,
         interests: selectedPreset.defaultInterests,
         gift_dos: selectedPreset.defaultGiftDos,
@@ -219,7 +225,7 @@ export function OccasionProfileModal({
               </div>
 
               <div>
-                <Label htmlFor="occasion-budget">Budget ($)</Label>
+                <Label htmlFor="occasion-budget">Budget per gift ($)</Label>
                 <Input
                   id="occasion-budget"
                   type="number"
@@ -230,6 +236,20 @@ export function OccasionProfileModal({
                   placeholder="e.g., 30"
                   disabled={loading}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="occasion-quantity">Keep on hand</Label>
+                <Input
+                  id="occasion-quantity"
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={quantity}
+                  onChange={e => setQuantity(e.target.value)}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-gray-500 mt-1">How many gifts to keep ready for this scenario</p>
               </div>
 
               <div>

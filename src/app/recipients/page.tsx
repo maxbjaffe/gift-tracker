@@ -31,6 +31,7 @@ type Recipient = {
   notes?: string | null;
   gift_dos?: string[] | null;
   gift_donts?: string[] | null;
+  target_quantity?: number | null;
 };
 
 interface NextOccasion {
@@ -81,6 +82,7 @@ function RecipientsPageContent() {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
   const [selectedOccasionProfile, setSelectedOccasionProfile] = useState<Recipient | null>(null);
+  const [onHandCounts, setOnHandCounts] = useState<Record<string, number>>({});
 
   const activeTab = searchParams.get('tab') === 'occasions' ? 'occasions' : 'people';
 
@@ -133,6 +135,34 @@ function RecipientsPageContent() {
       return a.name.localeCompare(b.name);
     });
   }, [peopleRecipients]);
+
+  // Fetch on-hand counts for occasion profiles
+  useEffect(() => {
+    if (occasionRecipients.length === 0) return;
+    const fetchOnHandCounts = async () => {
+      try {
+        const supabase = createClient();
+        const ids = occasionRecipients.map(r => r.id);
+        const { data, error } = await supabase
+          .from('gift_recipients')
+          .select('recipient_id')
+          .in('recipient_id', ids)
+          .in('status', ['purchased', 'wrapped']);
+        if (error) {
+          logger.error('Error fetching on-hand counts:', error);
+          return;
+        }
+        const counts: Record<string, number> = {};
+        for (const row of data || []) {
+          counts[row.recipient_id] = (counts[row.recipient_id] || 0) + 1;
+        }
+        setOnHandCounts(counts);
+      } catch (err) {
+        logger.error('Error fetching on-hand counts:', err);
+      }
+    };
+    fetchOnHandCounts();
+  }, [occasionRecipients]);
 
   const sortedOccasions = useMemo(() => {
     return [...occasionRecipients].sort((a, b) => {
@@ -428,12 +458,33 @@ function RecipientsPageContent() {
                           </div>
                         </div>
 
-                        {/* Budget + gift count summary */}
-                        <div className="flex items-center gap-2 mt-2">
-                          {profile.max_budget && (
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 bg-green-50 text-green-700 rounded-full">
-                              Budget: ${profile.max_budget}
-                            </span>
+                        {/* On-hand progress + budget */}
+                        <div className="mt-2 space-y-1.5">
+                          {(profile.target_quantity ?? 1) > 0 && (
+                            <div>
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className={`text-[10px] font-semibold ${
+                                  (onHandCounts[profile.id] || 0) >= (profile.target_quantity ?? 1)
+                                    ? 'text-green-700' : 'text-amber-700'
+                                }`}>
+                                  {onHandCounts[profile.id] || 0}/{profile.target_quantity ?? 1} on hand
+                                </span>
+                                {profile.max_budget != null && (
+                                  <span className="text-[10px] font-medium text-gray-500">
+                                    ${profile.max_budget}/gift
+                                  </span>
+                                )}
+                              </div>
+                              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all ${
+                                    (onHandCounts[profile.id] || 0) >= (profile.target_quantity ?? 1)
+                                      ? 'bg-green-500' : 'bg-amber-400'
+                                  }`}
+                                  style={{ width: `${Math.min(100, ((onHandCounts[profile.id] || 0) / (profile.target_quantity ?? 1)) * 100)}%` }}
+                                />
+                              </div>
+                            </div>
                           )}
                         </div>
                       </Link>
@@ -477,6 +528,7 @@ function RecipientsPageContent() {
           name: selectedOccasionProfile.name,
           profile_type: selectedOccasionProfile.profile_type || '',
           max_budget: selectedOccasionProfile.max_budget || null,
+          target_quantity: selectedOccasionProfile.target_quantity || null,
           notes: selectedOccasionProfile.notes || null,
           interests: selectedOccasionProfile.interests,
           gift_dos: selectedOccasionProfile.gift_dos || null,

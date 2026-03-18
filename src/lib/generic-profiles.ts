@@ -34,6 +34,7 @@ export interface GenericProfilePreset {
   defaultNotes: string
   keyDates: KeyDate[]
   suggestedBudget: number
+  suggestedQuantity: number
 }
 
 export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
@@ -54,6 +55,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: 'End of Term', monthDay: '12-20', repeats: true },
     ],
     suggestedBudget: 30,
+    suggestedQuantity: 1,
   },
   {
     type: 'coworker',
@@ -72,6 +74,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: 'Holiday Exchange', monthDay: '12-15', repeats: true },
     ],
     suggestedBudget: 25,
+    suggestedQuantity: 1,
   },
   {
     type: 'host',
@@ -86,6 +89,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
     defaultNotes: 'Bring something that doesn\'t require immediate attention from the host. A nice bottle of wine or artisan food item is always welcome.',
     keyDates: [],
     suggestedBudget: 40,
+    suggestedQuantity: 2,
   },
   {
     type: 'kids_party',
@@ -100,6 +104,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
     defaultNotes: 'Keep a few age-appropriate gifts on hand for last-minute party invites. Include a gift receipt.',
     keyDates: [],
     suggestedBudget: 15,
+    suggestedQuantity: 3,
   },
   {
     type: 'boss',
@@ -116,6 +121,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: "Boss's Day", monthDay: '10-16', repeats: true },
     ],
     suggestedBudget: 50,
+    suggestedQuantity: 1,
   },
   {
     type: 'neighbor',
@@ -132,6 +138,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: 'Holiday Season', monthDay: '12-20', repeats: true },
     ],
     suggestedBudget: 25,
+    suggestedQuantity: 1,
   },
   {
     type: 'babysitter',
@@ -149,6 +156,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: 'End of School', monthDay: '06-15', repeats: true },
     ],
     suggestedBudget: 75,
+    suggestedQuantity: 1,
   },
   {
     type: 'service_provider',
@@ -165,6 +173,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: 'Holiday Tipping', monthDay: '12-15', repeats: true },
     ],
     suggestedBudget: 25,
+    suggestedQuantity: 1,
   },
   {
     type: 'wedding',
@@ -179,6 +188,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
     defaultNotes: 'Check the registry first. Cash is increasingly acceptable and appreciated. If attending, budget should cover at least the cost of your plate.',
     keyDates: [],
     suggestedBudget: 150,
+    suggestedQuantity: 1,
   },
   {
     type: 'baby_shower',
@@ -193,6 +203,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
     defaultNotes: 'Check the registry. Practical items in 3-6 month sizes are most useful. Include a children\'s book with a personal inscription.',
     keyDates: [],
     suggestedBudget: 60,
+    suggestedQuantity: 1,
   },
   {
     type: 'graduation',
@@ -209,6 +220,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: 'Graduation', monthDay: '05-15', repeats: false },
     ],
     suggestedBudget: 75,
+    suggestedQuantity: 1,
   },
   {
     type: 'white_elephant',
@@ -225,6 +237,7 @@ export const GENERIC_PROFILE_PRESETS: GenericProfilePreset[] = [
       { label: 'Holiday Party', monthDay: '12-15', repeats: true },
     ],
     suggestedBudget: 25,
+    suggestedQuantity: 1,
   },
 ]
 
