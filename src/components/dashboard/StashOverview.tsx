@@ -173,34 +173,57 @@ export function StashOverview({ gifts, recipients, occasions }: StashOverviewPro
               const isExpanded = expandedGeneric === group.profileType
               const previewItems = group.gifts.slice(0, 2).map(g => g.name).join(', ')
 
+              // If this group has a linked recipient profile, make the header a link
+              const headerContent = (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-900">{group.label}</span>
+                    {!group.recipientId && (
+                      isExpanded ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />
+                    )}
+                    {group.recipientId && (
+                      <span className="text-[10px] text-purple-500 font-medium">View &rarr;</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-gray-500 mt-0.5">
+                    {group.gifts.length} item{group.gifts.length !== 1 ? 's' : ''} &middot; ${group.totalValue.toFixed(0)}
+                  </div>
+                  {!isExpanded && previewItems && (
+                    <p className="text-[10px] text-gray-400 mt-0.5 truncate">{previewItems}</p>
+                  )}
+                </>
+              )
+
               return (
                 <div key={group.profileType}>
-                  <button
-                    onClick={() => setExpandedGeneric(isExpanded ? null : group.profileType)}
-                    className={`w-full text-left px-3 py-2 rounded-xl bg-white border-l-4 ${config.borderLeft} hover:shadow-md transition-all`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-gray-900">{group.label}</span>
-                      {isExpanded ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
-                    </div>
-                    <div className="text-[11px] text-gray-500 mt-0.5">
-                      {group.gifts.length} item{group.gifts.length !== 1 ? 's' : ''} &middot; ${group.totalValue.toFixed(0)}
-                    </div>
-                    {!isExpanded && previewItems && (
-                      <p className="text-[10px] text-gray-400 mt-0.5 truncate">{previewItems}</p>
-                    )}
-                  </button>
-                  {isExpanded && (
-                    <div className="mt-1">
-                      <BucketCard
-                        title={group.label}
-                        icon={config.icon}
-                        gradientClasses={config.gradient}
-                        borderColor={config.border}
-                        items={group.gifts}
-                        onItemClick={(g) => router.push(`/gifts/${g.id}`)}
-                      />
-                    </div>
+                  {group.recipientId ? (
+                    <Link
+                      href={`/recipients/${group.recipientId}`}
+                      className={`block w-full text-left px-3 py-2 rounded-xl bg-white border-l-4 ${config.borderLeft} hover:shadow-md transition-all`}
+                    >
+                      {headerContent}
+                    </Link>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setExpandedGeneric(isExpanded ? null : group.profileType)}
+                        className={`w-full text-left px-3 py-2 rounded-xl bg-white border-l-4 ${config.borderLeft} hover:shadow-md transition-all`}
+                      >
+                        {headerContent}
+                      </button>
+                      {isExpanded && (
+                        <div className="mt-1">
+                          <BucketCard
+                            title={group.label}
+                            icon={config.icon}
+                            gradientClasses={config.gradient}
+                            borderColor={config.border}
+                            items={group.gifts}
+                            onItemClick={(g) => router.push(`/gifts/${g.id}`)}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )

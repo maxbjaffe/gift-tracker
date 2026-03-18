@@ -1986,6 +1986,7 @@ export type Database = {
           past_gifts_received: Json | null
           personality_description: string | null
           personality_type: string | null
+          profile_type: string | null
           relationship: string | null
           restrictions: string[] | null
           share_enabled: boolean | null
@@ -2025,6 +2026,7 @@ export type Database = {
           past_gifts_received?: Json | null
           personality_description?: string | null
           personality_type?: string | null
+          profile_type?: string | null
           relationship?: string | null
           restrictions?: string[] | null
           share_enabled?: boolean | null
@@ -2064,6 +2066,7 @@ export type Database = {
           past_gifts_received?: Json | null
           personality_description?: string | null
           personality_type?: string | null
+          profile_type?: string | null
           relationship?: string | null
           restrictions?: string[] | null
           share_enabled?: boolean | null

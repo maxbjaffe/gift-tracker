@@ -338,6 +338,10 @@ function buildRecommendationPrompt(
     ? context.popularStores.join(', ')
     : 'Amazon, Target, Best Buy, Walmart';
 
+  const profileContext = recipient.profile_type && recipient.profile_type !== 'person'
+    ? `\n- Occasion Type: ${recipient.profile_type.replace(/_/g, ' ')} (this is a gift category for a recurring occasion, not a specific person — suggest gifts good to keep on-hand)`
+    : ''
+
   return `You are an expert gift recommendation AI. Generate 8-10 personalized, SPECIFIC gift ideas using real-world data and trends.
 
 ====================
@@ -345,7 +349,7 @@ RECIPIENT PROFILE
 ====================
 - Name: ${recipient.name}
 - Relationship: ${recipient.relationship}
-- Age: ${age}
+- Age: ${age}${profileContext}
 - Interests: ${interests}
 - Budget: Up to ${budget}
 - Gift Preferences: ${preferences}
@@ -423,9 +427,13 @@ function buildLightweightPrompt(recipient: any, context: any, count: number): st
     ? context.dismissedRecommendations.map((d: any) => d.recommendation_name).join(', ')
     : 'None';
 
+  const profileContext = recipient.profile_type && recipient.profile_type !== 'person'
+    ? `\nOCCASION TYPE: ${recipient.profile_type.replace(/_/g, ' ')} (this is a gift category for a recurring occasion, not a specific person — suggest gifts good to keep on-hand)\n`
+    : ''
+
   return `Generate exactly ${count} specific, personalized gift ideas as a JSON array.
 
-RECIPIENT: ${recipient.name} (${recipient.relationship}, age ${age})
+RECIPIENT: ${recipient.name} (${recipient.relationship}, age ${age})${profileContext}
 INTERESTS: ${interests}
 BUDGET: Up to ${budget}
 PREFERENCES: ${preferences}

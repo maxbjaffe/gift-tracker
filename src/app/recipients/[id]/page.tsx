@@ -44,10 +44,12 @@ export default function RecipientDetailPage() {
   const [applyingSuggestions, setApplyingSuggestions] = useState(false);
   const [showChatDialog, setShowChatDialog] = useState(false);
 
-  // Profile Hub data
+  const isGenericProfile = recipient?.profile_type && recipient.profile_type !== 'person';
+
+  // Profile Hub data — skip for generic profiles
   const { profile: profileHub, loading: profileHubLoading } = useProfileHub(
     params.id as string,
-    recipient
+    isGenericProfile ? null : recipient
   );
 
   useEffect(() => {
@@ -157,7 +159,7 @@ export default function RecipientDetailPage() {
         <Breadcrumbs
           items={[
             { label: 'Dashboard', href: '/dashboard' },
-            { label: 'Recipients', href: '/recipients' },
+            { label: 'Recipients', href: isGenericProfile ? '/recipients?tab=occasions' : '/recipients' },
             { label: recipient.name, current: true },
           ]}
           className="mb-4"
@@ -180,9 +182,14 @@ export default function RecipientDetailPage() {
                   {recipient.name}
                 </h1>
                 <p className="text-sm text-gray-600">
-                  {recipient.relationship} &bull; {formatAgeDisplay(recipient.birthday, recipient.age_range)}
+                  {isGenericProfile
+                    ? recipient.relationship
+                    : <>
+                        {recipient.relationship} &bull; {formatAgeDisplay(recipient.birthday, recipient.age_range)}
+                      </>
+                  }
                 </p>
-                {recipient.birthday && (
+                {!isGenericProfile && recipient.birthday && (
                   <p className="text-xs text-gray-500 mt-1">
                     Birthday: {formatBirthday(recipient.birthday)}
                   </p>
@@ -191,7 +198,7 @@ export default function RecipientDetailPage() {
             </div>
 
             <div className="flex flex-row gap-2 w-full sm:w-auto">
-              {profileHub && (
+              {!isGenericProfile && profileHub && (
                 <a href={profileHub.profileHubUrl} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none">
                   <Button variant="outline" className="w-full h-button-md" aria-label="Edit profile in Profile Hub">
                     <ExternalLink className="h-4 w-4 mr-2" />
@@ -200,9 +207,9 @@ export default function RecipientDetailPage() {
                 </a>
               )}
               <Link href={`/recipients/${recipient.id}/edit`} className="flex-1 sm:flex-none">
-                <Button variant="outline" className="w-full h-button-md" aria-label="Edit gift settings">
+                <Button variant="outline" className="w-full h-button-md" aria-label={isGenericProfile ? 'Edit profile' : 'Edit gift settings'}>
                   <Settings className="h-4 w-4 mr-2" />
-                  Gift Settings
+                  {isGenericProfile ? 'Edit Profile' : 'Gift Settings'}
                 </Button>
               </Link>
               <DropdownMenu>
@@ -212,10 +219,12 @@ export default function RecipientDetailPage() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => setShowSurveyModal(true)}>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Take Personality Survey
-                  </DropdownMenuItem>
+                  {!isGenericProfile && (
+                    <DropdownMenuItem onClick={() => setShowSurveyModal(true)}>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Take Personality Survey
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()} asChild>
                     <div className="flex items-center cursor-pointer">
                       <ShareButton recipient={recipient as any} onShareUpdated={() => fetchRecipient()} />
@@ -240,9 +249,10 @@ export default function RecipientDetailPage() {
         <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-4 space-y-3 lg:space-y-0 mb-4">
           <PersonInfoCard
             recipient={recipient}
-            profileHub={profileHub}
-            profileHubLoading={profileHubLoading}
+            profileHub={isGenericProfile ? null : profileHub}
+            profileHubLoading={isGenericProfile ? false : profileHubLoading}
             onDatesUpdate={(newDates) => setRecipient({ ...recipient, important_dates: newDates as any })}
+            isGenericProfile={!!isGenericProfile}
           />
           <div className="lg:self-start">
             <BudgetTracker recipient={recipient} />
@@ -279,7 +289,7 @@ export default function RecipientDetailPage() {
       </div>
 
       {/* Modals */}
-      {recipient && (
+      {recipient && !isGenericProfile && (
         <PersonalitySurveyModal
           isOpen={showSurveyModal}
           onClose={() => setShowSurveyModal(false)}
