@@ -58,6 +58,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     fetchGiftData();
@@ -242,8 +243,6 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
     return images;
   }, [gift]);
-
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
