@@ -103,11 +103,21 @@ export function PersonInfoCard({ recipient, profileHub, profileHubLoading, onDat
 
       {/* Important Dates */}
       <div className="p-4 md:p-5">
-        <ImportantDates
-          recipientId={recipient.id}
-          dates={((recipient as any).important_dates || []) as ImportantDate[]}
-          onUpdate={onDatesUpdate}
-        />
+        {((recipient as any).important_dates || []).length > 0 ? (
+          <ImportantDates
+            recipientId={recipient.id}
+            dates={((recipient as any).important_dates || []) as ImportantDate[]}
+            onUpdate={onDatesUpdate}
+            embedded
+          />
+        ) : (
+          <ImportantDates
+            recipientId={recipient.id}
+            dates={[]}
+            onUpdate={onDatesUpdate}
+            embedded
+          />
+        )}
       </div>
 
       {/* Divider */}

@@ -224,11 +224,9 @@ export function ComingUpHero({ occasions, recipientMap }: ComingUpHeroProps) {
                           <span className={`text-[10px] font-bold flex-shrink-0 ${occasion.daysUntil <= 7 ? 'text-orange-500' : 'text-gray-600'}`}>
                             {occasion.daysUntil < 0 ? `${Math.abs(occasion.daysUntil)}d ago` : occasion.daysUntil === 0 ? 'Today' : `${occasion.daysUntil}d`}
                           </span>
-                          {occasion.occasionType !== 'holiday' && (
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${oStatus.bg}`}>
-                              {oStatus.label}
-                            </span>
-                          )}
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${oStatus.bg}`}>
+                            {oStatus.label}
+                          </span>
                         </Link>
                       )
                     })}

@@ -319,8 +319,8 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                                   href={`/gifts/${assignment.gift_id}`}
                                   className="flex-1"
                                 >
-                                  <h4 className="font-semibold hover:text-purple-600 transition-colors text-gray-900">
-                                    {gift.name}
+                                  <h4 className="font-semibold hover:text-purple-600 transition-colors text-gray-900 line-clamp-1" title={gift.name}>
+                                    {gift.name.length > 60 ? gift.name.slice(0, 60) + '...' : gift.name}
                                   </h4>
                                 </Link>
 
@@ -473,8 +473,8 @@ export function AssignedGiftsManager({ recipientId, recipientName, onUpdate }: A
                                   href={`/gifts/${assignment.gift_id}`}
                                   className="flex-1"
                                 >
-                                  <h4 className="font-semibold hover:text-purple-600 transition-colors text-green-900">
-                                    {gift.name}
+                                  <h4 className="font-semibold hover:text-purple-600 transition-colors text-green-900 line-clamp-1" title={gift.name}>
+                                    {gift.name.length > 60 ? gift.name.slice(0, 60) + '...' : gift.name}
                                   </h4>
                                 </Link>
 

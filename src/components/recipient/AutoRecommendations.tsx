@@ -157,16 +157,23 @@ export function AutoRecommendations({ recipientId, onGiftAdded }: AutoRecommenda
 
       {/* Skeleton loading */}
       {autoLoading && (
-        <div className="grid grid-cols-1 gap-3">
+        <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="border border-gray-100 rounded-xl p-3 animate-pulse">
-              <div className="h-28 bg-gray-200 rounded-lg mb-2.5" />
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-1" />
-              <div className="h-3 bg-gray-200 rounded w-1/3 mb-1.5" />
-              <div className="h-3 bg-gray-200 rounded w-full mb-2" />
-              <div className="flex gap-1">
+            <div key={i} className="border border-gray-100 rounded-xl p-2.5 animate-pulse">
+              <div className="flex gap-3">
+                <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="flex gap-2">
+                    <div className="h-4 bg-gray-200 rounded w-14" />
+                    <div className="h-4 bg-gray-200 rounded w-10" />
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded w-full" />
+                </div>
+              </div>
+              <div className="flex gap-1 mt-2">
                 {Array.from({ length: 5 }).map((_, j) => (
-                  <div key={j} className="flex-1 h-7 bg-gray-200 rounded-lg" />
+                  <div key={j} className="flex-1 h-6 bg-gray-200 rounded" />
                 ))}
               </div>
             </div>
@@ -176,7 +183,7 @@ export function AutoRecommendations({ recipientId, onGiftAdded }: AutoRecommenda
 
       {/* Recommendation cards */}
       {!autoLoading && recommendations.length > 0 && (
-        <div className="grid grid-cols-1 gap-3">
+        <div className="space-y-2">
           {recommendations.map((rec, i) => (
             <RecommendationCard
               key={`${rec.title}-${i}`}

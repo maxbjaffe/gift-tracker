@@ -46,7 +46,7 @@ function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
   ]
 
   return (
-    <Card className="mb-5 p-4 bg-gradient-to-r from-orange-50 to-blue-50 border-orange-200/50 relative">
+    <Card className="mb-3 p-4 bg-gradient-to-r from-orange-50 to-blue-50 border-orange-200/50 relative">
       <button
         onClick={onDismiss}
         className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
@@ -168,7 +168,7 @@ export default function DashboardPage() {
   return (
     <div className="p-3 md:p-4 lg:p-6 max-w-7xl mx-auto">
       {/* Greeting */}
-      <p className="text-sm text-gray-600 mb-5">
+      <p className="text-sm text-gray-600 mb-3">
         <span className="font-semibold text-gray-900">{greeting}</span>{' '}
         {nudge}
       </p>
@@ -181,8 +181,10 @@ export default function DashboardPage() {
         }} />
       )}
 
+
+
       {/* Two-column on desktop, single-column on mobile */}
-      <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-[1fr_340px] lg:gap-6">
+      <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-[1fr_340px] lg:gap-4">
         {/* Left col items */}
         <div className="lg:col-start-1 lg:row-start-1">
           <ComingUpHero occasions={occasions} recipientMap={recipientMap} />

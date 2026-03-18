@@ -34,9 +34,11 @@ interface ImportantDatesProps {
   dates: ImportantDate[]
   onUpdate: (dates: ImportantDate[]) => void
   readOnly?: boolean
+  /** When true, renders without its own card wrapper (for embedding inside another card) */
+  embedded?: boolean
 }
 
-export function ImportantDates({ recipientId, dates, onUpdate, readOnly = false }: ImportantDatesProps) {
+export function ImportantDates({ recipientId, dates, onUpdate, readOnly = false, embedded = false }: ImportantDatesProps) {
   const [adding, setAdding] = useState(false)
   const [label, setLabel] = useState('')
   const [customLabel, setCustomLabel] = useState('')
@@ -89,11 +91,11 @@ export function ImportantDates({ recipientId, dates, onUpdate, readOnly = false 
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8">
+    <div className={embedded ? '' : 'bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8'}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CalendarDays className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg md:text-xl font-bold text-gray-900">Important Dates</h2>
+          <h2 className={embedded ? 'text-xs font-bold text-gray-900 uppercase tracking-wide' : 'text-lg md:text-xl font-bold text-gray-900'}>Important Dates</h2>
         </div>
         {!readOnly && !adding && (
           <button

@@ -164,7 +164,7 @@ export default function RecipientDetailPage() {
         />
 
         {/* Header Card — full width */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm p-4 md:p-5 mb-4">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div className="flex items-center gap-4">
               <Avatar
@@ -237,7 +237,7 @@ export default function RecipientDetailPage() {
         </div>
 
         {/* Top row: Person Info (left) + Budget (right) */}
-        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6 space-y-4 lg:space-y-0 mb-6">
+        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-4 space-y-3 lg:space-y-0 mb-4">
           <PersonInfoCard
             recipient={recipient}
             profileHub={profileHub}
@@ -250,11 +250,10 @@ export default function RecipientDetailPage() {
         </div>
 
         {/* Bottom row: Assigned Gifts (left) + AI Recommendations (right) — equal columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Assigned Gifts */}
-          <div className="bg-white rounded-2xl shadow-sm p-4 md:p-5">
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Assigned Gifts</h2>
-            <div className="flex gap-2 mb-3">
+          <div>
+            <div className="flex gap-2 mb-2">
               <AssignGiftsDialog
                 recipientId={recipient.id}
                 recipientName={recipient.name}
