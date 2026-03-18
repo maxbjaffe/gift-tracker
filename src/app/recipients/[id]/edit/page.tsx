@@ -47,6 +47,7 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
   const [itemsAlreadyOwned, setItemsAlreadyOwned] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
   const [maxPurchasedBudget, setMaxPurchasedBudget] = useState('');
+  const [targetQuantity, setTargetQuantity] = useState('1');
   const [notes, setNotes] = useState('');
   const [budgetTier, setBudgetTier] = useState<string[]>([]);
   const [giftStyles, setGiftStyles] = useState<string[]>([]);
@@ -78,6 +79,7 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
       setItemsAlreadyOwned(Array.isArray(data.items_already_owned) ? data.items_already_owned.join(', ') : '');
       setMaxBudget(data.max_budget?.toString() || '');
       setMaxPurchasedBudget(data.max_purchased_budget?.toString() || '');
+      setTargetQuantity(data.target_quantity?.toString() || '1');
       setNotes(data.notes || '');
       setBudgetTier([]);
       setGiftStyles([]);
@@ -116,6 +118,7 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
         items_already_owned: itemsArray.length > 0 ? itemsArray : null,
         max_budget: maxBudget ? parseFloat(maxBudget) : null,
         max_purchased_budget: maxPurchasedBudget ? parseFloat(maxPurchasedBudget) : null,
+        target_quantity: targetQuantity ? parseInt(targetQuantity, 10) : 1,
         notes: notes || null,
         avatar_type: avatar?.type || null,
         avatar_data: avatar?.data || null,
@@ -236,6 +239,24 @@ export default function EditRecipientPage({ params }: { params: { id: string } }
                 </div>
               </div>
             </div>
+
+            {recipient?.profile_type && recipient.profile_type !== 'person' && (
+              <div>
+                <label htmlFor="target_quantity" className="block text-sm md:text-base font-medium text-gray-700 mb-1">
+                  Keep on Hand
+                </label>
+                <input
+                  type="number"
+                  id="target_quantity"
+                  value={targetQuantity}
+                  onChange={(e) => setTargetQuantity(e.target.value)}
+                  min="1"
+                  max="20"
+                  className="w-full min-h-11 md:min-h-12 px-4 py-2 md:py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">How many gifts to keep ready for this scenario</p>
+              </div>
+            )}
 
             <div>
               <label htmlFor="max_purchased_budget" className="block text-sm md:text-base font-medium text-gray-700 mb-2">
