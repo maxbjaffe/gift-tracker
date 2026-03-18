@@ -172,7 +172,7 @@ function TabContent({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
       {gifts.map((gift) => (
         <StashGiftCard key={gift.id} gift={gift} showRecipients={showRecipients} />
       ))}
@@ -222,7 +222,7 @@ function GroupedTabContent({
           </div>
 
           {/* Gift grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {group.gifts.map((gift) => (
               <StashGiftCard key={gift.id} gift={gift} />
             ))}

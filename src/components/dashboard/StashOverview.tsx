@@ -132,12 +132,12 @@ export function StashOverview({ gifts, recipients, occasions }: StashOverviewPro
                     <span className="text-xs text-gray-400 ml-1.5">{person.occasionName} &middot; {person.daysUntil}d</span>
                   </div>
                   {person.covered ? (
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <span className="text-xs font-medium text-green-700">{person.gifts[0].name}</span>
+                    <div className="flex items-center gap-1.5 flex-shrink-0 max-w-[40%]">
+                      <span className="text-xs font-medium text-green-700 truncate">{person.gifts[0].name}</span>
                       {person.gifts.length > 1 && (
-                        <span className="text-[10px] text-green-600">+{person.gifts.length - 1}</span>
+                        <span className="text-[10px] text-green-600 flex-shrink-0">+{person.gifts.length - 1}</span>
                       )}
-                      <span className="text-green-600 text-sm">&#10003;</span>
+                      <span className="text-green-600 text-sm flex-shrink-0">&#10003;</span>
                     </div>
                   ) : (
                     <span className="text-xs font-medium text-amber-700 flex-shrink-0">

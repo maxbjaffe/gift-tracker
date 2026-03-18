@@ -27,10 +27,10 @@ export function StashGiftCard({ gift, showRecipients }: StashGiftCardProps) {
   return (
     <button
       onClick={() => router.push(`/gifts/${gift.id}`)}
-      className="w-full flex items-start gap-3 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-all text-left group"
+      className="w-full flex items-center gap-2.5 p-2.5 bg-white rounded-xl shadow-sm hover:shadow-md transition-all text-left group"
     >
       {/* Thumbnail */}
-      <div className="flex-shrink-0 w-14 h-14 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
         {gift.image_url ? (
           <img
             src={gift.image_url}
@@ -38,25 +38,25 @@ export function StashGiftCard({ gift, showRecipients }: StashGiftCardProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <Package className="w-6 h-6 text-gray-300" />
+          <Package className="w-5 h-5 text-gray-300" />
         )}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-giftstash-orange transition-colors">
+        <p className="text-xs font-semibold text-gray-900 line-clamp-1 group-hover:text-giftstash-orange transition-colors">
           {gift.name}
         </p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${statusCfg.className}`}>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none ${statusCfg.className}`}>
             {statusCfg.label}
           </span>
           {price != null && price > 0 && (
-            <span className="text-xs text-gray-500 font-medium">${price.toFixed(0)}</span>
+            <span className="text-[11px] text-gray-500 font-medium">${price.toFixed(0)}</span>
           )}
         </div>
         {showRecipients && recipientNames.length > 0 && (
-          <p className="text-[11px] text-gray-400 mt-1 truncate">
+          <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-1">
             For: {recipientNames.join(', ')}
           </p>
         )}
