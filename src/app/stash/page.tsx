@@ -1,67 +1,87 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useMemo, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useGifts } from '@/lib/hooks/useGifts'
 import { useRecipients } from '@/lib/hooks/useRecipients'
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
-import { BucketCard } from '@/components/dashboard/BucketCard'
-import { groupGiftsByStashProfile, type StashProfileType } from '@/lib/dashboard/stash-data'
-import { Plus, Package, Users, GraduationCap, Home, Gift } from 'lucide-react'
+import { StashGiftCard } from '@/components/dashboard/StashGiftCard'
+import Avatar from '@/components/Avatar'
+import { categorizeGifts, groupByOccasionProfile, groupByPerson, type StashTab, type RecipientGroup } from '@/lib/dashboard/stash-tabs'
+import { Plus, Package, Users, PartyPopper, LayoutGrid } from 'lucide-react'
 
-const FILTER_CHIPS: { value: StashProfileType | 'all'; label: string; description: string }[] = [
-  { value: 'all', label: 'All', description: 'All gifts on hand' },
-  { value: 'specific', label: 'Assigned', description: 'Gifts for a specific person' },
-  { value: 'kids_party', label: "Kids' Party", description: 'Birthday parties, playdates' },
-  { value: 'teacher', label: 'Teacher', description: 'Teacher appreciation, holidays' },
-  { value: 'host', label: 'Host', description: 'Hostess gifts, thank-yous' },
-  { value: 'general', label: 'General', description: 'Grab bag, last-minute, regifts' },
+const TABS: { value: StashTab; label: string; icon: typeof Package }[] = [
+  { value: 'unassigned', label: 'Unassigned', icon: Package },
+  { value: 'occasions', label: 'Occasions', icon: PartyPopper },
+  { value: 'people', label: 'People', icon: Users },
+  { value: 'all', label: 'All', icon: LayoutGrid },
 ]
 
-const PROFILE_GRADIENTS: Record<StashProfileType, { gradient: string; border: string; icon: typeof Package }> = {
-  specific: { gradient: 'bg-gradient-to-r from-orange-500 to-pink-500', border: 'border-orange-400', icon: Users },
-  kids_party: { gradient: 'bg-gradient-to-r from-purple-500 to-pink-500', border: 'border-purple-400', icon: Gift },
-  teacher: { gradient: 'bg-gradient-to-r from-blue-500 to-indigo-500', border: 'border-blue-400', icon: GraduationCap },
-  host: { gradient: 'bg-gradient-to-r from-amber-500 to-orange-500', border: 'border-amber-400', icon: Home },
-  general: { gradient: 'bg-gradient-to-r from-teal-500 to-cyan-500', border: 'border-teal-400', icon: Package },
-}
-
-export default function StashPage() {
+function StashPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { gifts, loading: giftsLoading } = useGifts()
   const { recipients, loading: recipientsLoading } = useRecipients()
-  const [filter, setFilter] = useState<StashProfileType | 'all'>('all')
 
   const loading = giftsLoading || recipientsLoading
+  const rawTab = searchParams.get('tab')
+  const activeTab: StashTab = rawTab === 'occasions' || rawTab === 'people' || rawTab === 'all'
+    ? rawTab
+    : 'unassigned'
+
+  function setActiveTab(tab: StashTab) {
+    router.replace(`/stash${tab === 'unassigned' ? '' : `?tab=${tab}`}`, { scroll: false })
+  }
+
+  // Filter to stash-eligible gifts (idea, purchased, wrapped)
+  const stashGifts = useMemo(() => {
+    return (gifts || []).filter(g => {
+      const status = g.status || 'idea'
+      return ['idea', 'purchased', 'wrapped'].includes(status)
+    })
+  }, [gifts])
+
+  const safeRecipients = useMemo(() => recipients || [], [recipients])
+
+  const categorized = useMemo(
+    () => categorizeGifts(stashGifts, safeRecipients),
+    [stashGifts, safeRecipients]
+  )
+
+  const occasionGroups = useMemo(
+    () => groupByOccasionProfile(categorized.occasions, safeRecipients),
+    [categorized.occasions, safeRecipients]
+  )
+
+  const peopleGroups = useMemo(
+    () => groupByPerson(categorized.people, safeRecipients),
+    [categorized.people, safeRecipients]
+  )
+
+  const tabCounts: Record<StashTab, number> = useMemo(() => ({
+    unassigned: categorized.unassigned.length,
+    occasions: categorized.occasions.length,
+    people: categorized.people.length,
+    all: categorized.all.length,
+  }), [categorized])
 
   if (loading) {
     return (
       <div className="p-4 md:p-6 lg:p-8">
-        <LoadingSpinner type="card" count={3} />
+        <div className="text-center py-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-giftstash-orange mx-auto"></div>
+          <p className="mt-4 text-sm text-gray-500">Loading stash...</p>
+        </div>
       </div>
     )
   }
 
-  const safeGifts = gifts || []
-  const safeRecipients = recipients || []
-
-  // Only show gifts that are on-hand (purchased or wrapped) or ideas
-  const stashGifts = safeGifts.filter(g => {
-    const status = g.status || 'idea'
-    return ['idea', 'purchased', 'wrapped'].includes(status)
-  })
-
-  const groups = groupGiftsByStashProfile(stashGifts, safeRecipients)
-  const filteredGroups = filter === 'all'
-    ? groups
-    : groups.filter(g => g.profileType === filter)
-
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Stash</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 mt-0.5">
             {stashGifts.length} gift{stashGifts.length !== 1 ? 's' : ''} on hand
           </p>
         </div>
@@ -74,48 +94,156 @@ export default function StashPage() {
         </button>
       </div>
 
-      {/* Filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-4 -mx-4 px-4 scrollbar-hide">
-        {FILTER_CHIPS.map((chip) => (
+      {/* Tab bar */}
+      <div className="flex gap-1 mb-5 bg-gray-100 rounded-lg p-1 overflow-x-auto scrollbar-hide">
+        {TABS.map((tab) => (
           <button
-            key={chip.value}
-            onClick={() => setFilter(chip.value)}
-            title={chip.description}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              filter === chip.value
-                ? 'bg-orange-500 text-white'
-                : 'bg-white/70 text-gray-600 hover:bg-white'
+            key={tab.value}
+            onClick={() => setActiveTab(tab.value)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
+              activeTab === tab.value
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {chip.label}
+            {tab.label}
+            <span className={`text-xs ${activeTab === tab.value ? 'text-gray-500' : 'text-gray-400'}`}>
+              {tabCounts[tab.value]}
+            </span>
           </button>
         ))}
       </div>
 
-      {/* Groups */}
-      {filteredGroups.length === 0 ? (
-        <div className="text-center py-16">
-          <Package className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500">No gifts in this category</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredGroups.map((group) => {
-            const config = PROFILE_GRADIENTS[group.profileType]
-            return (
-              <BucketCard
-                key={group.profileType}
-                title={`${group.label} ($${group.totalValue.toFixed(0)})`}
-                icon={config.icon}
-                gradientClasses={config.gradient}
-                borderColor={config.border}
-                items={group.gifts}
-                onItemClick={(g) => router.push(`/gifts/${g.id}`)}
-              />
-            )
-          })}
-        </div>
+      {/* Tab content */}
+      {activeTab === 'unassigned' && (
+        <TabContent
+          gifts={categorized.unassigned}
+          emptyIcon={<Package className="w-12 h-12 mx-auto text-gray-300 mb-3" />}
+          emptyMessage="No unassigned gifts. All gifts are linked to a recipient!"
+        />
+      )}
+
+      {activeTab === 'occasions' && (
+        <GroupedTabContent
+          groups={occasionGroups}
+          emptyIcon={<PartyPopper className="w-12 h-12 mx-auto text-gray-300 mb-3" />}
+          emptyMessage="No gifts assigned to occasion profiles yet."
+        />
+      )}
+
+      {activeTab === 'people' && (
+        <GroupedTabContent
+          groups={peopleGroups}
+          emptyIcon={<Users className="w-12 h-12 mx-auto text-gray-300 mb-3" />}
+          emptyMessage="No gifts assigned to people yet."
+        />
+      )}
+
+      {activeTab === 'all' && (
+        <TabContent
+          gifts={categorized.all}
+          showRecipients
+          emptyIcon={<Package className="w-12 h-12 mx-auto text-gray-300 mb-3" />}
+          emptyMessage="Your stash is empty. Add some gift ideas!"
+        />
       )}
     </div>
+  )
+}
+
+function TabContent({
+  gifts,
+  showRecipients,
+  emptyIcon,
+  emptyMessage,
+}: {
+  gifts: import('@/types/database.types').GiftWithRecipients[]
+  showRecipients?: boolean
+  emptyIcon: React.ReactNode
+  emptyMessage: string
+}) {
+  if (gifts.length === 0) {
+    return (
+      <div className="text-center py-16">
+        {emptyIcon}
+        <p className="text-gray-500 text-sm">{emptyMessage}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+      {gifts.map((gift) => (
+        <StashGiftCard key={gift.id} gift={gift} showRecipients={showRecipients} />
+      ))}
+    </div>
+  )
+}
+
+function GroupedTabContent({
+  groups,
+  emptyIcon,
+  emptyMessage,
+}: {
+  groups: RecipientGroup[]
+  emptyIcon: React.ReactNode
+  emptyMessage: string
+}) {
+  if (groups.length === 0) {
+    return (
+      <div className="text-center py-16">
+        {emptyIcon}
+        <p className="text-gray-500 text-sm">{emptyMessage}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {groups.map((group) => (
+        <div key={group.recipientId}>
+          {/* Group header */}
+          <div className="flex items-center gap-2.5 mb-2">
+            <Avatar
+              type={(group.avatarType as any) ?? undefined}
+              data={group.avatarData ?? undefined}
+              background={group.avatarBackground ?? undefined}
+              name={group.name}
+              size="sm"
+              showBorder
+            />
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-gray-900 truncate">{group.name}</h3>
+              <p className="text-xs text-gray-500">
+                {group.gifts.length} gift{group.gifts.length !== 1 ? 's' : ''}
+                {group.totalValue > 0 && ` · $${group.totalValue.toFixed(0)}`}
+              </p>
+            </div>
+          </div>
+
+          {/* Gift grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            {group.gifts.map((gift) => (
+              <StashGiftCard key={gift.id} gift={gift} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export default function StashPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-4 md:p-6 lg:p-8">
+        <div className="text-center py-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-giftstash-orange mx-auto"></div>
+          <p className="mt-4 text-sm text-gray-500">Loading stash...</p>
+        </div>
+      </div>
+    }>
+      <StashPageContent />
+    </Suspense>
   )
 }
