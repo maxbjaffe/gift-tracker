@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,10 +20,11 @@ import { ProductTourModal } from './ProductTourModal';
 export function DashboardWelcomeSection() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showTour, setShowTour] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(true); // default hidden to avoid flash
 
-  // Check if user has dismissed this section before
-  const isDismissed = typeof window !== 'undefined' &&
-    localStorage.getItem('giftstash-dismissed-welcome-section') === 'true';
+  useEffect(() => {
+    setIsDismissed(localStorage.getItem('giftstash-dismissed-welcome-section') === 'true');
+  }, []);
 
   if (isDismissed) {
     return null;

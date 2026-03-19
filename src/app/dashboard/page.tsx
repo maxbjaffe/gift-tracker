@@ -14,8 +14,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus, Sparkles, Users, Gift, Share2, X } from 'lucide-react'
 
-function getGreeting(): string {
-  const hour = new Date().getHours()
+function getGreeting(hour: number): string {
   if (hour < 12) return 'Good morning!'
   if (hour < 17) return 'Good afternoon!'
   return 'Good evening!'
@@ -81,11 +80,11 @@ export default function DashboardPage() {
   const { gifts, loading: giftsLoading, refetch: refetchGifts } = useGifts()
   const seedAttempted = useRef(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [greeting, setGreeting] = useState('')
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setShowOnboarding(!localStorage.getItem(ONBOARDING_KEY))
-    }
+    setShowOnboarding(!localStorage.getItem(ONBOARDING_KEY))
+    setGreeting(getGreeting(new Date().getHours()))
   }, [])
 
   useEffect(() => {
@@ -162,7 +161,6 @@ export default function DashboardPage() {
     safeRecipients.map(r => [r.id, r])
   )
   const occasions = getUpcomingOccasions(safeRecipients, safeGifts, 150)
-  const greeting = getGreeting()
   const nudge = getGreetingNudge(occasions)
 
   return (

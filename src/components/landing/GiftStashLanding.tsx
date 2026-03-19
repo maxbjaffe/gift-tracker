@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -17,9 +17,11 @@ const TAGLINES = [
 ]
 
 export function GiftStashLanding() {
-  // Pick a random tagline once on mount (changes on page refresh)
-  const tagline = useMemo(() => {
-    return TAGLINES[Math.floor(Math.random() * TAGLINES.length)]
+  // Pick a tagline client-side to avoid hydration mismatch
+  const [tagline, setTagline] = useState(TAGLINES[0])
+
+  useEffect(() => {
+    setTagline(TAGLINES[Math.floor(Math.random() * TAGLINES.length)])
   }, [])
 
   return (
