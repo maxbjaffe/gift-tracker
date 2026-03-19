@@ -162,48 +162,48 @@ function normalizeImageUrl(url: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Tier 2: Google Custom Search Images API
+// Tier 2: Brave Image Search API
 // ---------------------------------------------------------------------------
 
-export async function searchGoogleImages(
+export async function searchProductImages(
   productName: string,
   excludeUrls: Set<string> = new Set()
 ): Promise<ExtractedImage[]> {
-  const cseId = process.env.GOOGLE_CSE_ID;
-  const apiKey = process.env.GOOGLE_CSE_API_KEY;
+  const apiKey = process.env.BRAVE_SEARCH_API_KEY;
 
-  if (!cseId || !apiKey) {
-    console.warn('[ImageEnrichment] Google CSE not configured — skipping search');
+  if (!apiKey) {
+    console.warn('[ImageEnrichment] Brave Search API not configured — skipping search');
     return [];
   }
 
-  const query = `"${productName}" product`;
+  const query = `${productName} product`;
   const params = new URLSearchParams({
-    key: apiKey,
-    cx: cseId,
     q: query,
-    searchType: 'image',
-    imgSize: 'large',
-    num: '8',
-    safe: 'active',
+    country: 'US',
+    count: '8',
+    safesearch: 'strict',
   });
 
   try {
     const res = await fetch(
-      `https://www.googleapis.com/customsearch/v1?${params}`,
-      { signal: AbortSignal.timeout(10_000) }
+      `https://api.search.brave.com/res/v1/images/search?${params}`,
+      {
+        headers: { 'X-Subscription-Token': apiKey },
+        signal: AbortSignal.timeout(10_000),
+      }
     );
     if (!res.ok) {
-      console.error('[ImageEnrichment] Google CSE error:', res.status);
+      console.error('[ImageEnrichment] Brave Search error:', res.status);
       return [];
     }
 
     const data = await res.json();
-    const items: any[] = data.items || [];
+    const results: any[] = data.results || [];
     const images: ExtractedImage[] = [];
 
-    for (const item of items) {
-      const url: string = item.link;
+    for (const item of results) {
+      // Use the original source URL from properties, not the Brave proxy thumbnail
+      const url: string = item.properties?.url || item.thumbnail?.src;
       if (!url || excludeUrls.has(url)) continue;
       images.push({ url, source: 'search' });
       if (images.length >= 5) break;
@@ -211,7 +211,7 @@ export async function searchGoogleImages(
 
     return images;
   } catch (err) {
-    console.error('[ImageEnrichment] Google CSE fetch failed:', err);
+    console.error('[ImageEnrichment] Brave Search fetch failed:', err);
     return [];
   }
 }

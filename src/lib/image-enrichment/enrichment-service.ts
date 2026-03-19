@@ -9,7 +9,7 @@
 import { createClient } from '@supabase/supabase-js';
 import {
   extractImagesFromUrl,
-  searchGoogleImages,
+  searchProductImages,
   type ExtractedImage,
 } from './extractor';
 import { uploadImages, type UploadResult } from './uploader';
@@ -78,7 +78,7 @@ export async function enrichGiftImages(
     // Tier 2: Google search if we have <3 images and a product name
     if (allImages.length < 3 && name) {
       const excludeUrls = new Set(allImages.map((img) => img.url));
-      const searchImages = await searchGoogleImages(name, excludeUrls);
+      const searchImages = await searchProductImages(name, excludeUrls);
       allImages.push(...searchImages);
       strategyUsed =
         strategyUsed === 'jsonld' ? 'both' : searchImages.length > 0 ? 'search' : strategyUsed;
