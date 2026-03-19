@@ -184,7 +184,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
       if (giftError) throw giftError;
 
-      router.push('/gifts');
+      router.push('/stash');
     } catch (err: any) {
       console.error('Error deleting gift:', err);
       alert(err.message || 'Failed to delete gift');
@@ -207,8 +207,8 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="text-sm md:text-base text-red-600">{error || 'Gift not found'}</div>
-          <Link href="/gifts" className="text-sm md:text-base text-purple-600 hover:text-purple-700 mt-4 inline-block">
-            ← Back to Gifts
+          <Link href="/stash" className="text-sm md:text-base text-purple-600 hover:text-purple-700 mt-4 inline-block">
+            ← Back to Stash
           </Link>
         </div>
       </div>
@@ -251,7 +251,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         <div className="mb-6 md:mb-8 space-y-4 md:space-y-6">
           <Breadcrumbs items={[
             { label: 'Dashboard', href: '/dashboard' },
-            { label: 'Gifts', href: '/gifts' },
+            { label: 'Stash', href: '/stash' },
             { label: gift.name },
           ]} />
 

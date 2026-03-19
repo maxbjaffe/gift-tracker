@@ -147,8 +147,8 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-red-600">{error}</div>
-          <Link href="/gifts" className="text-purple-600 hover:text-purple-700 mt-4 inline-block">
-            ← Back to Gifts
+          <Link href="/stash" className="text-purple-600 hover:text-purple-700 mt-4 inline-block">
+            ← Back to Stash
           </Link>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function EditGiftPage({ params }: { params: { id: string } }) {
       <div className="max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
         <div className="mb-6 md:mb-8">
           <Breadcrumbs items={[
-            { label: 'Gifts', href: '/gifts' },
+            { label: 'Stash', href: '/stash' },
             { label: gift?.name || 'Gift', href: `/gifts/${params.id}` },
             { label: 'Edit' },
           ]} />

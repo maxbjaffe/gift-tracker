@@ -265,7 +265,7 @@ function NewGiftPageContent() {
         await supabase.from('gift_recipients').insert(links);
       }
 
-      router.push('/gifts');
+      router.push('/stash');
     } catch (err) {
       console.error('Error creating gift:', err);
       setError(err instanceof Error ? err.message : 'Failed to create gift');
@@ -279,7 +279,7 @@ function NewGiftPageContent() {
         {/* Header */}
         <div className="mb-6 md:mb-8">
           <Breadcrumbs items={[
-            { label: 'Gifts', href: '/gifts' },
+            { label: 'Stash', href: '/stash' },
             { label: 'Add New Gift' },
           ]} />
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Add New Gift</h1>
@@ -690,7 +690,7 @@ function NewGiftPageContent() {
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button
               type="button"
-              onClick={() => router.push('/gifts')}
+              onClick={() => router.push('/stash')}
               className="w-full sm:flex-1 h-11 md:h-12 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg text-sm md:text-base hover:bg-gray-50 transition-colors font-medium"
               disabled={saving}
             >
