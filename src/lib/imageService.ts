@@ -1,10 +1,11 @@
-// Enhanced Image Service - Fetches real product images via OpenGraph or uses premium placeholders
+// Enhanced Image Service - Fetches real product images via OpenGraph, Brave Search, or uses premium placeholders
 import { logger } from '@/lib/logger';
+import { searchProductImages } from '@/lib/image-enrichment/extractor';
 
 interface ImageResult {
   url: string;
   thumbnail: string;
-  source: 'opengraph' | 'placeholder';
+  source: 'opengraph' | 'search' | 'placeholder';
   isPlaceholder: boolean;
 }
 
@@ -164,7 +165,7 @@ export async function fetchProductImage(
   productName?: string,
   productUrl?: string
 ): Promise<ImageResult> {
-  // Try to extract real product image from URL (if provided)
+  // Tier 1: Try to extract real product image from URL (if provided)
   if (productUrl) {
     try {
       const imageUrl = await extractOpenGraphImage(productUrl);
@@ -177,13 +178,28 @@ export async function fetchProductImage(
         };
       }
     } catch (error) {
-      // OpenGraph extraction failed - fall through to placeholder
-      logger.error('OpenGraph extraction failed, using placeholder:', error);
+      logger.error('OpenGraph extraction failed:', error);
     }
   }
 
-  // Fall back to enhanced SVG placeholder
-  // These are 100% reliable with no external dependencies
+  // Tier 2: Brave Image Search by product name
+  if (productName) {
+    try {
+      const searchResults = await searchProductImages(productName);
+      if (searchResults.length > 0) {
+        return {
+          url: searchResults[0].url,
+          thumbnail: searchResults[0].url,
+          source: 'search',
+          isPlaceholder: false,
+        };
+      }
+    } catch (error) {
+      logger.error('Brave Image Search failed:', error);
+    }
+  }
+
+  // Tier 3: Enhanced SVG placeholder (100% reliable, no external dependencies)
   return getEnhancedPlaceholder(keywords, productName);
 }
 
