@@ -9,17 +9,19 @@ function getSupabase() {
   );
 }
 
-// POST /api/enrichment/backfill — enrich all existing gifts that have no enrichment job
-// Pass ?limit=N to control batch size (default 10)
-// Pass ?dry=true to just see what would be enriched
+// POST /api/enrichment/backfill — enrich existing gifts
+// ?limit=N    — batch size (default 10)
+// ?dry=true   — preview only, don't process
+// ?force=true — re-process gifts that already have jobs (deletes old jobs + images first)
 export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') || '10', 10);
   const dry = searchParams.get('dry') === 'true';
+  const force = searchParams.get('force') === 'true';
 
   const supabase = getSupabase();
 
-  // Find gifts with a URL or name that don't have an enrichment job yet
+  // Find gifts with a URL or name
   const { data: allGifts } = await supabase
     .from('gifts')
     .select('id, name, url, image_url')
@@ -31,14 +33,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'No gifts found', candidates: 0 });
   }
 
-  // Filter out gifts that already have enrichment jobs
-  const { data: existingJobs } = await supabase
-    .from('gift_enrichment_jobs')
-    .select('gift_id')
-    .in('gift_id', allGifts.map((g: any) => g.id));
+  let candidates: any[];
 
-  const jobGiftIds = new Set((existingJobs || []).map((j: any) => j.gift_id));
-  const candidates = allGifts.filter((g: any) => !jobGiftIds.has(g.id));
+  if (force) {
+    // In force mode, re-process all gifts regardless of existing jobs
+    candidates = allGifts;
+  } else {
+    // Filter out gifts that already have enrichment jobs
+    const { data: existingJobs } = await supabase
+      .from('gift_enrichment_jobs')
+      .select('gift_id')
+      .in('gift_id', allGifts.map((g: any) => g.id));
+
+    const jobGiftIds = new Set((existingJobs || []).map((j: any) => j.gift_id));
+    candidates = allGifts.filter((g: any) => !jobGiftIds.has(g.id));
+  }
 
   if (dry) {
     return NextResponse.json({
@@ -56,6 +65,12 @@ export async function POST(request: Request) {
   const results: any[] = [];
 
   for (const gift of batch) {
+    // In force mode, delete old job and images so enrichment can re-run
+    if (force) {
+      await supabase.from('gift_images').delete().eq('gift_id', gift.id);
+      await supabase.from('gift_enrichment_jobs').delete().eq('gift_id', gift.id);
+    }
+
     const result = await enrichGiftImages(gift.id, gift.url || null, gift.name || null);
     results.push({ id: gift.id, name: gift.name, ...result });
   }
