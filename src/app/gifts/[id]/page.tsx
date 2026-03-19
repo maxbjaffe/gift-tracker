@@ -1,7 +1,7 @@
-// src/app/gifts/[id]/page.tsx - UPDATED with Edit/Delete functionality
+// src/app/gifts/[id]/page.tsx - UPDATED with enriched image carousel
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -36,6 +36,14 @@ type Gift = {
   created_at: string;
 };
 
+type GiftImage = {
+  id: string;
+  url: string;
+  original_url: string | null;
+  position: number;
+  source: string;
+};
+
 type Recipient = {
   id: string;
   name: string;
@@ -50,8 +58,10 @@ type GiftRecipient = {
 export default function GiftDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const supabase = createClient();
-  
+
   const [gift, setGift] = useState<Gift | null>(null);
+  const [giftImages, setGiftImages] = useState<GiftImage[]>([]);
+  const [enrichmentLoading, setEnrichmentLoading] = useState(false);
   const [linkedRecipients, setLinkedRecipients] = useState<Recipient[]>([]);
   const [allRecipients, setAllRecipients] = useState<Recipient[]>([]);
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -59,15 +69,60 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchGiftImages = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/gifts/${params.id}/images`);
+      if (!res.ok) return;
+      const images: GiftImage[] = await res.json();
+      if (images.length > 0) {
+        setGiftImages(images);
+        setEnrichmentLoading(false);
+        // Stop polling once images arrive
+        if (pollRef.current) {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+        }
+      }
+    } catch {
+      // Non-critical
+    }
+  }, [params.id]);
 
   useEffect(() => {
     fetchGiftData();
     fetchAllRecipients();
+    fetchGiftImages();
   }, [params.id]);
+
+  // Poll for enriched images if none exist yet and gift has a URL
+  useEffect(() => {
+    if (!gift) return;
+    if (giftImages.length > 0) return;
+    if (!gift.url && !gift.name) return;
+
+    setEnrichmentLoading(true);
+    let elapsed = 0;
+    const interval = setInterval(() => {
+      elapsed += 3000;
+      if (elapsed > 30000) {
+        clearInterval(interval);
+        setEnrichmentLoading(false);
+        return;
+      }
+      fetchGiftImages();
+    }, 3000);
+    pollRef.current = interval;
+
+    return () => {
+      clearInterval(interval);
+      pollRef.current = null;
+    };
+  }, [gift?.id, giftImages.length]);
 
   async function fetchGiftData() {
     try {
-      // Fetch gift details
       const { data: giftData, error: giftError } = await supabase
         .from('gifts')
         .select('*')
@@ -77,7 +132,6 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
       if (giftError) throw giftError;
       setGift(giftData as Gift);
 
-      // Fetch linked recipients
       const { data: linkData, error: linkError } = await supabase
         .from('gift_recipients')
         .select(`
@@ -94,7 +148,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
       const recipients = (linkData || []).map((item: GiftRecipient) => item.recipients);
       setLinkedRecipients(recipients);
-      
+
       setLoading(false);
     } catch (err) {
       console.error('Error fetching gift:', err);
@@ -128,7 +182,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         });
 
       if (error) throw error;
-      
+
       await fetchGiftData();
       setShowLinkModal(false);
     } catch (err: any) {
@@ -141,7 +195,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
   async function unlinkRecipient(recipientId: string) {
     if (!confirm('Remove this recipient from this gift?')) return;
-    
+
     setActionLoading(true);
     try {
       const { error } = await supabase
@@ -151,7 +205,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         .eq('recipient_id', recipientId);
 
       if (error) throw error;
-      
+
       await fetchGiftData();
     } catch (err: any) {
       console.error('Error unlinking recipient:', err);
@@ -168,7 +222,6 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
     setActionLoading(true);
     try {
-      // First delete all gift-recipient links
       const { error: linkError } = await supabase
         .from('gift_recipients')
         .delete()
@@ -176,7 +229,6 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
 
       if (linkError) throw linkError;
 
-      // Then delete the gift
       const { error: giftError } = await supabase
         .from('gifts')
         .delete()
@@ -208,7 +260,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
         <div className="max-w-4xl mx-auto text-center">
           <div className="text-sm md:text-base text-red-600">{error || 'Gift not found'}</div>
           <Link href="/stash" className="text-sm md:text-base text-purple-600 hover:text-purple-700 mt-4 inline-block">
-            ← Back to Stash
+            &larr; Back to Stash
           </Link>
         </div>
       </div>
@@ -219,8 +271,16 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
     (recipient) => !linkedRecipients.some((linked) => linked.id === recipient.id)
   );
 
-  // Collect all available images with labels
-  const allImages = useMemo(() => {
+  // Build display images: prefer enriched gift_images, fall back to legacy source_metadata
+  const allImages: { url: string; label: string }[] = (() => {
+    if (giftImages.length > 0) {
+      return giftImages.map((img, i) => ({
+        url: img.url,
+        label: i === 0 ? 'Product' : `Photo ${i + 1}`,
+      }));
+    }
+
+    // Fallback: legacy image collection from source_metadata
     const images: { url: string; label: string }[] = [];
     const meta = gift?.source_metadata;
     const seen = new Set<string>();
@@ -232,17 +292,13 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
       }
     };
 
-    // Primary image first
     add(gift?.image_url, 'Product Image');
-    // Then extracted image (may be same as image_url)
     add(meta?.extracted_image, 'Extracted');
-    // Cropped product image from screenshot
     add(meta?.cropped_image, 'Cropped');
-    // Full page screenshot
     add(meta?.screenshot, 'Screenshot');
 
     return images;
-  }, [gift]);
+  })();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 lg:p-8">
@@ -298,7 +354,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
           {/* Left Column - Gift Details */}
           <div className="space-y-4 md:space-y-6">
             {/* Image Gallery */}
-            {allImages.length > 0 && (
+            {allImages.length > 0 ? (
               <div className="bg-white rounded-xl shadow-sm p-3 md:p-4">
                 <div className="relative">
                   <img
@@ -323,25 +379,36 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
                     </>
                   )}
                 </div>
+                {/* Thumbnail strip */}
                 {allImages.length > 1 && (
-                  <div className="flex gap-2 mt-2 justify-center">
+                  <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
                     {allImages.map((img, i) => (
                       <button
                         key={i}
                         onClick={() => setActiveImageIndex(i)}
-                        className={`px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors ${
                           i === activeImageIndex
-                            ? 'bg-purple-100 text-purple-700'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            ? 'border-purple-500'
+                            : 'border-transparent hover:border-gray-300'
                         }`}
                       >
-                        {img.label}
+                        <img
+                          src={img.url}
+                          alt={img.label}
+                          className="w-full h-full object-cover"
+                        />
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-            )}
+            ) : enrichmentLoading ? (
+              <div className="bg-white rounded-xl shadow-sm p-3 md:p-4">
+                <div className="w-full h-48 md:h-64 rounded-lg bg-gray-100 animate-pulse flex items-center justify-center">
+                  <span className="text-sm text-gray-400">Fetching product images...</span>
+                </div>
+              </div>
+            ) : null}
 
             {/* Details Card */}
             <div className="bg-white rounded-xl shadow-sm p-4 md:p-5 lg:p-6 space-y-3 md:space-y-4">
@@ -377,7 +444,7 @@ export default function GiftDetailPage({ params }: { params: { id: string } }) {
                     rel="noopener noreferrer"
                     className="text-sm md:text-base text-purple-600 hover:text-purple-700 break-all"
                   >
-                    View Product →
+                    View Product &rarr;
                   </a>
                 </div>
               )}

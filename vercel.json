@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/cleanup-sms-context",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/enrich-images",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

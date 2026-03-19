@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/logger';
+import { enrichGiftImages } from '@/lib/image-enrichment/enrichment-service';
 
 // GET /api/gifts - List all gifts for the authenticated user or filter by recipient
 export async function GET(request: NextRequest) {
@@ -156,6 +157,11 @@ export async function POST(request: NextRequest) {
         logger.error('Error linking gift to recipients:', linkError);
         // Don't throw - gift is already created
       }
+    }
+
+    // Fire-and-forget image enrichment if gift has URL or name
+    if ((gift as any)?.id && (url || name)) {
+      enrichGiftImages((gift as any).id, url || null, name || null).catch(() => {});
     }
 
     return NextResponse.json({

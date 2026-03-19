@@ -113,6 +113,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.weatherapi.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      },
     ],
   },
   async headers() {

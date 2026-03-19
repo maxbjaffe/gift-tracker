@@ -265,6 +265,19 @@ function NewGiftPageContent() {
         await supabase.from('gift_recipients').insert(links);
       }
 
+      // Fire-and-forget image enrichment
+      if (data?.id && (formData.url || formData.name)) {
+        fetch('/api/enrichment/trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            giftId: data.id,
+            url: formData.url || undefined,
+            name: formData.name || undefined,
+          }),
+        }).catch(() => {});
+      }
+
       router.push('/stash');
     } catch (err) {
       console.error('Error creating gift:', err);

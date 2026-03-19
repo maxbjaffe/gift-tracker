@@ -3,6 +3,7 @@ import { BaseAgent } from './base-agent';
 import { callClaude } from '../claude';
 import { findRecipientMatch } from '../recipient-matcher';
 import { getPersonaPrompt } from './personas';
+import { enrichGiftImages } from '../image-enrichment/enrichment-service';
 import type { Intent, AgentResponse, ConversationContext, Action } from './types';
 
 interface ParsedGift {
@@ -138,6 +139,11 @@ export class CaptureAgent extends BaseAgent {
       type: 'create_gift',
       payload: { giftId: gift.id, name: parsed.gift_name },
     });
+
+    // Fire-and-forget image enrichment
+    if (parsed.url || parsed.gift_name) {
+      enrichGiftImages(gift.id, parsed.url || null, parsed.gift_name || null).catch(() => {});
+    }
 
     // 5. Link matched recipients
     if (matchedRecipients.length > 0) {
