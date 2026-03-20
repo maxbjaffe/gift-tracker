@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const SYNC_SECRET = process.env.PROFILE_SYNC_SECRET;
+const SYNC_SECRET = process.env.PROFILE_SYNC_SECRET?.trim();
 
 // Profile Hub field → GiftStash field mapping (reverse of profile-hub-sync.ts)
 const FIELD_MAP: Record<string, string> = {

@@ -2,8 +2,8 @@
 // Pushes profile changes to the unified Profile Hub when recipients are updated
 
 const PROFILE_HUB_URL =
-  process.env.PROFILE_HUB_URL || "https://profiles.maxjaffe.ai";
-const SYNC_SECRET = process.env.PROFILE_SYNC_SECRET;
+  (process.env.PROFILE_HUB_URL || "https://profiles.maxjaffe.ai").trim();
+const SYNC_SECRET = process.env.PROFILE_SYNC_SECRET?.trim();
 
 // GiftStash field → Profile Hub field mapping
 const FIELD_MAP: Record<string, string> = {
