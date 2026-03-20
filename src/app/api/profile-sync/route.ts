@@ -18,6 +18,8 @@ const FIELD_MAP: Record<string, string> = {
   personality_description: "personality_description",
   gender: "gender",
   clothing_sizes: "clothing_sizes",
+  grade: "grade",
+  important_dates: "important_dates",
   avatar_type: "avatar_type",
   avatar_value: "avatar_data",
   avatar_background: "avatar_background",

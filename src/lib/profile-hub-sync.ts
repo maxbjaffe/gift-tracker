@@ -21,6 +21,7 @@ const FIELD_MAP: Record<string, string> = {
   gender: "gender",
   clothing_sizes: "clothing_sizes",
   grade: "grade",
+  important_dates: "important_dates",
 };
 
 interface SyncResult {
